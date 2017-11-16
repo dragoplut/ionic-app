@@ -1,0 +1,33 @@
+@import '../../theme/variables';
+
+.row-with-action-container {
+  color: $col-neutral-text;
+  display: block;
+  font-size: 1.2em;
+  position: relative;
+  margin: 0;
+  padding: 0 5%;
+  text-align: left;
+  height: 50px;
+  width: 100%;
+  .action-label, .action-value {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    line-height: 50px;
+    text-align: left;
+    vertical-align: top;
+  }
+  .action-label {
+    font-weight: 600;
+    width: 45%;
+  }
+  .action-button {
+    position: absolute;
+    right: -12px;
+    top: 12px;
+    height: 24px;
+    width: 24px;
+  }
+}

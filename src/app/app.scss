@@ -1,0 +1,423 @@
+@import '../theme/variables';
+
+// http://ionicframework.com/docs/v2/theming/
+
+
+// App Global Sass
+// --------------------------------------------------
+// Put style rules here that you want to apply globally. These
+// styles are for the entire app and not just one component.
+// Additionally, this file can be also used as an entry point
+// to import other Sass files to be included in the output CSS.
+//
+// Shared Sass variables, which can be used to adjust Ionic's
+// default Sass variables, belong in "theme/variables.scss".
+//
+// To declare rules for a specific mode, create a child rule
+// for the .md, .ios, or .wp mode classes. The mode class is
+// automatically applied to the <body> element in the app.
+
+@mixin animationHelper {
+  -webkit-transform: translateZ(0) rotate(0.01deg);
+  -ms-transform: translateZ(0) rotate(0.01deg);
+  transform: translateZ(0) rotate(0.01deg);
+}
+
+/**********************************
+          APP BACKGROUNDS
+***********************************/
+
+.content {
+  background: url('../assets/img/background_app.png') no-repeat center top fixed;
+  background-size: 100% 100%;
+}
+.content .auth {
+  background: url('../assets/img/background_login.png') no-repeat center top fixed;
+  background-size: 100% 100%;
+}
+
+/**********************************
+          COMMON STYLES
+***********************************/
+
+.text-bold {
+  font-weight: 600;
+}
+.cursor-pointer {
+  cursor: pointer;
+}
+.primary-blue {
+  color: $col-primary-blue;
+}
+.secondary-blue {
+  color: $col-secondary-blue;
+}
+.page-content {
+  display: block;
+  position: relative;
+  margin-top: 44px;
+  min-height: calc(100vh - 170px);
+}
+.pull-center {
+  margin: 0 auto;
+}
+
+.pull-left {
+  float: left;
+}
+
+.pull-right {
+  float: right;
+}
+
+.link-btn {
+  display: inline-block;
+  font-size: 22px;
+  margin-top: 50px;
+  position: relative;
+}
+
+.link-nav {
+  color: $col-primary-blue;
+  display: inline-block;
+  font-size: 22px;
+  margin-top: 20px;
+  margin-right: 10%;
+  position: relative;
+}
+
+.text-center {
+  text-align: center;
+}
+.text-left {
+  text-align: left;
+}
+.text-right {
+  text-align: right;
+}
+.title-blue {
+  @include animationHelper;
+  font-size: 1.5em;
+  font-weight: 300;
+  color: $col-secondary-blue;
+}
+.header-title {
+  position: absolute;
+  top: 10px;
+  left: calc(50% - 35%);
+  text-align: center;
+  width: 70%;
+}
+.header-action-icon {
+  color: $col-secondary-blue;
+  line-height: 32px;
+  font-size: 32px;
+  margin: 6px 10px 9px 15px;
+  height: 6.5vw;
+  width: 6.5vw;
+  vertical-align: middle;
+}
+.header-action-icon-small {
+  line-height: 44px;
+  margin: 12px 15px;
+  height: 5.6vw;
+  width: 5.6vw;
+  vertical-align: middle;
+}
+.dpw-device-panel {
+  display: block;
+  position: relative;
+  margin: 40px auto;
+  text-align: center;
+  width: 30vw;
+  vertical-align: top;
+}
+.dpw-logo-foot {
+  display: block;
+  position: relative;
+  margin: 40px auto;
+  text-align: center;
+  height: 6vw;
+  width: 43vw;
+  vertical-align: bottom;
+}
+.dpw-logo-head {
+  @include animationHelper;
+  margin: 5px auto 0;
+  width: 60%;
+}
+.btn-nav-head {
+  background-color: transparent;
+  border: none;
+  color: $col-secondary-blue;
+  font-size: 32px;
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  line-height: 44px;
+  text-align: center;
+  height: 44px;
+  width: 44px;
+}
+.bottom-absolute {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.info-container {
+  color: $col-neutral-text;
+  display: block;
+  font-size: 1.3em;
+  margin: 0 36px;
+  padding: 0;
+  position: relative;
+}
+.info-text-small {
+  color: $col-neutral-placeholder;
+  display: block;
+  font-size: 1em;
+  margin: 0 40px 20px;
+  padding: 0;
+  position: relative;
+  text-align: left;
+}
+.list-icon-absolute {
+  color: $col-primary-blue;
+  position: absolute;
+  right: 10px;
+  top: 11px;
+  font-size: 22px;
+}
+.actions {
+  margin-top: 20px;
+}
+.additional-content-block {
+  margin-top: -40px;
+  margin-bottom: 10px;
+  padding: 0 24px;
+  contain: content;
+}
+.container-half {
+  display: inline-block;
+  position: relative;
+  width: 49%;
+  vertical-align: top;
+  .custom-input-container {
+    input {
+      margin-bottom: 15px !important;
+      margin-top: 25px !important;
+    }
+  }
+}
+.custom-input-container {
+  input {
+    z-index: 5;
+  }
+  .custom-input-label {
+    z-index: 1;
+  }
+}
+.truncated {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-all;
+  white-space: nowrap;
+}
+.left-90 {
+  @include animationHelper;
+  -webkit-transform: rotate(-9deg);
+  -ms-transform: rotate(-90deg);
+  transform: rotate(-90deg);
+}
+.right-90 {
+  @include animationHelper;
+  -webkit-transform: rotate(90deg);
+  -ms-transform: rotate(90deg);
+  transform: rotate(90deg);
+}
+.left-180 {
+  @include animationHelper;
+  -webkit-transform: rotate(-180deg);
+  -ms-transform: rotate(-180deg);
+  transform: rotate(-180deg);
+}
+.right-180 {
+  @include animationHelper;
+  -webkit-transform: rotate(180deg);
+  -ms-transform: rotate(180deg);
+  transform: rotate(180deg);
+}
+
+/**********************************
+      CUSTOM HEADER CONTAINER
+***********************************/
+
+.custom-header {
+  @include animationHelper;
+  background-color: rgba($col-primary-white, 0.7);
+  display: block;
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 44px;
+  width: 100%;
+  z-index: 50;
+}
+
+/**********************************
+      CUSTOM INPUT CONTAINER
+***********************************/
+
+.custom-input-container, .custom-select-container {
+  display: block;
+  position: relative;
+  margin: 0 auto;
+  padding: 0;
+  text-align: left;
+  width: 67.5%;
+  input {
+    background-color: transparent;
+    box-sizing: border-box;
+    border: none;
+    border-bottom: 1px solid $col-neutral-placeholder;
+    color: $col-neutral-text;
+    font-size: $text-body;
+    font-weight: 300;
+    display: block;
+    line-height: 36px;
+    margin: 0 auto 21px;
+    padding: 0;
+    outline: none;
+    height: 36px;
+    width: 100%;
+  }
+  input::-webkit-input-placeholder,
+  input:-ms-input-placeholder,
+  input::-moz-placeholder,
+  input:-moz-placeholder {
+    color: $col-neutral-placeholder;
+  }
+  input:focus {
+    border-bottom: 1px solid $col-neutral-text;
+  }
+  input.disabled {
+    border-bottom: 1px solid $col-neutral-placeholder;
+  }
+  input.error {
+    border-bottom: 1px solid $col-primary-red;
+  }
+  .custom-input-label {
+    transition: transform .3s ease-out 0s;
+    color: $col-neutral-placeholder;
+    position: absolute;
+    left: 0;
+    top: 10px;
+  }
+  .custom-input-label.input-active {
+    color: $col-primary-blue;
+    font-size: 12px;
+    position: absolute;
+    left: 0;
+    top: -8px;
+  }
+  .custom-input-label.input-not-empty {
+    font-size: 12px;
+    position: absolute;
+    left: 0;
+    top: -8px;
+  }
+  .custom-input-error {
+    color: $col-primary-red;
+    font-size: 10px;
+    position: absolute;
+    right: 0;
+    bottom: -14px;
+  }
+}
+.custom-select-container {
+  margin-top: 10px;
+  ion-item.item.item-block.item-select {
+    padding-left: 0;
+    padding-top: 10px;
+    ion-select.select {
+      color: $col-neutral-text;
+      padding-left: 0;
+      max-width: 85%;
+    }
+  }
+  .custom-select-down-icon {
+    font-size: 18px;
+    position: absolute;
+    right: 0;
+    bottom: 10px;
+    height: 18px;
+    width: 18px;
+  }
+  .custom-input-label {
+    top: 25px;
+  }
+  .custom-input-label.input-active,
+  .custom-input-label.input-not-empty {
+    top: 0;
+  }
+  .item-md.item-block .item-inner, .item-ios.item-block .item-inner {
+    border-bottom: 1px solid $col-neutral-placeholder;
+    color: $col-neutral-text;
+    max-height: 30px;
+    width: 100%;
+    vertical-align: top;
+  }
+  .select-icon {
+    display: none;
+  }
+}
+.row-container {
+  display: block;
+  margin: 0 auto 21px;
+  position: relative;
+  text-align: left;
+  height: 36px;
+  width: 80%;
+  .toggle {
+    display: inline-block;
+    padding: 12px 0;
+    position: relative;
+    margin: 0;
+    max-width: 80px;
+  }
+  .toggle-label {
+    color: $col-neutral-text;
+    display: inline-block;
+    line-height: 36px;
+    margin: 0 12px;
+    position: relative;
+    text-align: left;
+    vertical-align: top;
+  }
+}
+
+.map-container {
+  background-color: $col-primary-white;
+  border: 1px solid $col-neutral-label;
+  border-radius: 0.6em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin: 20px 40px;
+  height: 200px;
+  width: calc(100% - 80px);
+}
+
+.device-details {
+  display: block;
+  margin: 24px;
+  position: relative;
+  text-align: left;
+  text-wrap: normal;
+  word-wrap: break-word;
+  height: auto;
+  width: 100%;
+}

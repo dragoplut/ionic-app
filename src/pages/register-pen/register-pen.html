@@ -1,0 +1,68 @@
+<ion-content>
+  <div class="custom-header">
+    <ion-icon class="header-action-icon pull-left" name="arrow-back" (tap)="goBack()"></ion-icon>
+    <span class="header-title title-blue">Pen Update</span>
+  </div>
+  <div class="create-account row center-xs middle-xs">
+    <form
+      ngForm
+      name="penUpdateForm"
+      class="create-account-form col-xs-6"
+      #penUpdateForm="ngForm"
+    >
+      <div class="info-container">
+        <div class="plain-text text-left">
+          <span class="secondary-blue">{{dpDevice.name}}</span>
+          <span *ngIf="dpDevice.name && !gettingDevices"> ({{ dpDevice.paired ? 'paired' : 'unpaired' }}) </span>
+          <span *ngIf="!gettingDevices" class="primary-blue pull-center" (tap)="dpDevice.paired ? disconnect() : selectDevice(dpDevice.address || dpDevice.id, dpDevice)">
+             {{ dpDevice.paired ? ' Disconnect ' : ' Connect ' }}
+          </span>
+          <span *ngIf="!gettingDevices" class="secondary-blue pull-right" (tap)="startScanning()"> Scan <ion-icon small name="refresh"></ion-icon></span>
+        </div>
+        <ion-spinner name="crescent" *ngIf="gettingDevices"></ion-spinner>
+        <br/>
+        <div class="plain-text text-left">
+          Please ensure the pen is off then turned back on to begin pairing.The device screen should show as follows.
+        </div>
+        <img alt="Device screen example" src="{{devicePanelImg}}" class="dpw-device-panel">
+      </div>
+      <div class="actions col-xs-12">
+        <a class="link-nav pull-right" (click)="goNext()">
+          Next
+        </a>
+      </div>
+    </form>
+
+    <div *ngIf="false" class="create-account-form col-xs-6 ble-pair-container">
+      <ion-list padding>
+        <button ion-button block (click)="startScanning()">scan</button>
+        <!--<ion-list-header>-->
+          <!--Paired Devices-->
+        <!--</ion-list-header>-->
+        <!--<ion-item *ngFor="let device of pairedDevices">-->
+          <!--{{device.name}}-->
+        <!--</ion-item>-->
+        <!--<button ion-button block (click)="disconnect()">Disconnect</button>-->
+        <!--<ion-list-header>-->
+          <!--availlable Devices-->
+        <!--</ion-list-header>-->
+        <!--<ion-item *ngFor='let device of unpairedDevices' (click)="selectDevice(device.address, device)">-->
+          <!--<span>{{device.name}}</span>-->
+        <!--</ion-item>-->
+        <!--<button ion-button block (click)="readFromDevice(dpDevice.address, '1800', '2a00')">Read Volume {{deviceReadVolume}}</button>-->
+        <!--<button ion-button block (click)="writeToDevice(dpDevice.address, '1800', '2a00', deviceVolume)">Write Volume {{deviceVolume}}</button>-->
+        <!--<ion-item>-->
+          <!--<ion-range min="0" max="10" step="1" [(ngModel)]="deviceVolume">-->
+            <!--<ion-icon range-left small name="volume-down"></ion-icon>-->
+            <!--<ion-icon range-right name="volume-up"></ion-icon>-->
+          <!--</ion-range>-->
+        <!--</ion-item>-->
+        <!--<ion-spinner name="crescent" *ngIf="gettingDevices"></ion-spinner>-->
+      </ion-list>
+    </div>
+    <!--<span class="device-details">{{pairingDevice}}</span><br/>-->
+    <span class="device-details" *ngIf="successData"><ion-icon small class="list-icon-absolute" name="close" (tap)="successData = ''"></ion-icon>Success: {{successData}}</span>
+    <span class="device-details" *ngIf="errorData"><ion-icon small class="list-icon-absolute" name="close" (tap)="errorData = ''"></ion-icon>Error: {{errorData}}</span>
+    <img alt="Dermapenworld" src="{{logoTransparent}}" class="dpw-logo-foot">
+  </div>
+</ion-content>

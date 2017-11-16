@@ -1,0 +1,63 @@
+<ion-content>
+  <div class="auth row center-xs middle-xs">
+    <form
+      ngForm
+      name="authForm"
+      class="signin-form col-xs-6 shadow-2"
+      #authForm="ngForm"
+      (submit)="authenticate()"
+    >
+      <div class="title-container">
+        <img alt="Dermapenworld" src="{{logoTransparent}}" class="dpw-logo-transparent">
+      </div>
+      <div class="warn-container">
+      <span *ngIf="errorMessage" class="warn-message">
+        {{errorMessage}}
+        <i title="Clear" class="fa fa-trash warn-clear-icon" size="lg" (click)="clearError()"></i>
+      </span>
+      </div>
+      <div class="clear-container">
+        <custom-input
+          [itemDisabled]="false"
+          [itemValue]="user.email"
+          [itemLabel]="'Email'"
+          [itemType]="'email'"
+          [itemError]="validateItem('email')"
+          (itemChange)="user.email = $event"
+        ></custom-input>
+        <custom-input
+          [itemDisabled]="false"
+          [itemValue]="user.password"
+          [itemLabel]="'Password'"
+          [itemType]="'password'"
+          [itemError]="validateItem('password')"
+          (itemChange)="user.password = $event"
+        ></custom-input>
+      </div>
+      <div class="actions col-xs-12">
+        <button
+          type="submit"
+          class="btn-rounded"
+          [disabled]="!authForm.form.valid"
+        >
+          SIGN IN
+        </button>
+        <button
+          type="button"
+          class="btn-rounded btn-transparent"
+          (click)="goToCreateAccount()"
+        >
+          CREATE NEW ACCOUNT
+        </button>
+        <div class="auth-links-container">
+          <a
+            class="link"
+            (click)="goToReset()"
+          >
+            Forgotten password?
+          </a>
+        </div>
+      </div>
+    </form>
+  </div>
+</ion-content>

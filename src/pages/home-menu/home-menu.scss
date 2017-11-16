@@ -1,0 +1,52 @@
+@import '../../theme/variables';
+
+@mixin animationHelper {
+  -webkit-transform: translateZ(0) rotate(0.01deg);
+  -ms-transform: translateZ(0) rotate(0.01deg);
+  transform: translateZ(0) rotate(0.01deg);
+}
+
+.home-menu-container .scroll-content {
+  padding: 16px 0 !important;
+  .swiper-pagination.swiper-pagination-clickable.swiper-pagination-bullets {
+    bottom: 17%;
+    .swiper-pagination-bullet {
+      background-color: $col-primary-blue;
+      border: 3px solid $col-primary-blue;
+      line-height: 12px;
+      opacity: 1;
+      vertical-align: middle;
+    }
+    .swiper-pagination-bullet.swiper-pagination-bullet-active {
+      background-color: $col-primary-white;
+      border: 2px solid $col-primary-blue;
+      height: 12px;
+      width: 12px;
+    }
+  }
+}
+
+.menu-card {
+  background-color: $col-primary-white;
+  border-radius: 12px;
+  box-shadow: 0 0 20px 0 rgba(#000, 0.15);
+  padding: 0;
+  position: absolute;
+  left: calc(50% - 32%);
+  top: calc(50% - 25%);
+  transform: scale(.87);
+  transition: all .3s ease 0s;
+  height: 52%;
+  width: 64%;
+  img.img-card {
+    @include animationHelper;
+    transform: scale(0.93);
+  }
+}
+.swiper-slide-active {
+  .menu-card {
+    @include animationHelper;
+    transform: scale(1) !important;
+    top: calc(50% - 26%);
+  }
+}

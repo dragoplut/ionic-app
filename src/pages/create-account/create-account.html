@@ -1,0 +1,33 @@
+<ion-content>
+  <div class="custom-header">
+    <ion-icon class="header-action-icon pull-left" name="arrow-back" (tap)="goToSignin()"></ion-icon>
+    <span class="header-title title-blue">Create Account</span>
+  </div>
+  <div class="create-account row center-xs middle-xs">
+    <form
+      ngForm
+      name="authForm"
+      class="create-account-form col-xs-6 shadow-2"
+      #authForm="ngForm"
+      (submit)="authenticate()"
+    >
+      <div class="clear-container">
+        <custom-input
+          *ngFor="let field of createAccInputs"
+          [itemDisabled]="field.disabled"
+          [itemValue]="user[field.modelName]"
+          [itemLabel]="field.placeholder"
+          [itemType]="field.type"
+          [itemError]="validateItem(field)"
+          (itemChange)="user[field.modelName] = $event"
+        ></custom-input>
+      </div>
+      <div class="actions col-xs-12">
+        <a class="link-nav pull-right" (click)="next()">
+          Next
+        </a>
+      </div>
+    </form>
+    <img alt="Dermapenworld" src="{{logoTransparent}}" class="dpw-logo-foot">
+  </div>
+</ion-content>

@@ -1,0 +1,33 @@
+<ion-content>
+  <div class="custom-header">
+    <ion-icon class="header-action-icon pull-left" name="arrow-back" (tap)="back()"></ion-icon>
+    <span class="header-title title-blue">Register Clinic</span>
+  </div>
+  <div class="create-account row center-xs middle-xs">
+    <form
+      ngForm
+      name="registerClinicForm"
+      class="create-account-form col-xs-6 shadow-2"
+      #registerClinicForm="ngForm"
+      (submit)="false"
+    >
+      <div class="clear-container">
+        <custom-input
+          *ngFor="let field of createAccInputs"
+          [itemDisabled]="field.disabled"
+          [itemValue]="account[field.modelName]"
+          [itemLabel]="field.placeholder"
+          [itemType]="field.type"
+          [itemError]="''"
+          (itemChange)="account[field.modelName] = $event"
+        ></custom-input>
+      </div>
+      <div class="actions col-xs-12">
+        <a class="link-nav pull-right" (click)="save()">
+          Save
+        </a>
+      </div>
+    </form>
+    <img alt="Dermapenworld" src="{{logoTransparent}}" class="dpw-logo-foot">
+  </div>
+</ion-content>

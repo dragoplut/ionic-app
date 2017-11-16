@@ -1,0 +1,15 @@
+<ion-content class="home-menu-container" padding>
+  <div class="custom-header">
+    <ion-icon class="header-action-icon pull-left" name="arrow-back" (tap)="goBack()"></ion-icon>
+    <div class="header-title"><img alt="Dermapenworld" src="{{logoTransparent}}" class="dpw-logo-head"></div>
+    <img alt="Profile" src="{{userProfileImg}}" class="header-action-icon-small pull-right" (click)="goToProfile()">
+  </div>
+  <ion-slides spaceBetween="-120" pager>
+    <ion-slide style="background-color: transparent">
+      <div (click)="goToPen()" class="menu-card"><img alt="Dermapenworld" src="{{penImg}}" class="img-card"></div>
+    </ion-slide>
+    <ion-slide style="background-color: transparent">
+      <div (click)="goToClinic()" class="menu-card"><img alt="Dermapenworld" src="{{clinicImg}}" class="img-card"></div>
+    </ion-slide>
+  </ion-slides>
+</ion-content>

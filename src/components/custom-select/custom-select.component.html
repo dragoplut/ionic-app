@@ -1,0 +1,20 @@
+<div class="custom-input-container custom-select-container" [ngClass]="itemClass">
+  <ion-item>
+    <ion-label
+      #selectLabel
+      class="custom-input-label {{itemValue && itemValue.length ? 'input-not-empty' : ''}} {{selectLabel.isActive ? 'input-active' : ''}}"
+    >
+      {{itemLabel}}
+    </ion-label>
+    <ion-select
+      [(ngModel)]="itemValue"
+      (focus)="selectLabel.isActive=true"
+      (blur)="selectLabel.isActive=false"
+      (change)="valueChange()"
+    >
+      <ion-option *ngFor="let option of itemOptions" value="{{option}}">{{option}}</ion-option>
+    </ion-select>
+  </ion-item>
+  <ion-icon class="custom-select-down-icon" name="arrow-down"></ion-icon>
+  <span *ngIf="!selectLabel.isActive && itemValue" class="custom-input-error">{{itemError}}</span>
+</div>

@@ -1,0 +1,23 @@
+<div class="custom-input-container" [ngClass]="itemClass">
+  <label
+    #inputLabel
+    for="customInput"
+    class="custom-input-label {{itemValue && itemValue.length ? 'input-not-empty' : ''}} {{inputLabel.isActive ? 'input-active' : ''}}"
+  >
+    {{itemLabel}}
+  </label>
+  <input
+    ngModel
+    [disabled]="itemDisabled"
+    [ngClass]="itemError && !inputLabel.isActive ? 'error' : ''"
+    type="{{ itemLabel === 'Password' ? 'password' : (itemType ? itemType : 'text') }}"
+    name="password"
+    (focus)="inputLabel.isActive=true"
+    (blur)="inputLabel.isActive=false"
+    (keyup)="valueChange()"
+    [(ngModel)]="itemValue"
+    autoComplete="new-password"
+    id="customInput"
+  >
+  <span *ngIf="!inputLabel.isActive && itemValue" class="custom-input-error">{{itemError}}</span>
+</div>

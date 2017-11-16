@@ -1,0 +1,85 @@
+<ion-content>
+  <div class="custom-header">
+    <ion-icon class="header-action-icon pull-left" name="arrow-back" (tap)="back()"></ion-icon>
+    <span class="header-title title-blue">Register Clinic</span>
+  </div>
+  <div class="create-account row center-xs middle-xs">
+    <form
+      ngForm
+      name="registerClinicForm"
+      class="create-account-form col-xs-6 shadow-2"
+      #registerClinicForm="ngForm"
+      (submit)="false"
+    >
+      <div class="clear-container">
+        <custom-input
+          [itemDisabled]="false"
+          [itemValue]="account.clinicName"
+          [itemLabel]="'Clinic Name'"
+          [itemType]="'text'"
+          [itemError]="''"
+          (itemChange)="account.clinicName = $event"
+        ></custom-input>
+
+        <div class="clear-container additional-content-block">
+          <div class="container-half pull-left">
+            <custom-select
+              [itemDisabled]="false"
+              [itemValue]="account.clinicCountry"
+              [itemLabel]="'Country'"
+              [itemOptions]="['United States']"
+              [itemType]="'text'"
+              [itemError]="''"
+              (itemChange)="account.clinicCountry = $event"
+            ></custom-select>
+            <custom-select
+              [itemDisabled]="!account.clinicState"
+              [itemValue]="account.clinicCity"
+              [itemLabel]="'City'"
+              [itemOptions]="usCityNames"
+              [itemType]="'text'"
+              [itemError]="''"
+              (itemChange)="account.clinicCity = $event"
+            ></custom-select>
+          </div>
+          <div class="container-half pull-right">
+            <custom-select
+              [itemDisabled]="!account.clinicCountry"
+              [itemValue]="account.clinicState"
+              [itemLabel]="'State'"
+              [itemOptions]="['California']"
+              [itemType]="'text'"
+              [itemError]="''"
+              (itemChange)="account.clinicState = $event"
+            ></custom-select>
+            <custom-input
+              [itemDisabled]="false"
+              [itemValue]="account.clinicZip"
+              [itemLabel]="'ZIP'"
+              [itemType]="'number'"
+              [itemError]="''"
+              (itemChange)="account.clinicZip = $event"
+            ></custom-input>
+          </div>
+        </div>
+        <custom-input
+          [itemDisabled]="false"
+          [itemValue]="account.clinicAddress"
+          [itemLabel]="'Address'"
+          [itemType]="'text'"
+          [itemError]="''"
+          (itemChange)="account.clinicAddress = $event"
+        ></custom-input>
+      </div>
+      <div class="map-container">
+        <div class="info-container">No map available.</div>
+      </div>
+      <div class="actions col-xs-12">
+        <a class="link-nav pull-right" (click)="next()">
+          Next
+        </a>
+      </div>
+    </form>
+    <img alt="Dermapenworld" src="{{logoTransparent}}" class="dpw-logo-foot">
+  </div>
+</ion-content>

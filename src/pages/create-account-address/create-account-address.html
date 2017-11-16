@@ -1,0 +1,42 @@
+<ion-content>
+  <div class="custom-header">
+    <ion-icon class="header-action-icon pull-left" name="arrow-back" (tap)="back()"></ion-icon>
+    <span class="header-title title-blue">Create Account</span>
+  </div>
+  <div class="create-account row center-xs middle-xs">
+    <form
+      ngForm
+      name="authForm"
+      class="create-account-form col-xs-6 shadow-2"
+      #authForm="ngForm"
+      (submit)="authenticate()"
+    >
+      <div class="clear-container">
+        <custom-select
+          [itemDisabled]="false"
+          [itemValue]="account.country"
+          [itemLabel]="'Country'"
+          [itemOptions]="['United States']"
+          [itemType]="'text'"
+          [itemError]="''"
+          (itemChange)="account.country = $event"
+        ></custom-select>
+        <custom-select
+          [itemDisabled]="!account.country"
+          [itemValue]="account.city"
+          [itemLabel]="'City'"
+          [itemOptions]="usCityNames"
+          [itemType]="'text'"
+          [itemError]="''"
+          (itemChange)="account.city = $event"
+        ></custom-select>
+      </div>
+      <div class="actions col-xs-12">
+        <a class="link-nav pull-right" (click)="next()">
+          Next
+        </a>
+      </div>
+    </form>
+    <img alt="Dermapenworld" src="{{logoTransparent}}" class="dpw-logo-foot">
+  </div>
+</ion-content>
