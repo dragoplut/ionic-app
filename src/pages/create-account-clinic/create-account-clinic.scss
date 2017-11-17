@@ -3,19 +3,18 @@
 signin .content .scroll-content {
   //overflow: hidden;
 }
-.create-account {
+.create-account-clinic {
   height: 100%;
   width: 100%;
   .create-account-form {
     border: none;
-    background-color: transparent;
+    background: transparent !important;
     padding: 80px 0 0;
     position: relative;
-    min-height: calc(100% - 110px);
+    min-height: calc(100% - 410px);
     height: auto;
     width: 100%;
     text-align: center;
-    vertical-align: middle;
     input {
       background-color: transparent;
       box-sizing: border-box;
@@ -41,30 +40,6 @@ signin .content .scroll-content {
     input:focus {
       color: $col-primary-blue;
       border-bottom: 1px solid $col-primary-blue;
-    }
-    .actions {
-      margin-top: 54px;
-      .btn-rounded {
-        cursor: pointer;
-        box-sizing: border-box;
-        background-color: $col-primary-blue;
-        border: none;
-        border-radius: 22px;
-        color: #fff;
-        margin-bottom: 12px;
-        height: 44px;
-        width: 67.5%;
-      }
-      .btn-transparent {
-        background-color: transparent;
-        border: none;
-        color: $col-primary-blue;
-        height: 36px;
-      }
-      .btn-transparent:disabled {
-        color: $col-neutral-placeholder;
-        cursor: not-allowed;
-      }
     }
     .warn-clear-icon {
       cursor: pointer;
@@ -104,5 +79,31 @@ signin .content .scroll-content {
     .custom-input-container {
       width: 80%;
     }
+  }
+}
+.actions {
+  display: block;
+  margin-top: 54px;
+  width: 100%;
+  .btn-rounded {
+    cursor: pointer;
+    box-sizing: border-box;
+    background-color: $col-primary-blue;
+    border: none;
+    border-radius: 22px;
+    color: #fff;
+    margin-bottom: 12px;
+    height: 44px;
+    width: 67.5%;
+  }
+  .btn-transparent {
+    background-color: transparent;
+    border: none;
+    color: $col-primary-blue;
+    height: 36px;
+  }
+  .btn-transparent:disabled {
+    color: $col-neutral-placeholder;
+    cursor: not-allowed;
   }
 }

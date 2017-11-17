@@ -27,7 +27,7 @@
               [itemDisabled]="false"
               [itemValue]="account.clinicCountry"
               [itemLabel]="'Country'"
-              [itemOptions]="['United States']"
+              [itemOptions]="countriesList"
               [itemType]="'text'"
               [itemError]="''"
               (itemChange)="account.clinicCountry = $event"
@@ -47,7 +47,7 @@
               [itemDisabled]="!account.clinicCountry"
               [itemValue]="account.clinicState"
               [itemLabel]="'State'"
-              [itemOptions]="['California']"
+              [itemOptions]="statesList"
               [itemType]="'text'"
               [itemError]="''"
               (itemChange)="account.clinicState = $event"
@@ -62,24 +62,18 @@
             ></custom-input>
           </div>
         </div>
-        <custom-input
-          [itemDisabled]="false"
-          [itemValue]="account.clinicAddress"
-          [itemLabel]="'Address'"
-          [itemType]="'text'"
-          [itemError]="''"
-          (itemChange)="account.clinicAddress = $event"
-        ></custom-input>
-      </div>
-      <div class="map-container">
-        <div class="info-container">No map available.</div>
-      </div>
-      <div class="actions col-xs-12">
-        <a class="link-nav pull-right" (click)="next()">
-          Next
-        </a>
+        <div class="custom-input-container">
+          <span class="custom-input-label input-not-empty">Address</span>
+          <google-places-autocomplete types="geocode" (callback)="detail($event[0])" key="AIzaSyDJYtcVzKXghryIDmQaTBDp5gWYPbTBqfU"></google-places-autocomplete>
+        </div>
       </div>
     </form>
+    <div #map id="map" class="map-container"></div>
+    <div class="actions col-xs-12">
+      <a class="link-nav pull-right" (click)="next()">
+        Next
+      </a>
+    </div>
     <img alt="Dermapenworld" src="{{logoTransparent}}" class="dpw-logo-foot">
   </div>
 </ion-content>

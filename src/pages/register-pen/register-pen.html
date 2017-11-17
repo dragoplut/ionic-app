@@ -33,9 +33,9 @@
       </div>
     </form>
 
-    <div *ngIf="false" class="create-account-form col-xs-6 ble-pair-container">
-      <ion-list padding>
-        <button ion-button block (click)="startScanning()">scan</button>
+    <!--<div class="create-account-form col-xs-6 ble-pair-container">-->
+      <!--<ion-list padding>-->
+        <!--<button ion-button block (click)="startScanning()">scan</button>-->
         <!--<ion-list-header>-->
           <!--Paired Devices-->
         <!--</ion-list-header>-->
@@ -58,8 +58,8 @@
           <!--</ion-range>-->
         <!--</ion-item>-->
         <!--<ion-spinner name="crescent" *ngIf="gettingDevices"></ion-spinner>-->
-      </ion-list>
-    </div>
+      <!--</ion-list>-->
+    <!--</div>-->
     <!--<span class="device-details">{{pairingDevice}}</span><br/>-->
     <span class="device-details" *ngIf="successData"><ion-icon small class="list-icon-absolute" name="close" (tap)="successData = ''"></ion-icon>Success: {{successData}}</span>
     <span class="device-details" *ngIf="errorData"><ion-icon small class="list-icon-absolute" name="close" (tap)="errorData = ''"></ion-icon>Error: {{errorData}}</span>

@@ -1,0 +1,29 @@
+@import '../../theme/variables';
+
+.row-with-info-container {
+  color: $col-neutral-text;
+  display: block;
+  font-size: 1.2em;
+  position: relative;
+  margin: 0;
+  padding: 0 5%;
+  text-align: left;
+  height: 50px;
+  width: 100%;
+  .info-label, .info-value {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    line-height: 50px;
+    text-align: left;
+    vertical-align: top;
+  }
+  .info-label {
+    font-weight: 600;
+    width: 45%;
+  }
+  .info-value {
+    width: 53%;
+  }
+}

@@ -1,8 +1,12 @@
-import { NgModule, ErrorHandler } from '@angular/core';
+import { NgModule, ErrorHandler, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { HttpModule } from '@angular/http';
 import { BrowserModule } from '@angular/platform-browser';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { MyApp } from './app.component';
+
+import { GoogleMaps } from '@ionic-native/google-maps';
+import { Camera } from '@ionic-native/camera';
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
@@ -24,6 +28,7 @@ export const mapValuesToArray = (item: any) => Object.keys(item).map((key: any) 
   ],
   imports: [
     BrowserModule,
+    CommonModule,
     HttpModule,
     IonicModule.forRoot(MyApp, {}, { links: [] })
   ],
@@ -38,8 +43,13 @@ export const mapValuesToArray = (item: any) => Object.keys(item).map((key: any) 
     StatusBar,
     SplashScreen,
     BLE,
+    GoogleMaps,
+    Camera,
     ...mapValuesToArray(services),
     { provide: ErrorHandler, useClass: IonicErrorHandler }
+  ],
+  schemas: [
+    CUSTOM_ELEMENTS_SCHEMA
   ]
 })
 export class AppModule { }

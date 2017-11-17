@@ -215,9 +215,9 @@
   input {
     z-index: 5;
   }
-  .custom-input-label {
-    z-index: 1;
-  }
+}
+.custom-input-label {
+  z-index: 1;
 }
 .truncated {
   overflow: hidden;
@@ -277,7 +277,7 @@
   padding: 0;
   text-align: left;
   width: 67.5%;
-  input {
+  input, ion-searchbar.searchbar-md {
     background-color: transparent;
     box-sizing: border-box;
     border: none;
@@ -308,6 +308,45 @@
   input.error {
     border-bottom: 1px solid $col-primary-red;
   }
+  ion-searchbar.searchbar-md {
+    input {
+      box-shadow: none;
+    }
+    input::-webkit-input-placeholder,
+    input:-ms-input-placeholder,
+    input::-moz-placeholder,
+    input:-moz-placeholder {
+      color: $col-neutral-placeholder;
+    }
+    input:focus {
+      border-bottom: 1px solid $col-neutral-text;
+    }
+    input.disabled {
+      border-bottom: 1px solid $col-neutral-placeholder;
+    }
+    input.error {
+      border-bottom: 1px solid $col-primary-red;
+    }
+    .searchbar-search-icon {
+      left: 74vw;
+      top: 8px;
+    }
+  }
+  ion-searchbar.searchbar-md.searchbar-has-focus {
+    input {
+      border-bottom: 1px solid $col-primary-blue;
+      padding-left: 0;
+    }
+    input::-webkit-input-placeholder,
+    input:-ms-input-placeholder,
+    input::-moz-placeholder,
+    input:-moz-placeholder {
+      display: none;
+    }
+    .searchbar-search-icon {
+      display: none;
+    }
+  }
   .custom-input-label {
     transition: transform .3s ease-out 0s;
     color: $col-neutral-placeholder;
@@ -335,6 +374,7 @@
     right: 0;
     bottom: -14px;
   }
+
 }
 .custom-select-container {
   margin-top: 10px;
@@ -345,6 +385,12 @@
       color: $col-neutral-text;
       padding-left: 0;
       max-width: 85%;
+      z-index: 10;
+      .select-text {
+        color: $col-neutral-text;
+        font-size: $text-body;
+        font-weight: 400;
+      }
     }
   }
   .custom-select-down-icon {
@@ -398,17 +444,22 @@
   }
 }
 
-.map-container {
-  background-color: $col-primary-white;
-  border: 1px solid $col-neutral-label;
-  border-radius: 0.6em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+#map {
+  box-sizing: border-box;
+  display: block;
+  background: transparent !important;
+  //border: 1px solid $col-neutral-label;
+  border-radius: 0.6em !important;
+  //display: flex;
+  //align-items: center;
+  //justify-content: center;
   position: relative;
   margin: 20px 40px;
-  height: 200px;
+  overflow: hidden !important;
+  height: 200px !important;
+  min-height: 200px !important;
   width: calc(100% - 80px);
+  z-index: 120;
 }
 
 .device-details {
@@ -420,4 +471,11 @@
   word-wrap: break-word;
   height: auto;
   width: 100%;
+  .list-icon-absolute {
+    top: 0;
+  }
+}
+
+.create-account, .create-account-form {
+  background: transparent !important;
 }
