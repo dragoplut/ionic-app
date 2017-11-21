@@ -17,7 +17,7 @@ export class ApiService implements OnInit {
     'Accept': 'application/json',
     'Content-type': 'application/json-patch+json'
   });
-  protected endpoint: string = 'http://91.237.240.58/api';
+  protected endpoint: string = 'http://regen-dev.azurewebsites.net/api';
 
   constructor(
     public http: Http
