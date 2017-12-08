@@ -6,6 +6,7 @@ import { IonicModule, Platform, NavController} from 'ionic-angular/index';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { PlatformMock, StatusBarMock, SplashScreenMock } from '../../../test-config/mocks-ionic';
+import { AuthService } from '../../services/index';
 
 describe('Home Menu', () => {
   let de: DebugElement;
@@ -19,6 +20,7 @@ describe('Home Menu', () => {
         IonicModule.forRoot(HomeMenu)
       ],
       providers: [
+        AuthService,
         NavController,
         { provide: Platform, useClass: PlatformMock},
         { provide: StatusBar, useClass: StatusBarMock },

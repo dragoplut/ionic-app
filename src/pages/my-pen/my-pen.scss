@@ -1,0 +1,14 @@
+@import '../../theme/variables';
+
+.my-clinic-page {
+  .page-content {
+    .item-inner {
+      background-image: none !important;
+      color: $col-neutral-text;
+      padding-right: 32px !important;
+    }
+  }
+  .info-container {
+    font-size: 1.1em;
+  }
+}

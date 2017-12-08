@@ -7,7 +7,12 @@ import {
   MarkerOptions
 } from '@ionic-native/google-maps';
 import { Component, ViewChild, ElementRef, OnInit } from '@angular/core';
-import { AuthService, ApiService, PermissionService } from '../../services/index';
+import {
+  AuthService,
+  ApiService,
+  ClinicService,
+  PermissionService
+} from '../../services/index';
 import {
   ANGLE_IMG,
   DEFAULT_ERROR_MESSAGE,
@@ -16,7 +21,7 @@ import {
   PAGES_LIST,
   US_CITY_NAMES
 } from '../../app/constants';
-import { CreateAccountAddressComponent, SigninComponent } from '../index';
+import { CreateAccountAddressComponent, SigninComponent, HomeMenu } from '../index';
 import { Nav, NavController, NavParams } from 'ionic-angular';
 // noinspection TypeScriptCheckImport
 import * as _ from 'lodash';
@@ -37,7 +42,7 @@ export class CreateAccountClinicComponent implements OnInit {
   public countriesList: any[] = ['United States','Ukraine'];
   public statesList: any[] = ['California'];
 
-  public account: any = {};
+  public account: any = { clinic: { location: {} } };
   public user: any = { email: '', password: '' };
   public logoTransparent: string = DPW_LOGO_TRANSPARENT;
   public loading: boolean = false;
@@ -62,11 +67,16 @@ export class CreateAccountClinicComponent implements OnInit {
     public navParams: NavParams,
     public _api: ApiService,
     public _auth: AuthService,
+    public _clinic: ClinicService,
     public _permission: PermissionService
   ) {}
 
   public ionViewDidLoad() {
     this.account = this.navParams.get('account');
+    if (!this.account.clinic) {
+      this.account.clinic = { location: {} };
+    }
+    console.log('this.account: ', this.account);
     this.loadMap();
   }
 
@@ -250,28 +260,41 @@ export class CreateAccountClinicComponent implements OnInit {
   }
 
   public detail(address: any) {
+    if (!this.account.clinic) {
+      this.account.clinic = { location: {} };
+    } else if (!this.account.clinic.location) {
+      this.account.clinic.location = {};
+    }
     address.address_components.forEach((el: any) => {
       switch (el.types[0]) {
         case 'country':
           this.countriesList.push(el.long_name);
           this.countriesList = _.uniq(this.countriesList);
-          this.account.clinicCountry = el.long_name;
+          this.account.clinic.location.country = el.long_name;
           break;
         case 'administrative_area_level_1':
           this.statesList.push(el.long_name);
           this.statesList = _.uniq(this.statesList);
-          this.account.clinicState = el.short_name;
+          this.account.clinic.location.state = el.short_name;
           break;
         case 'locality':
           this.usCityNames.push(el.long_name);
           this.usCityNames = _.uniq(this.usCityNames);
-          this.account.clinicCity = el.short_name;
+          this.account.clinic.location.city = el.short_name;
           break;
         case 'postal_code':
-          this.account.clinicZip = el.long_name;
+          this.account.clinic.location.zip = el.long_name;
+          break;
+        case 'street_number':
+        case 'route':
+          this.account.location.address = this.account.location.address ?
+          this.account.location.address + el.long_name + ' ' :
+          el.long_name + ' ';
           break;
       }
     });
+    this.account.location.latitude = address.geometry.location.lat;
+    this.account.location.longtitude = address.geometry.location.lng;
     this.centerMap(address);
     // alert(JSON.stringify(address));
   }
@@ -281,7 +304,30 @@ export class CreateAccountClinicComponent implements OnInit {
   }
 
   public next() {
-    console.log('nex: ', this.account)
+    const valid: boolean = this.account &&
+        this.account.clinic &&
+        this.account.clinic.name &&
+        this.account.clinic.location &&
+        this.account.clinic.location.country;
+    if (valid) {
+      this.account.clinic.phoneNumber = '+0000000';
+      this.account.clinic.contactPerson = this.account.firstName + ' ' + this.account.lastName;
+      this.account.clinic.webSiteUrl = 'https://';
+      this.account.clinic.finderPageEnabled = false;
+      this.loading = true;
+      this._clinic.createClinic(this.account.clinic).subscribe(
+        (resp: any) => {
+          this.loading = false;
+          console.log('nex: ', this.account.clinic);
+          alert('Clinic created!');
+          this.openPage(HomeMenu);
+        },
+        (err: any) => {
+          this.loading = false;
+          alert(err);
+        }
+      );
+    }
   }
 
   public openPage(page) {

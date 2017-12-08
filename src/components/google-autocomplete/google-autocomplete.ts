@@ -13,6 +13,10 @@ export class GooglePlacesAutocompleteComponent {
 
   @Output("callback") callback : EventEmitter<any> = new EventEmitter();
 
+  @Output("inputChanged") inputChanged : EventEmitter<any> = new EventEmitter();
+
+  @Input("addressValue") addressValue : string;
+
   @Input("placeholder") placeholder : string;
 
   @Input("request") request : string;
@@ -86,5 +90,9 @@ export class GooglePlacesAutocompleteComponent {
   public detail(item: any) {
     this.getDetails(item);
     this.locals = [];
+  }
+
+  public valueChanged(value) {
+    this.inputChanged.emit(value);
   }
 }

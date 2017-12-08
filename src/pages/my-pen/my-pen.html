@@ -1,0 +1,31 @@
+<ion-content class="my-clinic-page">
+  <div class="custom-header">
+    <ion-icon class="header-action-icon pull-left" name="close" (tap)="goBack()"></ion-icon>
+    <span class="header-title title-blue">My Pen</span>
+    <ion-icon class="header-action-icon pull-right" name="add" (tap)="goToNewPen()"></ion-icon>
+  </div>
+  <div class="page-content">
+    <div class="clear-container">
+      <ion-searchbar
+        placeholder="Search"
+        [animated]="true"
+        [(ngModel)]="searchInput"
+        (ionInput)="onInput($event)"
+        (ionCancel)="onCancel($event)">
+      </ion-searchbar>
+      <ion-list>
+        <button ion-item *ngFor="let item of penListFiltered" (click)="itemSelected(item)">
+          {{ item.serialNumber }} <span class="pull-right secondary-blue">Update Pen</span>
+          <ion-icon class="list-icon-absolute" name="arrow-forward"></ion-icon>
+        </button>
+      </ion-list>
+      <div *ngIf="searchInput" class="info-container">
+        <div *ngIf="penListFiltered.length" class="plain-text text-center">Showing {{penListFiltered.length}} of {{penListFiltered.length}} items</div>
+        <div *ngIf="!penListFiltered.length" class="plain-text text-center">No results found</div>
+      </div>
+
+    </div>
+    <div class="actions"></div>
+  </div>
+  <img alt="Dermapenworld" src="{{logoTransparent}}" class="dpw-logo-foot">
+</ion-content>

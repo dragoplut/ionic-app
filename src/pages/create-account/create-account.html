@@ -12,18 +12,19 @@
       (submit)="authenticate()"
     >
       <div class="clear-container">
-        <custom-input
+        <span *ngIf="user.created && !loading" class="text-center red">Account created and can be change only after sign in!</span>
+        <input-select
           *ngFor="let field of createAccInputs"
-          [itemDisabled]="field.disabled"
+          [itemDisabled]="field.disabled || user.created"
           [itemValue]="user[field.modelName]"
           [itemLabel]="field.placeholder"
           [itemType]="field.type"
           [itemError]="validateItem(field)"
-          (itemChange)="user[field.modelName] = $event"
-        ></custom-input>
+          (itemChange)="user[field.modelName] = $event; onChangeValidate()"
+        ></input-select>
       </div>
       <div class="actions col-xs-12">
-        <a class="link-nav pull-right" (click)="next()">
+        <a class="link-nav pull-right" [ngClass]="!formValid ? 'disabled' : ''" (click)="formValid ? next() : false">
           Next
         </a>
       </div>

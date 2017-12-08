@@ -2,7 +2,6 @@ import { Component, ViewChild, OnInit } from '@angular/core';
 import { AuthService, ApiService, PermissionService } from '../../services/index';
 import {
   ANGLE_IMG,
-  CHECK,
   DEFAULT_ERROR_MESSAGE,
   DPW_LOGO_TRANSPARENT,
   EMAIL_REGEXP,
@@ -10,6 +9,8 @@ import {
 } from '../../app/constants';
 import { CreateAccountAddressComponent, SigninComponent } from '../index';
 import { Nav, NavController, NavParams } from 'ionic-angular';
+// noinspection TypeScriptCheckImport
+import * as _ from 'lodash';
 
 @Component({
   selector: 'create-account',
@@ -21,24 +22,21 @@ export class CreateAccountComponent implements OnInit {
   public user: any = { email: '', password: '' };
   public logoTransparent: string = DPW_LOGO_TRANSPARENT;
   public loading: boolean = false;
+  public formValid: boolean = false;
   public errorMessage: any = '';
   public PAGES_LIST: any = PAGES_LIST;
   public angleImg: string = ANGLE_IMG;
 
   public emailRegExp: any = EMAIL_REGEXP;
 
-  // TODO: Remove signin page blocker for prod
-  public approved: boolean = false;
-  public pwd: any = '';
-
   public createAccInputs: any = [
-    { modelName: 'firstName', placeholder: 'First Name', type: 'text', required: false },
+    { modelName: 'firstName', placeholder: 'First Name', type: 'text', required: true },
     { modelName: 'lastName', placeholder: 'Last Name', type: 'text', required: false },
-    { modelName: 'companyName', placeholder: 'Company Name', type: 'text', required: false },
+    { modelName: 'companyName', placeholder: 'Company Name', type: 'text', required: true },
     { modelName: 'email', placeholder: 'Email', type: 'email', required: true },
     { modelName: 'password', placeholder: 'Password', type: 'password', required: true },
     { modelName: 'confirmPassword', placeholder: 'Confirm Password', type: 'password', required: true },
-    { modelName: 'phoneNumber', placeholder: 'Phone Number', type: 'text', required: false }
+    { modelName: 'phoneNumber', placeholder: 'Phone Number', type: 'text', required: true }
   ];
 
   constructor(
@@ -50,29 +48,20 @@ export class CreateAccountComponent implements OnInit {
   ) {}
 
   public ionViewDidLoad() {
+    const acc: any = this.navParams.get('account');
     this.user.email = this.navParams.get('email');
+    if (acc) {
+      this.user = acc;
+    }
+    this.onChangeValidate();
   }
 
   public ngOnInit() {
     this._api.setHeaders({});
-    let pwdCheck: any = sessionStorage.getItem('app_check');
-    if (pwdCheck && pwdCheck === CHECK) {
-      this.approved = true;
-    }
   }
 
   public showErrorMessage(message?: string) {
     this.errorMessage = message ? message : DEFAULT_ERROR_MESSAGE;
-  }
-
-  public makeCheck() {
-    if (this.pwd && btoa(this.pwd) === CHECK) {
-      sessionStorage.setItem('app_check', CHECK);
-      this.approved = true;
-    } else {
-      this.approved = false;
-    }
-    return this.approved;
   }
 
   public goToReset() {
@@ -144,6 +133,24 @@ export class CreateAccountComponent implements OnInit {
         (resp: any) => this.handleSuccess(resp),
         (err: any) => this.handleErr(err)
       );
+  }
+
+  public onChangeValidate() {
+    let isValid = true;
+    _.forEach(this.createAccInputs, (item: any) => {
+      let err = this.validateItem(item);
+      if (err) {
+        isValid = false;
+      } else if (item.required) {
+        if (!this.user[item.modelName] ||
+            !this.user[item.modelName].length ||
+            this.user[item.modelName].length < 2) {
+          isValid = false;
+        }
+      }
+    });
+    console.log('isValid: ', isValid, ' user: ', this.user);
+    this.formValid = isValid;
   }
 
   public goToSignin() {

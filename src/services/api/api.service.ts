@@ -17,7 +17,8 @@ export class ApiService implements OnInit {
     'Accept': 'application/json',
     'Content-type': 'application/json-patch+json'
   });
-  protected endpoint: string = 'http://regen-dev.azurewebsites.net/api';
+  public token: string = '';
+  protected endpoint: string = 'http://regen-dev.azurewebsites.net/api/mobile';
 
   constructor(
     public http: Http
@@ -66,7 +67,7 @@ export class ApiService implements OnInit {
       .map(this.getJson);
   }
 
-  public setHeaders(headers) {
+  public setHeaders(headers: any) {
      Object.keys(headers)
       .forEach((header: any) => this.headers.set(header, headers[header]));
   }
@@ -77,10 +78,8 @@ export class ApiService implements OnInit {
 
   public checkForError(resp: Response): Response {
     if (resp.status >= 200 && resp.status < 300) {
-      console.log('OK: resp', resp);
       return resp;
     } else if (resp.status === 401) {
-      console.log('AUTH ERR: resp', resp);
       const error = new Error(resp.statusText);
       error['response'] = resp;
       this.post('/auth/signOut', {})
@@ -97,10 +96,19 @@ export class ApiService implements OnInit {
     }
   }
 
+  public setHeadersToken() {
+    const tokenEncrypted: any = localStorage.getItem('token_mobile');
+    this.token = tokenEncrypted ? atob(tokenEncrypted) : '';
+    this.setHeaders({ Authorization: `Bearer ${this.token}` });
+  }
+
   protected getDefaultOptions(): RequestOptions {
+    const tokenEncrypted: any = localStorage.getItem('token_mobile');
+    this.token = tokenEncrypted ? atob(tokenEncrypted) : '';
     const headers: any = new Headers({
       'Accept': 'application/json',
-      'Content-type': 'application/json-patch+json'
+      'Content-type': 'application/json-patch+json',
+      'Authorization': `Bearer ${this.token}`
     });
     let options: RequestOptions = new RequestOptions({ headers });
     options.withCredentials = true;

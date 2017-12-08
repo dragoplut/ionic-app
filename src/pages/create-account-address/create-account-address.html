@@ -12,27 +12,29 @@
       (submit)="authenticate()"
     >
       <div class="clear-container">
+        <ion-spinner name="crescent" *ngIf="loading"></ion-spinner>
+        <span *ngIf="account.created && !loading" class="text-center red">Account created and can be change only after sign in!</span>
         <custom-select
-          [itemDisabled]="false"
-          [itemValue]="account.country"
+          [itemDisabled]="account.created"
+          [itemValue]="account.location.country"
           [itemLabel]="'Country'"
           [itemOptions]="['United States']"
           [itemType]="'text'"
           [itemError]="''"
-          (itemChange)="account.country = $event"
+          (itemChange)="account.location.country = $event; onChangeValidate()"
         ></custom-select>
         <custom-select
-          [itemDisabled]="!account.country"
-          [itemValue]="account.city"
+          [itemDisabled]="!account.location.country || account.created"
+          [itemValue]="account.location.city"
           [itemLabel]="'City'"
           [itemOptions]="usCityNames"
           [itemType]="'text'"
           [itemError]="''"
-          (itemChange)="account.city = $event"
+          (itemChange)="account.location.city = $event; onChangeValidate()"
         ></custom-select>
       </div>
       <div class="actions col-xs-12">
-        <a class="link-nav pull-right" (click)="next()">
+        <a class="link-nav pull-right" [ngClass]="!formValid ? 'disabled' : ''" (click)="formValid ? next() : false">
           Next
         </a>
       </div>

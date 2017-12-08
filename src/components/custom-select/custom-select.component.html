@@ -7,12 +7,16 @@
       {{itemLabel}}
     </ion-label>
     <ion-select
+      [disabled]="itemDisabled"
       [(ngModel)]="itemValue"
       (focus)="selectLabel.isActive=true"
       (blur)="selectLabel.isActive=false"
-      (change)="valueChange()"
+      (ionChange)="valueChange()"
     >
-      <ion-option *ngFor="let option of itemOptions" value="{{option}}">{{option}}</ion-option>
+      <ion-option
+        *ngFor="let option of itemOptions"
+        value="{{option}}"
+      >{{option}}</ion-option>
     </ion-select>
   </ion-item>
   <ion-icon class="custom-select-down-icon" name="arrow-down"></ion-icon>

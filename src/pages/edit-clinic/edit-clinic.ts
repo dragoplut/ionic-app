@@ -7,7 +7,7 @@ import {
   MarkerOptions
 } from '@ionic-native/google-maps';
 import { Component, ViewChild, ElementRef, OnInit } from '@angular/core';
-import { ApiService, PermissionService } from '../../services/index';
+import { ApiService, ClinicService, PermissionService } from '../../services/index';
 import {
   DEFAULT_ERROR_MESSAGE,
   DPW_LOGO_TRANSPARENT,
@@ -35,7 +35,7 @@ export class EditClinicComponent implements OnInit {
   public countriesList: any[] = ['United States','Ukraine'];
   public statesList: any[] = ['California'];
 
-  public account: any = {};
+  public account: any = { location: {} };
   public logoTransparent: string = DPW_LOGO_TRANSPARENT;
   public loading: boolean = false;
   public errorMessage: any = '';
@@ -45,19 +45,26 @@ export class EditClinicComponent implements OnInit {
   public createAccInputs: any = [
     { modelName: 'phoneNumber', placeholder: 'Phone Number', type: 'text', required: false },
     { modelName: 'contactPerson', placeholder: 'Contact Person', type: 'text', required: false },
-    { modelName: 'websiteUrl', placeholder: 'Website URL', type: 'text', required: false }
+    { modelName: 'webSiteUrl', placeholder: 'Website URL', type: 'text', required: false }
   ];
 
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
     public _api: ApiService,
+    public _clinic: ClinicService,
     public _permission: PermissionService
   ) {}
 
   public ionViewDidLoad() {
-    const acc: any = this.navParams.get('clinic');
-    this.account = acc ? acc : {};
+    const clinicData: any = this.navParams.get('clinic');
+    this.account = clinicData ? clinicData : {};
+    if (!this.account) {
+      this.account = { location: {} };
+    } else if (!this.account.location) {
+      this.account.location = {};
+    }
+    this.getClinic(this.account.id);
     this.loadMap();
   }
 
@@ -143,20 +150,20 @@ export class EditClinicComponent implements OnInit {
         case 'country':
           this.countriesList.push(el.long_name);
           this.countriesList = _.uniq(this.countriesList);
-          this.account.clinicCountry = el.long_name;
+          this.account.location.country = el.long_name;
           break;
         case 'administrative_area_level_1':
           this.statesList.push(el.long_name);
           this.statesList = _.uniq(this.statesList);
-          this.account.clinicState = el.short_name;
+          this.account.location.state = el.short_name;
           break;
         case 'locality':
           this.usCityNames.push(el.long_name);
           this.usCityNames = _.uniq(this.usCityNames);
-          this.account.clinicCity = el.short_name;
+          this.account.location.city = el.short_name;
           break;
         case 'postal_code':
-          this.account.clinicZip = el.long_name;
+          this.account.location.zip = el.long_name;
           break;
       }
     });
@@ -164,8 +171,40 @@ export class EditClinicComponent implements OnInit {
     // alert(JSON.stringify(address));
   }
 
+  public validate(clinic: any) {
+    return clinic &&
+        clinic.name &&
+        clinic.location;
+  }
+
   public ngOnInit() {
     this._api.setHeaders({});
+  }
+
+  public getClinic(id: number | string) {
+    this._clinic.getClinicById(id).subscribe(
+      (resp: any) => {
+        this.updateSelectOptions(resp.location);
+        this.account = resp;
+      },
+      (err: any) => {
+        console.log('err: ', err);
+      }
+    );
+  }
+
+  public updateSelectOptions(location: any) {
+    console.log('1 updateSelectOptions location, this.countriesList', location, this.countriesList);
+    if (location && location.country) {
+      // usCityNames, countriesList, statesList
+      this.countriesList.push(location.country);
+      this.countriesList = _.uniq(this.countriesList);
+      this.statesList.push(location.state);
+      this.statesList = _.uniq(this.statesList);
+      this.usCityNames.push(location.city);
+      this.usCityNames = _.uniq(this.usCityNames);
+    }
+    console.log('2 updateSelectOptions location, this.countriesList', location, this.countriesList);
   }
 
   public showErrorMessage(message?: string) {
@@ -181,7 +220,17 @@ export class EditClinicComponent implements OnInit {
   }
 
   public save() {
-    this.openPage(MyClinicComponent);
+    const valid: boolean = this.validate(this.account);
+    if (valid) {
+      this._clinic.updateClinic(this.account).subscribe(
+        (resp: any) => {
+          this.openPage(MyClinicComponent);
+        },
+        (err: any) => {
+          console.log('err: ', err);
+        }
+      );
+    }
   }
 
   public openPage(page) {

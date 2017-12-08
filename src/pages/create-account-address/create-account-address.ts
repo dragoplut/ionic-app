@@ -1,8 +1,12 @@
 import { Component, ViewChild, OnInit } from '@angular/core';
-import { AuthService, ApiService, PermissionService } from '../../services/index';
+import {
+  AuthService,
+  ApiService,
+  AccountService,
+  PermissionService
+} from '../../services/index';
 import {
   ANGLE_IMG,
-  CHECK,
   DEFAULT_ERROR_MESSAGE,
   DPW_LOGO_TRANSPARENT,
   EMAIL_REGEXP,
@@ -23,10 +27,11 @@ import { Nav, NavController, NavParams } from 'ionic-angular';
 export class CreateAccountAddressComponent implements OnInit {
   @ViewChild(Nav) nav: Nav;
 
-  public account: any = {};
+  public account: any = { location: {} };
   public user: any = { email: '', password: '' };
   public logoTransparent: string = DPW_LOGO_TRANSPARENT;
   public loading: boolean = false;
+  public formValid: boolean = false;
   public errorMessage: any = '';
   public PAGES_LIST: any = PAGES_LIST;
   public angleImg: string = ANGLE_IMG;
@@ -34,52 +39,32 @@ export class CreateAccountAddressComponent implements OnInit {
   public emailRegExp: any = EMAIL_REGEXP;
   public usCityNames: any[] = US_CITY_NAMES;
 
-  // TODO: Remove signin page blocker for prod
-  public approved: boolean = false;
-  public pwd: any = '';
-
-  public createAccInputs: any = [
-    { modelName: 'firstName', placeholder: 'First Name', type: 'text', required: false },
-    { modelName: 'lastName', placeholder: 'Last Name', type: 'text', required: false },
-    { modelName: 'companyName', placeholder: 'Company Name', type: 'text', required: false },
-    { modelName: 'email', placeholder: 'Email', type: 'email', required: true },
-    { modelName: 'password', placeholder: 'Password', type: 'password', required: true },
-    { modelName: 'confirmPassword', placeholder: 'Confirm Password', type: 'password', required: true },
-    { modelName: 'phoneNumber', placeholder: 'Phone Number', type: 'text', required: false }
-  ];
+  public dependencies: any = {};
 
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
     public _api: ApiService,
     public _auth: AuthService,
+    public _account: AccountService,
     public _permission: PermissionService
   ) {}
 
   public ionViewDidLoad() {
     this.account = this.navParams.get('account');
+    if (!this.account.location) {
+      this.account.location = {};
+    }
+    this.onChangeValidate();
+    console.log('this.account: ', this.account);
   }
 
   public ngOnInit() {
     this._api.setHeaders({});
-    let pwdCheck: any = sessionStorage.getItem('app_check');
-    if (pwdCheck && pwdCheck === CHECK) {
-      this.approved = true;
-    }
   }
 
   public showErrorMessage(message?: string) {
     this.errorMessage = message ? message : DEFAULT_ERROR_MESSAGE;
-  }
-
-  public makeCheck() {
-    if (this.pwd && btoa(this.pwd) === CHECK) {
-      sessionStorage.setItem('app_check', CHECK);
-      this.approved = true;
-    } else {
-      this.approved = false;
-    }
-    return this.approved;
   }
 
   public goToReset() {
@@ -88,34 +73,6 @@ export class CreateAccountAddressComponent implements OnInit {
 
   public clearError() {
     this.errorMessage = '';
-  }
-
-  public validateItem(field: any) {
-    let errMessage: string = '';
-
-    switch (field.type) {
-      case 'email':
-        errMessage = !this.emailRegExp.test(this.user.email) && this.user.email ?
-          'Email is invalid' : '';
-        break;
-      case 'password':
-        if (field.modelName === 'password') {
-          errMessage = !this.user.password || this.user.password.length < 4 ?
-            'Min length is 4 characters' : '';
-        } else {
-          if (!this.user.confirmPassword || this.user.confirmPassword.length < 4) {
-            errMessage = !this.user.confirmPassword || this.user.confirmPassword.length < 4 ?
-              'Min length is 4 characters' : '';
-          } else if (this.user.confirmPassword && this.user.confirmPassword !== this.user.password) {
-            errMessage = 'Confirm password and password do not match!'
-          }
-        }
-        break;
-      default:
-        break;
-    }
-
-    return errMessage;
   }
 
   public handleSuccess(resp: any) {
@@ -140,17 +97,21 @@ export class CreateAccountAddressComponent implements OnInit {
     this.loading = false;
     const message = err && err._body ?
       JSON.parse(err._body) : { error: { message: DEFAULT_ERROR_MESSAGE } };
-    this.showErrorMessage(message.error.message);
+    alert(message.error.message);
     return err && err._body ? JSON.parse(err._body) : message;
   }
 
-  public authenticate() {
-    this.loading = true;
-    this._auth.authenticate(this.user)
-      .subscribe(
-        (resp: any) => this.handleSuccess(resp),
-        (err: any) => this.handleErr(err)
-      );
+  public onChangeValidate() {
+    let isValid = true;
+    if (!this.account.location ||
+        !this.account.location.country ||
+        !this.account.location.country.length ||
+        !this.account.location.city ||
+        !this.account.location.city.length) {
+      isValid = false;
+    }
+    console.log();
+    this.formValid = isValid;
   }
 
   public back() {
@@ -158,10 +119,46 @@ export class CreateAccountAddressComponent implements OnInit {
   }
 
   public next() {
-    this.openPage(CreateAccountClinicComponent);
+    if (!this.account.created) {
+      this.loading = true;
+      this._account.createAccount(this.account).subscribe(
+        (resp: any) => {
+          this.account.created = resp;
+          this.loading = false;
+          this.authenticate();
+        },
+        (err: any) => {
+          this.loading = false;
+          alert(err);
+        }
+      );
+    } else {
+      this.openPage(CreateAccountClinicComponent);
+    }
+  }
+
+  public authenticate() {
+    this.loading = true;
+    const credentials = {
+      email: this.account.email,
+      password: this.account.password
+    };
+    this._auth.generateToken(credentials)
+      .subscribe(
+        (resp: any) => {
+          this.loading = false;
+          alert('Account created!');
+          this.openPage(CreateAccountClinicComponent);
+        },
+        (err: any) => {
+          this.loading = false;
+          this.handleErr(err);
+        }
+      );
   }
 
   public openPage(page) {
-    this.navCtrl.push(page, { account: this.account });
+    console.log('openPage this.account', this.account);
+    this.navCtrl.push(page, { account: this.account, dependencies: this.dependencies });
   }
 }

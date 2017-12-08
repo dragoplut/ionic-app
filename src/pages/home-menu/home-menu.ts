@@ -9,12 +9,13 @@ import {
   DPW_LOGO_TRANSPARENT,
   USER_PROFILE_IMG
 } from '../../app/constants';
+// import { AuthService } from '../../services/index'
 
 import {
   SigninComponent,
   MyAccountComponent,
   MyClinicComponent,
-  RegisterPenComponent
+  MyPenComponent
 } from '../index';
 
 @Component({
@@ -29,8 +30,17 @@ export class HomeMenu {
   public userProfileImg: string = USER_PROFILE_IMG;
   public angleImg: string = ANGLE_IMG;
 
-  constructor(public navCtrl: NavController) {
+  constructor(
+    // public _auth: AuthService,
+    public navCtrl: NavController
+  ) {
 
+  }
+
+  public ionViewDidLoad() {
+    if (!localStorage.getItem('token_mobile')) {
+      // this._auth.signOut();
+    }
   }
 
   public goBack() {
@@ -38,7 +48,7 @@ export class HomeMenu {
   }
 
   public goToPen() {
-    this.openPage(RegisterPenComponent)
+    this.openPage(MyPenComponent)
   }
 
   public goToClinic() {

@@ -18,6 +18,7 @@ export class ForgottenPasswordComponent implements OnInit {
   public angleImg: string = ANGLE_IMG;
 
   public email: string = 'developer@dermapenworld.com';
+  public emailResent: boolean = false;
 
   constructor(
     public navCtrl: NavController,
@@ -36,6 +37,15 @@ export class ForgottenPasswordComponent implements OnInit {
   }
 
   public resendEmail() {
+    this._auth.resetPassword(this.email).subscribe(
+      (resp: any) => {
+        this.emailResent = true;
+      },
+      (err: any) => {
+        console.log('err: ', err);
+      }
+    );
+
     console.log('resendEmail');
   }
 

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-
+import { AccountService } from '../../services/index';
 import { ActionSheetController, NavController } from 'ionic-angular'
 
 import {
@@ -21,14 +21,20 @@ import {
 })
 export class MyAccountComponent {
 
+  public account: any = {};
   public logoTransparent: string = DPW_LOGO_TRANSPARENT;
   public userProfileImg: string = USER_PROFILE_IMG;
   public angleImg: string = ANGLE_IMG;
 
   constructor(
     public navCtrl: NavController,
-    public actionSheetCtrl: ActionSheetController
+    public actionSheetCtrl: ActionSheetController,
+    public _account: AccountService
   ) {}
+
+  public ionViewDidLoad() {
+    this.account.email = atob(localStorage.getItem('app_email'));
+  }
 
   public presentLogOutConfirm() {
     let actionSheet = this.actionSheetCtrl.create({

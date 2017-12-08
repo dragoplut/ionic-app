@@ -12,69 +12,62 @@
       (submit)="authenticate()"
     >
       <div class="clear-container">
+        <ion-spinner name="crescent" *ngIf="loading"></ion-spinner>
         <span class="info-text-small">For registration purposes you must register at least one clinic to your account.</span>
 
         <custom-input
           [itemDisabled]="false"
-          [itemValue]="account.clinicName"
+          [itemValue]="account.clinic.name"
           [itemLabel]="'Clinic Name'"
           [itemType]="'text'"
           [itemError]="''"
-          (itemChange)="account.clinicName = $event"
+          (itemChange)="account.clinic.name = $event"
         ></custom-input>
 
         <div class="clear-container additional-content-block">
           <div class="container-half pull-left">
             <custom-select
               [itemDisabled]="false"
-              [itemValue]="account.clinicCountry"
+              [itemValue]="account.clinic.location.country"
               [itemLabel]="'Country'"
               [itemOptions]="countriesList"
               [itemType]="'text'"
               [itemError]="''"
-              (itemChange)="account.clinicCountry = $event"
+              (itemChange)="account.clinic.location.country = $event"
             ></custom-select>
             <custom-select
-              [itemDisabled]="!account.clinicState"
-              [itemValue]="account.clinicCity"
+              [itemDisabled]="!account.clinic.location.state"
+              [itemValue]="account.clinic.location.city"
               [itemLabel]="'City'"
               [itemOptions]="usCityNames"
               [itemType]="'text'"
               [itemError]="''"
-              (itemChange)="account.clinicCity = $event"
+              (itemChange)="account.clinic.location.city = $event"
             ></custom-select>
           </div>
           <div class="container-half pull-right">
             <custom-select
-              [itemDisabled]="!account.clinicCountry"
-              [itemValue]="account.clinicState"
+              [itemDisabled]="!account.clinic.location.country"
+              [itemValue]="account.clinic.location.state"
               [itemLabel]="'State'"
               [itemOptions]="statesList"
               [itemType]="'text'"
               [itemError]="''"
-              (itemChange)="account.clinicState = $event"
+              (itemChange)="account.clinic.location.state = $event"
             ></custom-select>
             <custom-input
               [itemDisabled]="false"
-              [itemValue]="account.clinicZip"
+              [itemValue]="account.clinic.location.zip"
               [itemLabel]="'ZIP'"
               [itemType]="'number'"
               [itemError]="''"
-              (itemChange)="account.clinicZip = $event"
+              (itemChange)="account.clinic.location.zip = $event"
             ></custom-input>
           </div>
         </div>
-        <!--<custom-input-->
-          <!--[itemDisabled]="false"-->
-          <!--[itemValue]="account.clinicAddress"-->
-          <!--[itemLabel]="'Address'"-->
-          <!--[itemType]="'text'"-->
-          <!--[itemError]="''"-->
-          <!--(itemChange)="account.clinicAddress = $event"-->
-        <!--&gt;</custom-input>-->
         <div class="custom-input-container">
           <span class="custom-input-label input-not-empty">Address</span>
-          <google-places-autocomplete types="geocode" (callback)="detail($event[0])" key="AIzaSyDJYtcVzKXghryIDmQaTBDp5gWYPbTBqfU"></google-places-autocomplete>
+          <google-places-autocomplete types="geocode" [addressValue]="account.clinic.location.address" (callback)="detail($event[0])" (inputChanged)="account.clinic.location.address = $event" key="AIzaSyDJYtcVzKXghryIDmQaTBDp5gWYPbTBqfU"></google-places-autocomplete>
         </div>
       </div>
     </form>

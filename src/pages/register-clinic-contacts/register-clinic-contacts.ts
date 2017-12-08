@@ -1,12 +1,12 @@
 import { Component, ViewChild, OnInit } from '@angular/core';
-import { ApiService, PermissionService } from '../../services/index';
+import { ApiService, ClinicService, PermissionService } from '../../services/index';
 import {
   DEFAULT_ERROR_MESSAGE,
   DPW_LOGO_TRANSPARENT,
   EMAIL_REGEXP,
   US_CITY_NAMES
 } from '../../app/constants';
-import { RegisterClinicAddressComponent } from '../index';
+import { RegisterClinicAddressComponent, MyClinicComponent } from '../index';
 import { Nav, NavController, NavParams } from 'ionic-angular';
 
 @Component({
@@ -27,19 +27,24 @@ export class RegisterClinicContactsComponent implements OnInit {
   public createAccInputs: any = [
     { modelName: 'phoneNumber', placeholder: 'Phone Number', type: 'text', required: false },
     { modelName: 'contactPerson', placeholder: 'Contact Person', type: 'text', required: false },
-    { modelName: 'websiteUrl', placeholder: 'Website URL', type: 'text', required: false }
+    { modelName: 'webSiteUrl', placeholder: 'Website URL', type: 'text', required: false }
   ];
+
+  public dependencies: any = {};
 
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
     public _api: ApiService,
+    public _clinic: ClinicService,
     public _permission: PermissionService
   ) {}
 
   public ionViewDidLoad() {
+    this.dependencies = this.navParams.get('dependencies') || {};
     const acc: any = this.navParams.get('account');
     this.account = acc ? acc : {};
+    console.log('this.dependencies: ', this.dependencies);
   }
 
   public ngOnInit() {
@@ -58,11 +63,27 @@ export class RegisterClinicContactsComponent implements OnInit {
     this.openPage(RegisterClinicAddressComponent);
   }
 
+  public validate(clinic: any) {
+    return clinic &&
+      clinic.name &&
+      clinic.location;
+  }
+
   public save() {
-    console.log('save: ', this.account)
+    const valid: boolean = this.validate(this.account);
+    if (valid) {
+      this._clinic.createClinic(this.account).subscribe(
+        (resp: any) => {
+          this.openPage(MyClinicComponent);
+        },
+        (err: any) => {
+          console.log('err: ', err);
+        }
+      );
+    }
   }
 
   public openPage(page) {
-    this.navCtrl.push(page, { account: this.account });
+    this.navCtrl.push(page, { account: this.account, dependencies: this.dependencies });
   }
 }

@@ -17,11 +17,12 @@ export class MyApp {
 
   constructor(public platform: Platform, public statusBar: StatusBar, public splashScreen: SplashScreen) {
     // used for an example of ngFor and navigation
-    this.pages = [
-      { title: 'Main page', component: pages.HomeMenu },
-      { title: 'Page Two', component: pages.Page2 },
-      { title: 'Sign In', component: pages.SigninComponent }
-    ];
+    this.pages = [];
+    // this.pages = [
+    //  { title: 'Main page', component: pages.HomeMenu },
+    //  { title: 'Page Two', component: pages.Page2 },
+    //  { title: 'Sign In', component: pages.SigninComponent }
+    // ];
   }
 
   public ionViewDidLoad() {

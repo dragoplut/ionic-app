@@ -5,6 +5,7 @@ import {
   ANGLE_IMG,
   DPW_LOGO_TRANSPARENT
 } from '../../app/constants';
+import { AccountService } from '../../services/index';
 import { MyAccountComponent } from '../index';
 
 @Component({
@@ -16,8 +17,8 @@ export class MyNameComponent {
   public logoTransparent: string = DPW_LOGO_TRANSPARENT;
   public angleImg: string = ANGLE_IMG;
   public user: any = {
-    firstName: 'Doe',
-    lastName: 'John',
+    firstName: '',
+    lastName: '',
     companyName: '',
     phoneNumber: ''
   };
@@ -29,12 +30,32 @@ export class MyNameComponent {
     { modelName: 'phoneNumber', placeholder: 'Phone Number', type: 'text', required: false }
   ];
 
-  constructor(public navCtrl: NavController) {
+  constructor(
+    public _account: AccountService,
+    public navCtrl: NavController
+  ) {}
 
+  public ionViewDidLoad() {
+    this._account.getAccountInfo().subscribe(
+      (resp: any) => {
+        this.user = resp;
+      },
+      (err: any) => {
+        console.log('err: ', err);
+      }
+    );
   }
 
   public save() {
-    this.openPage(MyAccountComponent);
+    this._account.updateAccount(this.user).subscribe(
+      (resp: any) => {
+        this.openPage(MyAccountComponent);
+      },
+      (err: any) => {
+        console.log('err: ', err);
+        this.openPage(MyAccountComponent);
+      }
+    );
   }
 
   public goBack() {

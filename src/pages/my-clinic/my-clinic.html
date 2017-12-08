@@ -15,7 +15,7 @@
       </ion-searchbar>
       <ion-list>
         <button ion-item *ngFor="let item of clinicListFiltered" (click)="itemSelected(item)">
-          {{ item.clinicName }} <span class="pull-right">{{ item.address }}</span>
+          {{ item.name }} <span class="pull-right">{{ item.address }}</span>
           <ion-icon class="list-icon-absolute" name="arrow-forward"></ion-icon>
         </button>
       </ion-list>

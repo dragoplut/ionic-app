@@ -1,5 +1,10 @@
 import { Component, ViewChild, OnInit } from '@angular/core';
-import { AuthService, ApiService, PermissionService } from '../../services/index';
+import {
+  AuthService,
+  ApiService,
+  AccountService,
+  PermissionService
+} from '../../services/index';
 import {
   CHECK,
   DEFAULT_ERROR_MESSAGE,
@@ -17,7 +22,8 @@ import { Nav, NavController } from 'ionic-angular';
 export class SigninComponent implements OnInit {
   @ViewChild(Nav) nav: Nav;
 
-  public user: any = { email: 'equipmed@dummy.com', password: '1234qwer' };
+  public user: any = { email: 'customeruser@dummy.com', password: '123123' };
+  public token: string = '';
   public logoTransparent: string = DPW_LOGO_TRANSPARENT;
   public loading: boolean = false;
   public errorMessage: any = '';
@@ -33,6 +39,7 @@ export class SigninComponent implements OnInit {
     public navCtrl: NavController,
     public _api: ApiService,
     public _auth: AuthService,
+    public _account: AccountService,
     public _permission: PermissionService
   ) {}
 
@@ -60,7 +67,14 @@ export class SigninComponent implements OnInit {
 
   public goToReset() {
     if (this.user.email && !this.validateItem('email')) {
-      this.openPage(ForgottenPasswordComponent);
+      this._auth.resetPassword(this.user.email).subscribe(
+        (resp: any) => {
+          this.openPage(ForgottenPasswordComponent);
+        },
+        (err: any) => {
+          this.errorMessage = 'Something went wrong. Try again later.'
+        }
+      );
     } else if (!this.user.email) {
       this.user.email = ' ';
     }
@@ -91,14 +105,16 @@ export class SigninComponent implements OnInit {
 
   public handleSuccess(resp: any) {
     this.loading = false;
-    if (this._permission.isAllowedAction('view', 'signin')) {
-      for (const page of this.PAGES_LIST) {
-        if (this._permission.isAllowedAction('view', page.permissionRef)) {
-          console.log('handleSuccess page.routerLink: ', page.routerLink);
-          this.openPage(HomeMenu);
-          break;
-        }
-      }
+    //if (this._permission.isAllowedAction('view', 'signin')) {
+    if (resp) {
+      this.openPage(HomeMenu);
+      // for (const page of this.PAGES_LIST) {
+      //  if (this._permission.isAllowedAction('view', page.permissionRef)) {
+      //    console.log('handleSuccess page.routerLink: ', page.routerLink);
+      //    this.openPage(HomeMenu);
+      //    break;
+      //  }
+      // }
     } else {
       // this._auth.signOut();
       const message: string = 'You are not allowed to sign in!';
@@ -117,11 +133,18 @@ export class SigninComponent implements OnInit {
 
   public authenticate() {
     this.loading = true;
-    this._auth.authenticate(this.user)
+    this._auth.generateToken(this.user)
       .subscribe(
-        (resp: any) => this.handleSuccess(resp),
+        (resp: any) => this.getUserData(),
         (err: any) => this.handleErr(err)
       );
+  }
+
+  public getUserData() {
+    this._account.getAccountInfo().subscribe(
+      (resp: any) => this.handleSuccess(resp),
+      (err: any) => this.handleErr(err)
+    );
   }
 
   public goToCreateAccount() {

@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { NavController, NavParams } from 'ionic-angular';
 // noinspection TypeScriptCheckImport
-import * as _ from 'lodash';
+// import * as _ from 'lodash';
 
+import { ClinicService } from '../../services/index';
 import {
   ANGLE_IMG,
   DPW_LOGO_TRANSPARENT
@@ -10,6 +11,7 @@ import {
 import {
   EditClinicComponent,
   HomeMenu,
+  RegisterPenComponent,
   RegisterClinicAddressComponent
 } from '../index';
 
@@ -24,34 +26,44 @@ export class MyClinicComponent {
 
   public searchInput: string = '';
 
-  public clinicList: any[] = [
-    { clinicName: 'Clinic X', address: '23 Sunrise Ave' },
-    { clinicName: 'Clinic Y', address: '23 Redmond Ave' },
-    { clinicName: 'Clinic Z', address: '23 Redmond Ave' },
-    { clinicName: 'Clinic XY', address: '23 Redmond Ave' },
-    { clinicName: 'Clinic XYZ', address: '23 Redmond Ave' },
-  ];
-  public clinicListFiltered: any[] = _.clone(this.clinicList);
+  public clinicList: any[] = [];
+  public clinicListFiltered: any[] = [];
 
-  constructor(public navCtrl: NavController) {
+  public dependencies: any = {};
+
+  constructor(
+    public _clinic: ClinicService,
+    public navCtrl: NavController,
+    public navParams: NavParams
+  ) {
     this.clinicListFiltered = this.searchByString(this.searchInput, this.clinicList);
+  }
+
+  public ionViewDidLoad() {
+    this.dependencies = this.navParams.get('dependencies') || {};
+    this.getClinics();
   }
 
   public onInput(event) {
-    console.log('onInput event: ', event);
-    // this.searchInput = event.data;
-    this.clinicListFiltered = this.searchByString(this.searchInput, this.clinicList);
+    if (event.target.value) {
+      this.getClinicsSearch(event.target.value);
+    } else {
+      this.getClinics();
+    }
   }
 
-  public onCancel(event) {
-    console.log('onCancel event: ', event);
+  public onCancel() {
     this.searchInput = '';
-    this.clinicListFiltered = this.searchByString(this.searchInput, this.clinicList);
+    this.getClinics();
   }
 
   public itemSelected(clinic) {
-    console.log('itemSelected clinic: ', clinic);
-    this.navCtrl.push(EditClinicComponent, { clinic })
+    if (this.dependencies.newPen) {
+      this.dependencies.clinic = clinic;
+      this.openPage(RegisterPenComponent);
+    } else {
+      this.navCtrl.push(EditClinicComponent, { clinic })
+    }
   }
 
   public goBack() {
@@ -63,7 +75,31 @@ export class MyClinicComponent {
   }
 
   public openPage(page) {
-    this.navCtrl.push(page);
+    this.navCtrl.push(page, { dependencies: this.dependencies });
+  }
+
+  public getClinics() {
+    this._clinic.getClinics().subscribe(
+      (resp: any) => {
+        console.log('resp: ', resp);
+        this.clinicListFiltered = resp;
+      },
+      (err: any) => {
+        console.log('err: ', err);
+      }
+    );
+  }
+
+  public getClinicsSearch(searchValue: string) {
+    this._clinic.getClinicsSearch(searchValue).subscribe(
+      (resp: any) => {
+        console.log('resp: ', resp);
+        this.clinicListFiltered = resp;
+      },
+      (err: any) => {
+        console.log('err: ', err);
+      }
+    );
   }
 
   /** Search function **/

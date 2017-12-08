@@ -1,0 +1,27 @@
+<ion-content padding>
+  <div class="custom-header">
+    <ion-icon class="header-action-icon pull-left" name="arrow-back" (tap)="goBack()"></ion-icon>
+    <span class="header-title title-blue">Register Pen</span>
+  </div>
+
+  <div class="page-content">
+    <row-with-info
+      [itemValue]="''"
+      [itemLabel]="'Register a pen for a...'"
+    ></row-with-info>
+    <ion-list>
+      <button ion-item (click)="navigateTo('MyClinicComponent')">
+        Existing Clinic
+        <span class="pull-right secondary-blue"></span>
+        <ion-icon class="list-icon-absolute" name="arrow-forward"></ion-icon>
+      </button>
+      <button ion-item (click)="navigateTo('RegisterClinicAddressComponent')">
+        New Clinic
+        <span class="pull-right secondary-blue"></span>
+        <ion-icon class="list-icon-absolute" name="arrow-forward"></ion-icon>
+      </button>
+    </ion-list>
+
+    <img alt="Dermapenworld" src="{{logoTransparent}}" class="dpw-logo-foot bottom-absolute">
+  </div>
+</ion-content>

@@ -7,7 +7,7 @@ import {
   MarkerOptions
 } from '@ionic-native/google-maps';
 import { Component, ViewChild, ElementRef, OnInit } from '@angular/core';
-import { ApiService, PermissionService } from '../../services/index';
+import { ApiService, ClinicService, PermissionService } from '../../services/index';
 import {
   DEFAULT_ERROR_MESSAGE,
   DPW_LOGO_TRANSPARENT,
@@ -35,10 +35,11 @@ export class RegisterClinicAddressComponent implements OnInit {
   public countriesList: any[] = ['United States','Ukraine'];
   public statesList: any[] = ['California'];
 
-  public account: any = {};
+  public account: any = { location: {} };
   public logoTransparent: string = DPW_LOGO_TRANSPARENT;
   public loading: boolean = false;
   public errorMessage: any = '';
+  public dependencies: any = {};
 
   public emailRegExp: any = EMAIL_REGEXP;
 
@@ -46,13 +47,21 @@ export class RegisterClinicAddressComponent implements OnInit {
     public navCtrl: NavController,
     public navParams: NavParams,
     public _api: ApiService,
+    public _clinic: ClinicService,
     public _permission: PermissionService
   ) {}
 
   public ionViewDidLoad() {
+    this.dependencies = this.navParams.get('dependencies') || {};
     const acc: any = this.navParams.get('account');
     this.account = acc ? acc : {};
+    if (!this.account) {
+      this.account = { location: {} };
+    } else if (!this.account.location) {
+      this.account.location = {};
+    }
     this.loadMap();
+    console.log('this.dependencies: ', this.dependencies);
   }
 
   public loadMap() {
@@ -137,25 +146,33 @@ export class RegisterClinicAddressComponent implements OnInit {
         case 'country':
           this.countriesList.push(el.long_name);
           this.countriesList = _.uniq(this.countriesList);
-          this.account.clinicCountry = el.long_name;
+          this.account.location.country = el.long_name;
           break;
         case 'administrative_area_level_1':
           this.statesList.push(el.long_name);
           this.statesList = _.uniq(this.statesList);
-          this.account.clinicState = el.short_name;
+          this.account.location.state = el.short_name;
           break;
         case 'locality':
           this.usCityNames.push(el.long_name);
           this.usCityNames = _.uniq(this.usCityNames);
-          this.account.clinicCity = el.short_name;
+          this.account.location.city = el.short_name;
           break;
         case 'postal_code':
-          this.account.clinicZip = el.long_name;
+          this.account.location.zip = el.long_name;
+          break;
+        case 'street_number':
+        case 'route':
+          this.account.location.address = this.account.location.address ?
+            this.account.location.address + el.long_name + ' ' :
+            el.long_name + ' ';
           break;
       }
     });
+    this.account.location.latitude = address.geometry.location.lat;
+    this.account.location.longtitude = address.geometry.location.lng;
     this.centerMap(address);
-    // alert(JSON.stringify(address));
+    alert(JSON.stringify(address));
   }
 
   public ngOnInit() {
@@ -180,6 +197,6 @@ export class RegisterClinicAddressComponent implements OnInit {
   }
 
   public openPage(page) {
-    this.navCtrl.push(page, { account: this.account });
+    this.navCtrl.push(page, { account: this.account, dependencies: this.dependencies });
   }
 }

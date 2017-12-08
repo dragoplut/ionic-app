@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { NavController, NavParams } from 'ionic-angular';
 import { BluetoothSerial } from '@ionic-native/bluetooth-serial';
 import { AlertController } from 'ionic-angular';
 import { BLE } from '@ionic-native/ble';
@@ -9,7 +9,8 @@ import {
   DEVICE_PANEL_IMG,
   DPW_LOGO_TRANSPARENT
 } from '../../app/constants';
-import { HomeMenu } from '../index';
+import { HomeMenu, MyPenComponent } from '../index';
+import { PenService } from '../../services/index';
 
 @Component({
   selector: 'register-pen',
@@ -34,8 +35,12 @@ export class RegisterPenComponent {
   public pairedDevices: any[] = [];
   public gettingDevices: boolean = false;
 
+  public dependencies: any = {};
+
   constructor(
     public navCtrl: NavController,
+    public navParams: NavParams,
+    public _pen: PenService,
     private ble: BLE,
     private bluetoothSerial: BluetoothSerial,
     private alertCtrl: AlertController
@@ -45,7 +50,11 @@ export class RegisterPenComponent {
   }
 
   public ionViewDidLoad() {
+    this.dependencies = this.navParams.get('dependencies') || {};
     this.dpDevice = { name: '' };
+    if (this.dependencies && this.dependencies.pen) {
+      this.dpDevice.name = this.dependencies.pen.serialNumber;
+    }
     this.startScanning();
   }
 
@@ -210,8 +219,6 @@ export class RegisterPenComponent {
     alert.present();
   }
 
-
-
   public readFromDevice(address, serviceUUID, characteristicUUID) {
     let makeRead = () => {
       this.ble.read(address, serviceUUID, characteristicUUID).then(
@@ -239,10 +246,25 @@ export class RegisterPenComponent {
   }
 
   public goNext() {
-    this.openPage(HomeMenu);
+    if (this.dependencies.clinic && this.dependencies.newPen) {
+      let pen = {
+        clinicId: this.dependencies.clinic.id,
+        serialNumber: this.dpDevice.id
+      };
+      this._pen.registerPen(pen).subscribe(
+        (resp: any) => {
+          this.openPage(MyPenComponent);
+        },
+        (err: any) => {
+          console.log('err: ', err);
+        }
+      );
+    } else {
+      alert('Error. No clinic provided for pen!');
+    }
   }
 
   public openPage(page) {
-    this.navCtrl.push(page);
+    this.navCtrl.push(page, { dependencies: this.dependencies });
   }
 }

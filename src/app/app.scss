@@ -85,6 +85,9 @@
   margin-right: 10%;
   position: relative;
 }
+.link-nav.disabled {
+  color: $col-neutral-placeholder;
+}
 
 .text-center {
   text-align: center;
@@ -192,6 +195,7 @@
 }
 .actions {
   margin-top: 20px;
+  z-index: 10;
 }
 .additional-content-block {
   margin-top: -40px;
@@ -217,7 +221,8 @@
   }
 }
 .custom-input-label {
-  z-index: 1;
+  z-index: -2 !important;
+  opacity: .99 !important;
 }
 .truncated {
   overflow: hidden;
@@ -381,6 +386,8 @@
   ion-item.item.item-block.item-select {
     padding-left: 0;
     padding-top: 10px;
+    background-color: transparent !important;
+    z-index: 5;
     ion-select.select {
       color: $col-neutral-text;
       padding-left: 0;
@@ -395,11 +402,13 @@
   }
   .custom-select-down-icon {
     font-size: 18px;
+    opacity: .99;
     position: absolute;
     right: 0;
     bottom: 10px;
     height: 18px;
     width: 18px;
+    z-index: -2;
   }
   .custom-input-label {
     top: 25px;

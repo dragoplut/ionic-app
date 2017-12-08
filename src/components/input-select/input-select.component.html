@@ -1,0 +1,19 @@
+<custom-input
+  *ngIf="itemType !== 'select'"
+  [itemDisabled]="itemDisabled"
+  [itemValue]="itemValue"
+  [itemLabel]="itemLabel"
+  [itemType]="itemType"
+  [itemError]="itemError"
+  (itemChange)="itemValue = $event; valueChange($event)"
+></custom-input>
+<custom-select
+  *ngIf="itemType === 'select'"
+  [itemDisabled]="itemDisabled"
+  [itemValue]="itemValue"
+  [itemLabel]="itemLabel"
+  [itemOptions]="itemOptions"
+  [itemType]="'text'"
+  [itemError]="itemError"
+  (itemChange)="valueChange($event)"
+></custom-select>
