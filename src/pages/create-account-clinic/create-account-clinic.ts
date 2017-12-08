@@ -294,7 +294,7 @@ export class CreateAccountClinicComponent implements OnInit {
       }
     });
     this.account.location.latitude = address.geometry.location.lat;
-    this.account.location.longtitude = address.geometry.location.lng;
+    this.account.location.longitude = address.geometry.location.lng;
     this.centerMap(address);
     // alert(JSON.stringify(address));
   }
