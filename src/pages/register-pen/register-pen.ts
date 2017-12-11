@@ -45,7 +45,7 @@ export class RegisterPenComponent {
     private bluetoothSerial: BluetoothSerial,
     private alertCtrl: AlertController
   ) {
-    // bluetoothSerial.enable();
+    bluetoothSerial.enable();
     ble.enable();
   }
 
@@ -63,6 +63,10 @@ export class RegisterPenComponent {
     this.pairedDevices = [];
     this.unpairedDevices = [];
     this.gettingDevices = true;
+
+    this.bluetoothSerial.setDiscoverable(60);
+
+    this.ble.stopScan();
 
     //this.ble.startScan([]).subscribe(function(device) {
     //  this.unpairedDevices.push(device);
@@ -89,39 +93,44 @@ export class RegisterPenComponent {
     //  }, 5000);
     //});
 
-    this.bluetoothSerial.discoverUnpaired().then(
-      (success: any) => {
-        this.unpairedDevices = success;
-        this.gettingDevices = false;
-        success.forEach(element => {
-          // alert(element.name);
-          if (element.class === 7936 && (element.name.indexOf('D') !== -1 || element.name.indexOf('Derma') !== -1)) {
-            for (let item in element) {
-              this.dpDevice[item] = element[item];
+    this.ble.scan([], 5).subscribe(() => {
+      this.bluetoothSerial.discoverUnpaired().then(
+        (success: any) => {
+          this.unpairedDevices = success;
+          for (var e = 0; e < success.length; e++) {
+            let element = success[e];
+            if (this.gettingDevices && element.class === 7936 && (element.name.indexOf('D') !== -1 || element.name.indexOf('Derma') !== -1)) {
+              for (let item in element) {
+                this.dpDevice[item] = element[item];
+              }
+              this.dpDevice.paired = false;
+              this.selectDevice(element.id, element);
+              this.gettingDevices = false;
+              break;
             }
-            this.dpDevice.paired = false;
           }
+        },
+        (err: any) => {
+          console.log(err);
         });
-      },
-      (err: any) => {
-        console.log(err);
-      });
 
-    this.bluetoothSerial.list().then(
-      (success: any) => {
-        this.pairedDevices = success;
-        success.forEach((element: any) => {
-          // alert(element.name);
-          if (element.class === 7936 && (element.name.indexOf('D') !== -1 || element.name.indexOf('Derma') !== -1)) {
-            for (let item in element) {
-              this.dpDevice[item] = element[item];
+      this.bluetoothSerial.list().then(
+        (success: any) => {
+          this.pairedDevices = success;
+          success.forEach((element: any) => {
+            // alert(element.name);
+            if (element.class === 7936 && (element.name.indexOf('D') !== -1 || element.name.indexOf('Derma') !== -1)) {
+              for (let item in element) {
+                this.dpDevice[item] = element[item];
+              }
             }
-          }
+          });
+        },
+        (err: any) => {
+          console.log('err: err');
         });
-      },
-      (err: any) => {
-        console.log('err: err');
-      });
+    }, this.onScanError);
+
 
     //this.ble.scan([], 5).subscribe(this.onScanDiscoverDevice, this.onScanError);
   }
@@ -139,6 +148,9 @@ export class RegisterPenComponent {
     this.errorData = '';
     this.dpDevice = data;
     this.dpDevice.paired = true;
+    // setTimeout(() => {
+    //   this.ble.scan([], 5).subscribe(this.success, this.onScanError);
+    // }, 100);
   };
 
   public disconnected = (data: any) => {
@@ -151,7 +163,7 @@ export class RegisterPenComponent {
   public success = (data: any) => {
     this.successData = JSON.stringify(data);
     this.errorData = '';
-    alert('success: ' + this.successData);
+    //alert('success: ' + this.successData);
   };
 
   public fail = (error: any) => {
@@ -256,7 +268,7 @@ export class RegisterPenComponent {
           this.openPage(MyPenComponent);
         },
         (err: any) => {
-          console.log('err: ', err);
+          alert(err);
         }
       );
     } else {

@@ -21,7 +21,7 @@
           [itemLabel]="'Clinic Name'"
           [itemType]="'text'"
           [itemError]="''"
-          (itemChange)="account.clinic.name = $event"
+          (itemChange)="account.clinic.name = $event; onChangeValidate()"
         ></custom-input>
 
         <div class="clear-container additional-content-block">
@@ -33,7 +33,7 @@
               [itemOptions]="countriesList"
               [itemType]="'text'"
               [itemError]="''"
-              (itemChange)="account.clinic.location.country = $event"
+              (itemChange)="account.clinic.location.country = $event; onChangeValidate()"
             ></custom-select>
             <custom-select
               [itemDisabled]="!account.clinic.location.state"
@@ -42,7 +42,7 @@
               [itemOptions]="usCityNames"
               [itemType]="'text'"
               [itemError]="''"
-              (itemChange)="account.clinic.location.city = $event"
+              (itemChange)="account.clinic.location.city = $event; onChangeValidate()"
             ></custom-select>
           </div>
           <div class="container-half pull-right">
@@ -53,7 +53,7 @@
               [itemOptions]="statesList"
               [itemType]="'text'"
               [itemError]="''"
-              (itemChange)="account.clinic.location.state = $event"
+              (itemChange)="account.clinic.location.state = $event; onChangeValidate()"
             ></custom-select>
             <custom-input
               [itemDisabled]="false"
@@ -61,19 +61,23 @@
               [itemLabel]="'ZIP'"
               [itemType]="'number'"
               [itemError]="''"
-              (itemChange)="account.clinic.location.zip = $event"
+              (itemChange)="account.clinic.location.zip = $event; onChangeValidate()"
             ></custom-input>
           </div>
         </div>
         <div class="custom-input-container">
           <span class="custom-input-label input-not-empty">Address</span>
-          <google-places-autocomplete types="geocode" [addressValue]="account.clinic.location.address" (callback)="detail($event[0])" (inputChanged)="account.clinic.location.address = $event" key="AIzaSyDJYtcVzKXghryIDmQaTBDp5gWYPbTBqfU"></google-places-autocomplete>
+          <google-places-autocomplete types="geocode" [addressValue]="account.clinic.location.address" (callback)="detail($event[0])" (inputChanged)="account.clinic.location.address = $event; onChangeValidate()" key="AIzaSyDJYtcVzKXghryIDmQaTBDp5gWYPbTBqfU"></google-places-autocomplete>
         </div>
       </div>
     </form>
     <div #map id="map" class="map-container"></div>
     <div class="actions col-xs-12">
-      <a class="link-nav pull-right" (click)="next()">
+      <a
+        class="link-nav pull-right"
+        (click)="!formValid || loading ? false : next()"
+        [ngClass]="!formValid || loading ? 'disabled' : ''"
+      >
         Next
       </a>
     </div>

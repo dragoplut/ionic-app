@@ -56,7 +56,6 @@ export class CreateAccountAddressComponent implements OnInit {
       this.account.location = {};
     }
     this.onChangeValidate();
-    console.log('this.account: ', this.account);
   }
 
   public ngOnInit() {
@@ -80,7 +79,6 @@ export class CreateAccountAddressComponent implements OnInit {
     if (this._permission.isAllowedAction('view', 'signin')) {
       for (const page of this.PAGES_LIST) {
         if (this._permission.isAllowedAction('view', page.permissionRef)) {
-          console.log('handleSuccess page.routerLink: ', page.routerLink);
           this.openPage(SigninComponent);
           break;
         }
@@ -95,6 +93,7 @@ export class CreateAccountAddressComponent implements OnInit {
 
   public handleErr(err: any) {
     this.loading = false;
+    this.formValid = false;
     const message = err && err._body ?
       JSON.parse(err._body) : { error: { message: DEFAULT_ERROR_MESSAGE } };
     alert(message.error.message);
@@ -110,7 +109,6 @@ export class CreateAccountAddressComponent implements OnInit {
         !this.account.location.city.length) {
       isValid = false;
     }
-    console.log();
     this.formValid = isValid;
   }
 
@@ -147,7 +145,7 @@ export class CreateAccountAddressComponent implements OnInit {
       .subscribe(
         (resp: any) => {
           this.loading = false;
-          alert('Account created!');
+          // alert('Account created!');
           this.openPage(CreateAccountClinicComponent);
         },
         (err: any) => {
@@ -158,7 +156,6 @@ export class CreateAccountAddressComponent implements OnInit {
   }
 
   public openPage(page) {
-    console.log('openPage this.account', this.account);
     this.navCtrl.push(page, { account: this.account, dependencies: this.dependencies });
   }
 }

@@ -46,6 +46,7 @@ export class CreateAccountClinicComponent implements OnInit {
   public user: any = { email: '', password: '' };
   public logoTransparent: string = DPW_LOGO_TRANSPARENT;
   public loading: boolean = false;
+  public formValid: boolean = false;
   public errorMessage: any = '';
   public PAGES_LIST: any = PAGES_LIST;
   public angleImg: string = ANGLE_IMG;
@@ -78,6 +79,7 @@ export class CreateAccountClinicComponent implements OnInit {
     }
     console.log('this.account: ', this.account);
     this.loadMap();
+    this.onChangeValidate();
   }
 
   public ngOnInit() {
@@ -196,32 +198,23 @@ export class CreateAccountClinicComponent implements OnInit {
     this.errorMessage = '';
   }
 
-  public validateItem(field: any) {
-    let errMessage: string = '';
-
-    switch (field.type) {
-      case 'email':
-        errMessage = !this.emailRegExp.test(this.user.email) && this.user.email ?
-          'Email is invalid' : '';
-        break;
-      case 'password':
-        if (field.modelName === 'password') {
-          errMessage = !this.user.password || this.user.password.length < 4 ?
-            'Min length is 4 characters' : '';
-        } else {
-          if (!this.user.confirmPassword || this.user.confirmPassword.length < 4) {
-            errMessage = !this.user.confirmPassword || this.user.confirmPassword.length < 4 ?
-              'Min length is 4 characters' : '';
-          } else if (this.user.confirmPassword && this.user.confirmPassword !== this.user.password) {
-            errMessage = 'Confirm password and password do not match!'
-          }
-        }
-        break;
-      default:
-        break;
+  public onChangeValidate() {
+    let isValid = true;
+    if (!this.account.location ||
+      !this.account.clinic.name ||
+      !this.account.clinic.location.address ||
+      !this.account.clinic.location.address.length ||
+      !this.account.clinic.location.country ||
+      !this.account.clinic.location.country.length ||
+      !this.account.clinic.location.state ||
+      !this.account.clinic.location.state.length ||
+      !this.account.clinic.location.zip ||
+      !this.account.clinic.location.zip.length ||
+      !this.account.clinic.location.city ||
+      !this.account.clinic.location.city.length) {
+      isValid = false;
     }
-
-    return errMessage;
+    this.formValid = isValid;
   }
 
   public handleSuccess(resp: any) {
@@ -229,7 +222,6 @@ export class CreateAccountClinicComponent implements OnInit {
     if (this._permission.isAllowedAction('view', 'signin')) {
       for (const page of this.PAGES_LIST) {
         if (this._permission.isAllowedAction('view', page.permissionRef)) {
-          console.log('handleSuccess page.routerLink: ', page.routerLink);
           this.openPage(SigninComponent);
           break;
         }
@@ -265,6 +257,8 @@ export class CreateAccountClinicComponent implements OnInit {
     } else if (!this.account.clinic.location) {
       this.account.clinic.location = {};
     }
+    let street: string = '';
+    let route: string = '';
     address.address_components.forEach((el: any) => {
       switch (el.types[0]) {
         case 'country':
@@ -286,16 +280,22 @@ export class CreateAccountClinicComponent implements OnInit {
           this.account.clinic.location.zip = el.long_name;
           break;
         case 'street_number':
+          street = el.long_name;
+          break;
         case 'route':
-          this.account.location.address = this.account.location.address ?
-          this.account.location.address + el.long_name + ' ' :
-          el.long_name + ' ';
+          route = el.long_name;
           break;
       }
     });
-    this.account.location.latitude = address.geometry.location.lat;
-    this.account.location.longitude = address.geometry.location.lng;
+    if (street || route) {
+      this.account.clinic.location.address = (street + ' ' + route).trim();
+    }
+    if (address.geometry && address.geometry.location && address.geometry.location.lat) {
+      this.account.clinic.location.latitude = address.geometry.location.lat;
+      this.account.clinic.location.longitude = address.geometry.location.lng;
+    }
     this.centerMap(address);
+    this.onChangeValidate();
     // alert(JSON.stringify(address));
   }
 
@@ -319,7 +319,7 @@ export class CreateAccountClinicComponent implements OnInit {
         (resp: any) => {
           this.loading = false;
           console.log('nex: ', this.account.clinic);
-          alert('Clinic created!');
+          // alert('Clinic created!');
           this.openPage(HomeMenu);
         },
         (err: any) => {

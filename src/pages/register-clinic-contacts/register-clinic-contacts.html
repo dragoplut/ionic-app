@@ -19,11 +19,11 @@
           [itemLabel]="field.placeholder"
           [itemType]="field.type"
           [itemError]="''"
-          (itemChange)="account[field.modelName] = $event"
+          (itemChange)="account[field.modelName] = $event; onChangeValidate()"
         ></custom-input>
       </div>
       <div class="actions col-xs-12">
-        <a class="link-nav pull-right" (click)="save()">
+        <a [ngClass]="formValid ? '' : 'disabled'" class="link-nav pull-right" (click)="formValid ? save() : false">
           Save
         </a>
       </div>

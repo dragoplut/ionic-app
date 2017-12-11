@@ -15,5 +15,5 @@
   [itemOptions]="itemOptions"
   [itemType]="'text'"
   [itemError]="itemError"
-  (itemChange)="valueChange($event)"
+  (itemChange)="itemValue = $event; valueChange($event)"
 ></custom-select>

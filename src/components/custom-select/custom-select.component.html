@@ -2,11 +2,12 @@
   <ion-item>
     <ion-label
       #selectLabel
-      class="custom-input-label {{itemValue && itemValue.length ? 'input-not-empty' : ''}} {{selectLabel.isActive ? 'input-active' : ''}}"
+      class="custom-input-label {{itemValue ? 'input-not-empty' : ''}} {{selectLabel.isActive ? 'input-active' : ''}}"
     >
       {{itemLabel}}
     </ion-label>
     <ion-select
+      *ngIf="itemOptions && itemOptions[0] && !itemOptions[0].id"
       [disabled]="itemDisabled"
       [(ngModel)]="itemValue"
       (focus)="selectLabel.isActive=true"
@@ -17,6 +18,19 @@
         *ngFor="let option of itemOptions"
         value="{{option}}"
       >{{option}}</ion-option>
+    </ion-select>
+    <ion-select
+      *ngIf="itemOptions && itemOptions[0] && itemOptions[0].id"
+      [disabled]="itemDisabled"
+      [(ngModel)]="itemValue"
+      (focus)="selectLabel.isActive=true"
+      (blur)="selectLabel.isActive=false"
+      (ionChange)="valueChange()"
+    >
+      <ion-option
+        *ngFor="let option of itemOptions"
+        value="{{option.id}}"
+      >{{option.name}}</ion-option>
     </ion-select>
   </ion-item>
   <ion-icon class="custom-select-down-icon" name="arrow-down"></ion-icon>

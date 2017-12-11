@@ -1,15 +1,15 @@
 <ion-content>
   <div class="custom-header">
     <ion-icon class="header-action-icon pull-left" name="arrow-back" (tap)="back()"></ion-icon>
-    <span class="header-title title-blue">Register Clinic</span>
+    <span class="header-title title-blue">Edit Clinic</span>
   </div>
   <div class="create-account row center-xs middle-xs">
     <form
       ngForm
       name="editClinicForm"
-      class="create-account-form col-xs-6 shadow-2"
+      class="create-account-form col-xs-6"
       #editClinicForm="ngForm"
-      (submit)="false"
+      (submit)="save()"
     >
       <div class="clear-container">
         <custom-input
@@ -18,7 +18,7 @@
           [itemLabel]="'Clinic Name'"
           [itemType]="'text'"
           [itemError]="''"
-          (itemChange)="account.name = $event"
+          (itemChange)="account.name = $event; onChangeValidate()"
         ></custom-input>
 
         <div class="clear-container additional-content-block">
@@ -30,7 +30,7 @@
               [itemOptions]="countriesList"
               [itemType]="'text'"
               [itemError]="''"
-              (itemChange)="account.location.country = $event"
+              (itemChange)="account.location.country = $event; onChangeValidate()"
             ></custom-select>
             <custom-select
               [itemDisabled]="!account.location.state"
@@ -39,7 +39,7 @@
               [itemOptions]="usCityNames"
               [itemType]="'text'"
               [itemError]="''"
-              (itemChange)="account.location.city = $event"
+              (itemChange)="account.location.city = $event; onChangeValidate()"
             ></custom-select>
           </div>
           <div class="container-half pull-right">
@@ -50,7 +50,7 @@
               [itemOptions]="statesList"
               [itemType]="'text'"
               [itemError]="''"
-              (itemChange)="account.location.state = $event"
+              (itemChange)="account.location.state = $event; onChangeValidate()"
             ></custom-select>
             <custom-input
               [itemDisabled]="false"
@@ -58,16 +58,24 @@
               [itemLabel]="'ZIP'"
               [itemType]="'number'"
               [itemError]="''"
-              (itemChange)="account.location.zip = $event"
+              (itemChange)="account.location.zip = $event; onChangeValidate()"
             ></custom-input>
           </div>
         </div>
         <div class="custom-input-container">
           <span class="custom-input-label input-not-empty">Address</span>
-          <google-places-autocomplete types="geocode" [addressValue]="account.location.address" (callback)="detail($event[0])" (inputChanged)="account.location.address = $event" key="AIzaSyDJYtcVzKXghryIDmQaTBDp5gWYPbTBqfU"></google-places-autocomplete>
+          <google-places-autocomplete types="geocode" [addressValue]="account.location.address" (callback)="detail($event[0])" (inputChanged)="account.location.address = $event; onChangeValidate()" key="AIzaSyDJYtcVzKXghryIDmQaTBDp5gWYPbTBqfU"></google-places-autocomplete>
         </div>
       </div>
-      <div #map id="map" class="map-container"></div>
+    </form>
+    <div #map id="map" class="map-container"></div>
+    <form
+      ngForm
+      name="editClinicFormSecond"
+      class="create-account-form col-xs-6"
+      #editClinicFormSecond="ngForm"
+      (submit)="save()"
+    >
       <div class="clear-container">
         <custom-input
           *ngFor="let field of createAccInputs"
@@ -76,7 +84,7 @@
           [itemLabel]="field.placeholder"
           [itemType]="field.type"
           [itemError]="''"
-          (itemChange)="account[field.modelName] = $event"
+          (itemChange)="account[field.modelName] = $event; onChangeValidate()"
         ></custom-input>
         <div class="row-container">
           <span class="info-text-small">Would you like to appear in our clinic finder page?</span>
@@ -86,7 +94,7 @@
       </div>
     </form>
     <div class="actions col-xs-12">
-      <a class="link-nav pull-right" (tap)="save()">
+      <a [ngClass]="formValid ? '' : 'disabled'" class="link-nav pull-right" (tap)="formValid ? save() : false">
         Save
       </a>
     </div>

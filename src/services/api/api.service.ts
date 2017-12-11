@@ -72,7 +72,10 @@ export class ApiService implements OnInit {
       .forEach((header: any) => this.headers.set(header, headers[header]));
   }
 
-  public getJson(resp: Response) {
+  public getJson(resp: Response | any) {
+    if (resp && (!resp._body || (resp._body && resp._body[0] === '<'))) {
+      resp._body = '{}';
+    }
     return resp.json();
   }
 
@@ -89,7 +92,6 @@ export class ApiService implements OnInit {
         );
       throw error;
     } else {
-      console.log('ERR: resp', resp);
       const error = new Error(resp.statusText);
       error['response'] = resp;
       throw error;
@@ -105,11 +107,16 @@ export class ApiService implements OnInit {
   protected getDefaultOptions(): RequestOptions {
     const tokenEncrypted: any = localStorage.getItem('token_mobile');
     this.token = tokenEncrypted ? atob(tokenEncrypted) : '';
-    const headers: any = new Headers({
-      'Accept': 'application/json',
-      'Content-type': 'application/json-patch+json',
-      'Authorization': `Bearer ${this.token}`
-    });
+    const headers: any = tokenEncrypted ?
+      new Headers({
+        'Accept': 'application/json',
+        'Content-type': 'application/json-patch+json',
+        'Authorization': `Bearer ${this.token}`
+      }) :
+      new Headers({
+        'Accept': 'application/json',
+        'Content-type': 'application/json-patch+json'
+      });
     let options: RequestOptions = new RequestOptions({ headers });
     options.withCredentials = true;
     return options;

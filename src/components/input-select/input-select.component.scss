@@ -1,1 +1,8 @@
 @import '../../theme/variables';
+
+input-select {
+  .custom-input-container.custom-select-container {
+    margin-top: -20px !important;
+    margin-bottom: 40px !important;
+  }
+}

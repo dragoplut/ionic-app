@@ -12,18 +12,19 @@
       (submit)="save()"
     >
       <div class="clear-container">
-        <custom-input
+        <input-select
           *ngFor="let field of updateAccInputs"
           [itemDisabled]="field.disabled"
           [itemValue]="user[field.modelName]"
           [itemLabel]="field.placeholder"
           [itemType]="field.type"
+          [itemOptions]="field.options ? field.options : []"
           [itemError]="''"
-          (itemChange)="user[field.modelName] = $event"
-        ></custom-input>
+          (itemChange)="user[field.modelName] = $event; onChangeValidate()"
+        ></input-select>
       </div>
       <div class="actions col-xs-12 text-center">
-        <a class="link-nav pull-right" (click)="save()">
+        <a [ngClass]="formValid ? '' : 'disabled'" class="link-nav pull-right" (click)="formValid ? save() : false">
           Save
         </a>
       </div>

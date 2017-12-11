@@ -19,6 +19,7 @@ export class RegisterClinicContactsComponent implements OnInit {
   public account: any = {};
   public logoTransparent: string = DPW_LOGO_TRANSPARENT;
   public loading: boolean = false;
+  public formValid: boolean = false;
   public errorMessage: any = '';
 
   public emailRegExp: any = EMAIL_REGEXP;
@@ -44,7 +45,7 @@ export class RegisterClinicContactsComponent implements OnInit {
     this.dependencies = this.navParams.get('dependencies') || {};
     const acc: any = this.navParams.get('account');
     this.account = acc ? acc : {};
-    console.log('this.dependencies: ', this.dependencies);
+    this.onChangeValidate();
   }
 
   public ngOnInit() {
@@ -67,6 +68,28 @@ export class RegisterClinicContactsComponent implements OnInit {
     return clinic &&
       clinic.name &&
       clinic.location;
+  }
+
+  public onChangeValidate() {
+    let isValid = true;
+    if (!this.account.location ||
+      !this.account.name ||
+      !this.account.phoneNumber ||
+      !this.account.contactPerson ||
+      !this.account.webSiteUrl ||
+      !this.account.location.address ||
+      !this.account.location.address.length ||
+      !this.account.location.country ||
+      !this.account.location.country.length ||
+      !this.account.location.state ||
+      !this.account.location.state.length ||
+      !this.account.location.zip ||
+      !this.account.location.zip.length ||
+      !this.account.location.city ||
+      !this.account.location.city.length) {
+      isValid = false;
+    }
+    this.formValid = isValid;
   }
 
   public save() {

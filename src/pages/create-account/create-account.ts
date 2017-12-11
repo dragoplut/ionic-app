@@ -49,7 +49,7 @@ export class CreateAccountComponent implements OnInit {
 
   public ionViewDidLoad() {
     const acc: any = this.navParams.get('account');
-    this.user.email = this.navParams.get('email');
+    // this.user.email = this.navParams.get('email');
     if (acc) {
       this.user = acc;
     }
@@ -105,7 +105,6 @@ export class CreateAccountComponent implements OnInit {
     if (this._permission.isAllowedAction('view', 'signin')) {
       for (const page of this.PAGES_LIST) {
         if (this._permission.isAllowedAction('view', page.permissionRef)) {
-          console.log('handleSuccess page.routerLink: ', page.routerLink);
           this.openPage(SigninComponent);
           break;
         }
@@ -149,12 +148,10 @@ export class CreateAccountComponent implements OnInit {
         }
       }
     });
-    console.log('isValid: ', isValid, ' user: ', this.user);
     this.formValid = isValid;
   }
 
   public goToSignin() {
-    console.log('goToSignin');
     this.openPage(SigninComponent);
   }
 

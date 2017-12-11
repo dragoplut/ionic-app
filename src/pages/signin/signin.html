@@ -38,7 +38,7 @@
         <button
           type="submit"
           class="btn-rounded"
-          [disabled]="!authForm.form.valid"
+          [disabled]="!authForm.form.valid || loading || !emailRegExp.test(user.email) || !user.password"
         >
           SIGN IN
         </button>
@@ -46,13 +46,15 @@
           type="button"
           class="btn-rounded btn-transparent"
           (click)="goToCreateAccount()"
+          [disabled]="loading"
         >
           CREATE NEW ACCOUNT
         </button>
         <div class="auth-links-container">
           <a
             class="link"
-            (click)="goToReset()"
+            (click)="loading ? false : goToReset()"
+            [ngClass]="loading ? 'disabled' : ''"
           >
             Forgotten password?
           </a>

@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { Nav, Platform } from 'ionic-angular';
+import { App, Nav, Platform, ViewController } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
@@ -15,7 +15,12 @@ export class MyApp {
 
   public pages: Array<{ title: string, component: any }>;
 
-  constructor(public platform: Platform, public statusBar: StatusBar, public splashScreen: SplashScreen) {
+  constructor(
+    public platform: Platform,
+    public statusBar: StatusBar,
+    public splashScreen: SplashScreen,
+    private app: App
+  ) {
     // used for an example of ngFor and navigation
     this.pages = [];
     // this.pages = [
@@ -37,6 +42,20 @@ export class MyApp {
         this.statusBar.styleBlackTranslucent();
       }
       this.splashScreen.hide();
+    });
+    this.platform.registerBackButtonAction(() => {
+      let nav = this.app.getActiveNav();
+      let activeView: ViewController = nav.getActive();
+
+      if(activeView != null){
+        if(nav.canGoBack()) {
+          nav.pop();
+        } else if (typeof activeView.instance.backButtonAction === 'function') {
+          activeView.instance.backButtonAction();
+        } else {
+          nav.parent.select(0); // goes to the first tab
+        }
+      }
     });
   }
 

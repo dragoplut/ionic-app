@@ -7,6 +7,8 @@ import {
 } from '../../app/constants';
 import { AccountService } from '../../services/index';
 import { MyAccountComponent } from '../index';
+// noinspection TypeScriptCheckImport
+import * as _ from 'lodash';
 
 @Component({
   selector: 'my-name',
@@ -19,14 +21,15 @@ export class MyNameComponent {
   public user: any = {
     firstName: '',
     lastName: '',
-    companyName: '',
+    companyId: '',
     phoneNumber: ''
   };
+  public formValid: boolean = false;
 
   public updateAccInputs: any = [
     { modelName: 'firstName', placeholder: 'First Name', type: 'text', required: false },
     { modelName: 'lastName', placeholder: 'Last Name', type: 'text', required: false },
-    { modelName: 'companyName', placeholder: 'Company Name', type: 'text', required: false },
+    { modelName: 'companyId', placeholder: 'Company Name', type: 'select', required: false, options: [] },
     { modelName: 'phoneNumber', placeholder: 'Phone Number', type: 'text', required: false }
   ];
 
@@ -39,6 +42,7 @@ export class MyNameComponent {
     this._account.getAccountInfo().subscribe(
       (resp: any) => {
         this.user = resp;
+        this.getCompanies();
       },
       (err: any) => {
         console.log('err: ', err);
@@ -47,15 +51,45 @@ export class MyNameComponent {
   }
 
   public save() {
+    console.log('this.user: ', this.user);
     this._account.updateAccount(this.user).subscribe(
       (resp: any) => {
         this.openPage(MyAccountComponent);
       },
       (err: any) => {
-        console.log('err: ', err);
-        this.openPage(MyAccountComponent);
+        alert(err);
       }
     );
+  }
+
+  public getCompanies() {
+    this._account.getAllCompanies().subscribe(
+      (resp: any) => {
+        console.log('getCompanies resp: ', resp);
+        _.forEach(this.updateAccInputs, (option: any) => {
+          if (option.modelName === 'companyId') {
+            option.options = resp;
+          }
+        });
+        this.onChangeValidate();
+      },
+      (err: any) => {
+        alert(err);
+      }
+    );
+  }
+
+  public onChangeValidate() {
+    let isValid = true;
+    if (!this.user.firstName ||
+      !this.user.firstName.length ||
+      !this.user.lastName ||
+      !this.user.lastName.length ||
+      !this.user.phoneNumber ||
+      !this.user.companyId) {
+      isValid = false;
+    }
+    this.formValid = isValid;
   }
 
   public goBack() {

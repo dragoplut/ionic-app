@@ -38,6 +38,7 @@ export class EditClinicComponent implements OnInit {
   public account: any = { location: {} };
   public logoTransparent: string = DPW_LOGO_TRANSPARENT;
   public loading: boolean = false;
+  public formValid: boolean = false;
   public errorMessage: any = '';
 
   public emailRegExp: any = EMAIL_REGEXP;
@@ -145,6 +146,8 @@ export class EditClinicComponent implements OnInit {
   }
 
   public detail(address: any) {
+    let street: string = '';
+    let route: string = '';
     address.address_components.forEach((el: any) => {
       switch (el.types[0]) {
         case 'country':
@@ -165,9 +168,23 @@ export class EditClinicComponent implements OnInit {
         case 'postal_code':
           this.account.location.zip = el.long_name;
           break;
+        case 'street_number':
+          street = el.long_name;
+          break;
+        case 'route':
+          route = el.long_name;
+          break;
       }
     });
+    if (street || route) {
+      this.account.location.address = (street + ' ' + route).trim();
+    }
+    if (address.geometry && address.geometry.location && address.geometry.location.lat) {
+      this.account.location.latitude = address.geometry.location.lat;
+      this.account.location.longitude = address.geometry.location.lng;
+    }
     this.centerMap(address);
+    this.onChangeValidate();
     // alert(JSON.stringify(address));
   }
 
@@ -175,6 +192,28 @@ export class EditClinicComponent implements OnInit {
     return clinic &&
         clinic.name &&
         clinic.location;
+  }
+
+  public onChangeValidate() {
+    let isValid = true;
+    if (!this.account.location ||
+      !this.account.name ||
+      !this.account.phoneNumber ||
+      !this.account.contactPerson ||
+      !this.account.webSiteUrl ||
+      !this.account.location.address ||
+      !this.account.location.address.length ||
+      !this.account.location.country ||
+      !this.account.location.country.length ||
+      !this.account.location.state ||
+      !this.account.location.state.length ||
+      !this.account.location.zip ||
+      !this.account.location.zip.length ||
+      !this.account.location.city ||
+      !this.account.location.city.length) {
+      isValid = false;
+    }
+    this.formValid = isValid;
   }
 
   public ngOnInit() {
@@ -186,6 +225,7 @@ export class EditClinicComponent implements OnInit {
       (resp: any) => {
         this.updateSelectOptions(resp.location);
         this.account = resp;
+        this.onChangeValidate();
       },
       (err: any) => {
         console.log('err: ', err);
@@ -194,7 +234,6 @@ export class EditClinicComponent implements OnInit {
   }
 
   public updateSelectOptions(location: any) {
-    console.log('1 updateSelectOptions location, this.countriesList', location, this.countriesList);
     if (location && location.country) {
       // usCityNames, countriesList, statesList
       this.countriesList.push(location.country);
@@ -204,7 +243,6 @@ export class EditClinicComponent implements OnInit {
       this.usCityNames.push(location.city);
       this.usCityNames = _.uniq(this.usCityNames);
     }
-    console.log('2 updateSelectOptions location, this.countriesList', location, this.countriesList);
   }
 
   public showErrorMessage(message?: string) {

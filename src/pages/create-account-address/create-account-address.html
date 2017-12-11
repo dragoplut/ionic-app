@@ -34,7 +34,7 @@
         ></custom-select>
       </div>
       <div class="actions col-xs-12">
-        <a class="link-nav pull-right" [ngClass]="!formValid ? 'disabled' : ''" (click)="formValid ? next() : false">
+        <a class="link-nav pull-right" [ngClass]="!formValid || loading ? 'disabled' : ''" (click)="formValid || loading ? next() : false">
           Next
         </a>
       </div>

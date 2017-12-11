@@ -6,7 +6,6 @@ import {
   PermissionService
 } from '../../services/index';
 import {
-  CHECK,
   DEFAULT_ERROR_MESSAGE,
   DPW_LOGO_TRANSPARENT,
   EMAIL_REGEXP,
@@ -22,7 +21,7 @@ import { Nav, NavController } from 'ionic-angular';
 export class SigninComponent implements OnInit {
   @ViewChild(Nav) nav: Nav;
 
-  public user: any = { email: 'customeruser@dummy.com', password: '123123' };
+  public user: any = { email: '', password: '' };
   public token: string = '';
   public logoTransparent: string = DPW_LOGO_TRANSPARENT;
   public loading: boolean = false;
@@ -45,37 +44,27 @@ export class SigninComponent implements OnInit {
 
   public ngOnInit() {
     this._api.setHeaders({});
-    let pwdCheck: any = sessionStorage.getItem('app_check');
-    if (pwdCheck && pwdCheck === CHECK) {
-      this.approved = true;
-    }
   }
 
   public showErrorMessage(message?: string) {
     this.errorMessage = message ? message : DEFAULT_ERROR_MESSAGE;
   }
 
-  public makeCheck() {
-    if (this.pwd && btoa(this.pwd) === CHECK) {
-      sessionStorage.setItem('app_check', CHECK);
-      this.approved = true;
-    } else {
-      this.approved = false;
-    }
-    return this.approved;
-  }
-
   public goToReset() {
+    this.loading = true;
     if (this.user.email && !this.validateItem('email')) {
       this._auth.resetPassword(this.user.email).subscribe(
         (resp: any) => {
+          this.loading = false;
           this.openPage(ForgottenPasswordComponent);
         },
         (err: any) => {
-          this.errorMessage = 'Something went wrong. Try again later.'
+          this.loading = false;
+          alert(err);
         }
       );
     } else if (!this.user.email) {
+      this.loading = false;
       this.user.email = ' ';
     }
   }

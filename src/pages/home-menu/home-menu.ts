@@ -9,7 +9,7 @@ import {
   DPW_LOGO_TRANSPARENT,
   USER_PROFILE_IMG
 } from '../../app/constants';
-// import { AuthService } from '../../services/index'
+import { AuthService } from '../../services/index'
 
 import {
   SigninComponent,
@@ -31,7 +31,7 @@ export class HomeMenu {
   public angleImg: string = ANGLE_IMG;
 
   constructor(
-    // public _auth: AuthService,
+    public _auth: AuthService,
     public navCtrl: NavController
   ) {
 
@@ -39,8 +39,22 @@ export class HomeMenu {
 
   public ionViewDidLoad() {
     if (!localStorage.getItem('token_mobile')) {
-      // this._auth.signOut();
+      console.log('NO token found!');
+      this._auth.signOut().subscribe(
+        (resp: any) => {
+          this.openPage(SigninComponent);
+        },
+        (err: any) => {
+          alert(err);
+        }
+      );
+    } else {
+      console.log('Token found.');
     }
+  }
+
+  public backButtonAction() {
+    this.goBack();
   }
 
   public goBack() {

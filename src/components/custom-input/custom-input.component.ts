@@ -20,6 +20,6 @@ export class CustomInputComponent {
   @Output() public itemChange = new EventEmitter();
 
   public valueChange() {
-    this.itemChange.next(this.itemValue);
+    this.itemChange.next(this.itemValue ? this.itemValue.trim() : this.itemValue);
   }
 }

@@ -38,6 +38,7 @@ export class RegisterClinicAddressComponent implements OnInit {
   public account: any = { location: {} };
   public logoTransparent: string = DPW_LOGO_TRANSPARENT;
   public loading: boolean = false;
+  public formValid: boolean = false;
   public errorMessage: any = '';
   public dependencies: any = {};
 
@@ -61,7 +62,7 @@ export class RegisterClinicAddressComponent implements OnInit {
       this.account.location = {};
     }
     this.loadMap();
-    console.log('this.dependencies: ', this.dependencies);
+    this.onChangeValidate();
   }
 
   public loadMap() {
@@ -141,6 +142,8 @@ export class RegisterClinicAddressComponent implements OnInit {
   }
 
   public detail(address: any) {
+    let street: string = '';
+    let route: string = '';
     address.address_components.forEach((el: any) => {
       switch (el.types[0]) {
         case 'country':
@@ -162,17 +165,42 @@ export class RegisterClinicAddressComponent implements OnInit {
           this.account.location.zip = el.long_name;
           break;
         case 'street_number':
+          street = el.long_name;
+          break;
         case 'route':
-          this.account.location.address = this.account.location.address ?
-            this.account.location.address + el.long_name + ' ' :
-            el.long_name + ' ';
+          route = el.long_name;
           break;
       }
     });
-    this.account.location.latitude = address.geometry.location.lat;
-    this.account.location.longitude = address.geometry.location.lng;
+    if (street || route) {
+      this.account.location.address = (street + ' ' + route).trim();
+    }
+    if (address.geometry && address.geometry.location && address.geometry.location.lat) {
+      this.account.location.latitude = address.geometry.location.lat;
+      this.account.location.longitude = address.geometry.location.lng;
+    }
     this.centerMap(address);
-    alert(JSON.stringify(address));
+    this.onChangeValidate();
+    //alert(JSON.stringify(address));
+  }
+
+  public onChangeValidate() {
+    let isValid = true;
+    if (!this.account.location ||
+      !this.account.name ||
+      !this.account.location.address ||
+      !this.account.location.address.length ||
+      !this.account.location.country ||
+      !this.account.location.country.length ||
+      !this.account.location.state ||
+      !this.account.location.state.length ||
+      !this.account.location.zip ||
+      !this.account.location.zip.length ||
+      !this.account.location.city ||
+      !this.account.location.city.length) {
+      isValid = false;
+    }
+    this.formValid = isValid;
   }
 
   public ngOnInit() {

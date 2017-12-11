@@ -18,6 +18,7 @@ export class MyPasswordComponent {
   public angleImg: string = ANGLE_IMG;
   public user: any = {};
   public errorMessages: any = {};
+  public formValid: boolean = false;
 
   public passwordInputs: any = [
     { modelName: 'currentPassword', placeholder: 'Existing Password', type: 'password', required: true },
@@ -71,9 +72,11 @@ export class MyPasswordComponent {
         'Error. Please provide new password!' : '';
       this.errorMessages.confirmPassword = !this.user.confirmPassword ?
         'Error. Please provide confirm password!' : '';
+      this.formValid = false;
     }
     if (this.user && this.user.newPassword !== this.user.confirmPassword) {
       this.errorMessages.confirmPassword = 'Error. Confirm password do not match!';
+      this.formValid = false;
     }
     if (this.user &&
       this.user.currentPassword &&
@@ -82,6 +85,7 @@ export class MyPasswordComponent {
       this.user.newPassword === this.user.confirmPassword
     ) {
       this.errorMessages = {};
+      this.formValid = true;
     }
   }
 

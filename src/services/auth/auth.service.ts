@@ -37,7 +37,6 @@ export class AuthService {
     return this.api.post(`/auth/signIn`, credits)
       .map((res: any) => {
         const userData: string = JSON.stringify(res);
-        console.log('authenticate res: ', res, ' userData: ', userData);
         localStorage.setItem(APP_USER, btoa(userData));
         return res;
       });
@@ -69,20 +68,22 @@ export class AuthService {
     console.log('checkAuth check:', response);
   }
 
-  public signOut() {
-    localStorage.removeItem(APP_USER);
-    this.api.post('/auth/signOut', {})
-      .subscribe(
+  public signOut(): Observable<any> {
+    return this.api.post('/auth/signOut', {})
+      .map(
         (done: any) => {
+          localStorage.removeItem(APP_USER);
           localStorage.removeItem('token_mobile');
           localStorage.removeItem('app_email');
-          console.log('done', done);
+          return done;
         },
-        (err: any) => { console.log('err', err); }
+        (err: any) => err
       );
   }
 
   public generateToken(credentials: any): Observable<any> {
+    localStorage.removeItem('token_mobile');
+    localStorage.removeItem('app_email');
     return this.api.post(`${this.path}/generateToken`, credentials)
       .map((res: any) => {
         // const userData: string = JSON.stringify(res);
