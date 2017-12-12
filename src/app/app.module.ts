@@ -19,12 +19,15 @@ import * as components from '../components/index';
 import * as pages from '../pages/index';
 import * as services from '../services/index';
 
+/** Config "Sentry" raven errors logger service **/
 Raven
   .config('https://afa5fddabf534b62832c6a6682afa26e@sentry.io/258024')
   .install();
 
 export class RavenErrorHandler implements ErrorHandler {
   handleError(err:any) : void {
+    /** Uncomment only for dev testing purpose **/
+    // console.error(err);
     Raven.captureException(err);
   }
 }
