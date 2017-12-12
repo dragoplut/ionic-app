@@ -1,8 +1,9 @@
+import * as Raven from 'raven-js';
 import { NgModule, ErrorHandler, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpModule } from '@angular/http';
 import { BrowserModule } from '@angular/platform-browser';
-import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
+import { IonicApp, IonicModule } from 'ionic-angular';
 import { MyApp } from './app.component';
 
 import { GoogleMaps } from '@ionic-native/google-maps';
@@ -17,6 +18,16 @@ import { BLE } from '@ionic-native/ble';
 import * as components from '../components/index';
 import * as pages from '../pages/index';
 import * as services from '../services/index';
+
+Raven
+  .config('https://afa5fddabf534b62832c6a6682afa26e@sentry.io/258024')
+  .install();
+
+export class RavenErrorHandler implements ErrorHandler {
+  handleError(err:any) : void {
+    Raven.captureException(err);
+  }
+}
 
 export const mapValuesToArray = (item: any) => Object.keys(item).map((key: any) => item[key]);
 
@@ -46,7 +57,7 @@ export const mapValuesToArray = (item: any) => Object.keys(item).map((key: any) 
     GoogleMaps,
     Camera,
     ...mapValuesToArray(services),
-    { provide: ErrorHandler, useClass: IonicErrorHandler }
+    { provide: ErrorHandler, useClass: RavenErrorHandler }
   ],
   schemas: [
     CUSTOM_ELEMENTS_SCHEMA
