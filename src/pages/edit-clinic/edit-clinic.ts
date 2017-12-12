@@ -66,10 +66,9 @@ export class EditClinicComponent implements OnInit {
       this.account.location = {};
     }
     this.getClinic(this.account.id);
-    this.loadMap();
   }
 
-  public loadMap() {
+  public loadMap(acc: any) {
 
     let mapOptions: GoogleMapOptions = {
       controls: {
@@ -86,8 +85,10 @@ export class EditClinicComponent implements OnInit {
       },
       camera: {
         target: {
-          lat: 43.0741904,
-          lng: -89.3809802
+          lat: acc && acc.location && acc.location.latitude ?
+            acc.location.latitude : 43.0741904,
+          lng: acc && acc.location && acc.location.longitude ?
+            acc.location.longitude : -89.3809802
         },
         tilt: 30,
         zoom: 10,
@@ -98,12 +99,14 @@ export class EditClinicComponent implements OnInit {
     this.map.one(GoogleMapsEvent.MAP_READY)
       .then(() => {
         this.map.addMarker({
-            title: 'Ionic',
+            title: acc && acc.location ? acc.location.address : 'Ionic',
             icon: 'blue',
             animation: 'DROP',
             position: {
-              lat: 43.0741904,
-              lng: -89.3809802
+              lat: acc && acc.location && acc.location.latitude ?
+                acc.location.latitude : 43.0741904,
+              lng: acc && acc.location && acc.location.longitude ?
+                acc.location.longitude : -89.3809802
             }
           })
           .then(marker => {
@@ -139,7 +142,7 @@ export class EditClinicComponent implements OnInit {
     this.map.one(GoogleMapsEvent.MAP_READY)
       .then(() => {
           // Now you can add elements to the map like the marker
-          this.map.animateCamera(position);
+          this.map.moveCamera(position);
           this.map.addMarker(markerOptions);
         }
       );
@@ -185,6 +188,7 @@ export class EditClinicComponent implements OnInit {
     }
     this.centerMap(address);
     this.onChangeValidate();
+    this.loadMap(this.account);
     // alert(JSON.stringify(address));
   }
 
@@ -226,6 +230,7 @@ export class EditClinicComponent implements OnInit {
         this.updateSelectOptions(resp.location);
         this.account = resp;
         this.onChangeValidate();
+        this.loadMap(this.account);
       },
       (err: any) => {
         console.log('err: ', err);

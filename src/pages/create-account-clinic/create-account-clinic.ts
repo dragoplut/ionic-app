@@ -234,14 +234,6 @@ export class CreateAccountClinicComponent implements OnInit {
     return resp;
   }
 
-  public handleErr(err: any) {
-    this.loading = false;
-    const message = err && err._body ?
-      JSON.parse(err._body) : { error: { message: DEFAULT_ERROR_MESSAGE } };
-    this.showErrorMessage(message.error.message);
-    return err && err._body ? JSON.parse(err._body) : message;
-  }
-
   public authenticate() {
     this.loading = true;
     this._auth.authenticate(this.user)
@@ -323,11 +315,19 @@ export class CreateAccountClinicComponent implements OnInit {
           this.openPage(HomeMenu);
         },
         (err: any) => {
-          this.loading = false;
-          alert(err);
+          this.handleErr(err);
         }
       );
     }
+  }
+
+  public handleErr(err: any) {
+    this.loading = false;
+    this.formValid = false;
+    const message = err && err._body ?
+      JSON.parse(err._body) : { error: { message: DEFAULT_ERROR_MESSAGE } };
+    alert(message.error.message);
+    return err && err._body ? JSON.parse(err._body) : message;
   }
 
   public openPage(page) {

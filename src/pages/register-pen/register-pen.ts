@@ -99,7 +99,7 @@ export class RegisterPenComponent {
           this.unpairedDevices = success;
           for (var e = 0; e < success.length; e++) {
             let element = success[e];
-            if (this.gettingDevices && element.class === 7936 && (element.name.indexOf('D') !== -1 || element.name.indexOf('Derma') !== -1)) {
+            if (this.gettingDevices && element.class === 7936 && (element.name.toLowerCase().indexOf('dp4') !== -1 || element.name.indexOf('derma') !== -1)) {
               for (let item in element) {
                 this.dpDevice[item] = element[item];
               }
@@ -144,20 +144,19 @@ export class RegisterPenComponent {
   }
 
   public connected = (data: any) => {
-    this.successData = JSON.stringify(data);
-    this.errorData = '';
-    this.dpDevice = data;
-    this.dpDevice.paired = true;
-    // setTimeout(() => {
-    //   this.ble.scan([], 5).subscribe(this.success, this.onScanError);
-    // }, 100);
+    this.ble.scan([], 2).subscribe(() => {
+      this.successData = JSON.stringify(data);
+      this.errorData = '';
+      this.dpDevice = data;
+      this.dpDevice.paired = true;
+    }, () => {});
   };
 
   public disconnected = (data: any) => {
     this.successData = JSON.stringify(data);
     this.errorData = '';
     this.dpDevice.paired = false;
-    this.startScanning();
+    //this.startScanning();
   };
 
   public success = (data: any) => {
@@ -223,7 +222,7 @@ export class RegisterPenComponent {
             let makeDisconnection = () => this.ble.disconnect(this.dpDevice.id || this.dpDevice.address)
               .then(this.disconnected, this.fail);
             this.ble.scan([], 5).subscribe(makeDisconnection, this.onScanError);
-            //this.ble.disconnect(this.dpDevice.id || this.dpDevice.address).then(this.success, this.fail);
+            this.ble.disconnect(this.dpDevice.id || this.dpDevice.address).then(this.success, this.fail);
           }
         }
       ]
@@ -254,6 +253,8 @@ export class RegisterPenComponent {
   }
 
   public goBack() {
+    this.ble.disconnect(this.dpDevice.id || this.dpDevice.address);
+    this.bluetoothSerial.disconnect();
     this.openPage(HomeMenu);
   }
 

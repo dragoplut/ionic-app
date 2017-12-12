@@ -127,7 +127,7 @@ export class CreateAccountAddressComponent implements OnInit {
         },
         (err: any) => {
           this.loading = false;
-          alert(err);
+          this.handleErr(err);
         }
       );
     } else {
