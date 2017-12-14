@@ -42,6 +42,11 @@ export class SigninComponent implements OnInit {
     public _permission: PermissionService
   ) {}
 
+  public ionViewDidLoad() {
+    localStorage.removeItem('token_mobile');
+    this.user.email = localStorage.getItem('lastEmail') || '';
+  }
+
   public ngOnInit() {
     this._api.setHeaders({});
   }
@@ -122,6 +127,7 @@ export class SigninComponent implements OnInit {
 
   public authenticate() {
     this.loading = true;
+    localStorage.setItem('lastEmail', this.user.email);
     this._auth.generateToken(this.user)
       .subscribe(
         (resp: any) => this.getUserData(),

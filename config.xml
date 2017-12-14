@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="io.ionic.starter" version="00.00.47" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="io.ionic.starter" version="00.00.48" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Dpworld</name>
     <description>Dermapenworld Ionic/Cordova app.</description>
     <author email="alastin.t@gmail.com" href="http://regen-dev.azurewebsites.net/">PI Team</author>
