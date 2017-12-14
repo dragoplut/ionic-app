@@ -9,7 +9,7 @@ import {
   DPW_LOGO_TRANSPARENT,
   USER_PROFILE_IMG
 } from '../../app/constants';
-import { AuthService } from '../../services/index'
+import { AuthService } from '../../services'
 
 import {
   SigninComponent,

@@ -5,7 +5,23 @@
     .item-inner {
       background-image: none !important;
       color: $col-neutral-text;
+    }
+    ion-item-sliding ion-item:first-child {
+      padding-left: 0;
+      ion-label {
+        margin: 0 8px 0 0;
+      }
+    }
+    ion-item-sliding ion-item .item-inner {
+      padding-right: 0 !important;
+    }
+    ion-item-sliding ion-item .item-inner button .item-inner {
+      border: none;
       padding-right: 32px !important;
+    }
+    ion-item-options {
+      padding-right: 8px;
+
     }
   }
   .info-container {

@@ -14,10 +14,17 @@
         (ionCancel)="onCancel($event)">
       </ion-searchbar>
       <ion-list>
-        <button ion-item *ngFor="let item of clinicListFiltered" (click)="itemSelected(item)">
-          {{ item.name }} <span class="pull-right">{{ item.address }}</span>
-          <ion-icon class="list-icon-absolute" name="arrow-forward"></ion-icon>
-        </button>
+        <ion-item-sliding *ngFor="let item of clinicListFiltered">
+          <ion-item>
+            <button ion-item (click)="itemSelected(item)">
+              {{ item.name }} <span class="pull-right">{{ item.address }}</span>
+              <ion-icon class="list-icon-absolute" name="arrow-forward"></ion-icon>
+            </button>
+          </ion-item>
+          <ion-item-options>
+            <button class="danger" (click)="requestRemove(item)">Delete</button>
+          </ion-item-options>
+        </ion-item-sliding>
       </ion-list>
       <div *ngIf="searchInput" class="info-container">
         <div *ngIf="clinicListFiltered.length" class="plain-text text-center">Showing {{clinicListFiltered.length}} of {{clinicListFiltered.length}} items</div>

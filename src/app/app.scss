@@ -46,6 +46,12 @@
 .cursor-pointer {
   cursor: pointer;
 }
+.danger {
+  background-color: $col-primary-red;
+  color: $col-primary-white;
+  font-size: $text-body;
+  font-weight: 400;
+}
 .primary-blue {
   color: $col-primary-blue;
 }

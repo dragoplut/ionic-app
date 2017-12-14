@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import { AlertController, NavController, NavParams } from 'ionic-angular';
 // noinspection TypeScriptCheckImport
 // import * as _ from 'lodash';
 
@@ -33,6 +33,7 @@ export class MyClinicComponent {
 
   constructor(
     public _clinic: ClinicService,
+    public alertCtrl: AlertController,
     public navCtrl: NavController,
     public navParams: NavParams
   ) {
@@ -68,6 +69,7 @@ export class MyClinicComponent {
 
   public goBack() {
     this.openPage(HomeMenu);
+    // this.navCtrl.pop();
   }
 
   public goToNewClinic() {
@@ -86,6 +88,17 @@ export class MyClinicComponent {
       },
       (err: any) => {
         console.log('err: ', err);
+      }
+    );
+  }
+
+  public removeItem(item: any) {
+    this._clinic.deleteClinic(item.id).subscribe(
+      (resp: any) => {
+        this.getClinics();
+      },
+      (err: any) => {
+        alert(JSON.stringify(err));
       }
     );
   }
@@ -136,4 +149,44 @@ export class MyClinicComponent {
     }
   }
 
+  public requestRemove(item: any) {
+    const options: any = {
+      title: 'Confirm',
+      message: `Do you really want to remove Clinic ${item.name}, ${item.address}?`
+    };
+    this.showConfirm(options, 'delete', item);
+  }
+
+  public showConfirm(options: any, action: string, item?: any) {
+    let alert: any = this.alertCtrl.create({
+      title: options.title,
+      message: options.message,
+      buttons: [
+        {
+          text: 'No',
+          role: 'cancel',
+          handler: () => {
+            console.log('Cancel clicked');
+          }
+        },
+        {
+          text: 'Yes',
+          handler: () => {
+            this.doConfirmed(action, item);
+          }
+        }
+      ]
+    });
+    alert.present();
+  }
+
+  public doConfirmed(action: string, item?: any) {
+    switch (action) {
+      case 'delete':
+        this.removeItem(item);
+        break;
+      default:
+        break;
+    }
+  }
 }

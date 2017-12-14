@@ -6,7 +6,7 @@ import { IonicModule, Platform, NavController} from 'ionic-angular/index';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { PlatformMock, StatusBarMock, SplashScreenMock } from '../../../test-config/mocks-ionic';
-import { AuthService } from '../../services/index';
+import { AuthService } from '../../services';
 
 describe('Home Menu', () => {
   let de: DebugElement;

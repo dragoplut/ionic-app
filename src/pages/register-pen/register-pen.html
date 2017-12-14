@@ -15,7 +15,7 @@
           <span class="secondary-blue">{{dpDevice.name}}</span>
           <span *ngIf="dpDevice.name && !gettingDevices"> ({{ dpDevice.paired ? 'paired' : 'unpaired' }}) </span>
           <span *ngIf="!gettingDevices" class="primary-blue pull-center" (tap)="dpDevice.paired ? disconnect() : selectDevice(dpDevice.address || dpDevice.id, dpDevice)">
-             {{ dpDevice.paired ? ' Disconnect ' : ' Connect ' }}
+             {{ dpDevice.paired ? ' Disconnect ' : ' ' }}
           </span>
           <span *ngIf="!gettingDevices" class="secondary-blue pull-right" (tap)="startScanning()"> Scan <ion-icon small name="refresh"></ion-icon></span>
         </div>
@@ -28,7 +28,7 @@
       </div>
       <div class="actions col-xs-12">
         <a class="link-nav pull-right" (click)="goNext()">
-          Next
+          {{ dependencies.newPen ? 'Register' : 'Next' }}
         </a>
       </div>
     </form>
@@ -42,13 +42,14 @@
         <!--<ion-item *ngFor="let device of pairedDevices">-->
           <!--{{device.name}}-->
         <!--</ion-item>-->
-        <!--<button ion-button block (click)="disconnect()">Disconnect</button>-->
+        <!--&lt;!&ndash;<button ion-button block (click)="disconnect()">Disconnect</button>&ndash;&gt;-->
         <!--<ion-list-header>-->
           <!--availlable Devices-->
         <!--</ion-list-header>-->
         <!--<ion-item *ngFor='let device of unpairedDevices' (click)="selectDevice(device.address, device)">-->
           <!--<span>{{device.name}}</span>-->
         <!--</ion-item>-->
+        <!--<button ion-button block (click)="isConnected(dpDevice)">Check, if {{dpDevice.name}} is connected.</button>-->
         <!--<button ion-button block (click)="readFromDevice(dpDevice.address, '1800', '2a00')">Read Volume {{deviceReadVolume}}</button>-->
         <!--<button ion-button block (click)="writeToDevice(dpDevice.address, '1800', '2a00', deviceVolume)">Write Volume {{deviceVolume}}</button>-->
         <!--<ion-item>-->

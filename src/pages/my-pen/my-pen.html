@@ -14,10 +14,17 @@
         (ionCancel)="onCancel($event)">
       </ion-searchbar>
       <ion-list>
-        <button ion-item *ngFor="let item of penListFiltered" (click)="itemSelected(item)">
-          {{ item.serialNumber }} <span class="pull-right secondary-blue">Update Pen</span>
-          <ion-icon class="list-icon-absolute" name="arrow-forward"></ion-icon>
-        </button>
+        <ion-item-sliding *ngFor="let item of penListFiltered">
+          <ion-item>
+            <button ion-item (click)="itemSelected(item)">
+              {{ item.serialNumber }} <span class="pull-right secondary-blue">Update Pen</span>
+              <ion-icon class="list-icon-absolute" name="arrow-forward"></ion-icon>
+            </button>
+          </ion-item>
+          <ion-item-options>
+            <button class="danger" (click)="requestRemove(item)">Delete</button>
+          </ion-item-options>
+        </ion-item-sliding>
       </ion-list>
       <div *ngIf="searchInput" class="info-container">
         <div *ngIf="penListFiltered.length" class="plain-text text-center">Showing {{penListFiltered.length}} of {{penListFiltered.length}} items</div>

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import { AlertController, NavController, NavParams } from 'ionic-angular';
 // noinspection TypeScriptCheckImport
 // import * as _ from 'lodash';
 
@@ -33,7 +33,8 @@ export class MyPenComponent {
   constructor(
     public _pen: PenService,
     public navCtrl: NavController,
-    public navParams: NavParams
+    public navParams: NavParams,
+    private alertCtrl: AlertController
   ) {
     this.penListFiltered = this.searchByString(this.searchInput, this.penList);
   }
@@ -64,6 +65,7 @@ export class MyPenComponent {
 
   public goBack() {
     this.openPage(HomeMenu);
+    // this.navCtrl.pop();
   }
 
   public goToNewPen() {
@@ -73,6 +75,14 @@ export class MyPenComponent {
 
   public openPage(page) {
     this.navCtrl.push(page, { dependencies: this.dependencies });
+  }
+
+  public requestRemove(item: any) {
+    const options: any = {
+      title: 'Confirm',
+      message: `Do you really want to remove Pen ${item.serialNumber}?`
+    };
+    this.showConfirm(options, 'delete', item);
   }
 
   public getPens() {
@@ -85,6 +95,40 @@ export class MyPenComponent {
         console.log('err: ', err);
       }
     );
+  }
+
+  public removeItem(item: any) {
+    this._pen.deletePen(item.id).subscribe(
+      (resp: any) => {
+        this.getPens();
+      },
+      (resp: any) => {
+        alert(JSON.stringify(resp));
+      }
+    );
+  }
+
+  public showConfirm(options: any, action: string, item?: any) {
+    let alert: any = this.alertCtrl.create({
+      title: options.title,
+      message: options.message,
+      buttons: [
+        {
+          text: 'No',
+          role: 'cancel',
+          handler: () => {
+            console.log('Cancel clicked');
+          }
+        },
+        {
+          text: 'Yes',
+          handler: () => {
+            this.doConfirmed(action, item);
+          }
+        }
+      ]
+    });
+    alert.present();
   }
 
   public getPensSearch(searchValue: string) {
@@ -133,4 +177,13 @@ export class MyPenComponent {
     }
   }
 
+  public doConfirmed(action: string, item?: any) {
+    switch (action) {
+      case 'delete':
+        this.removeItem(item);
+        break;
+      default:
+        break;
+    }
+  }
 }
