@@ -7,7 +7,7 @@ import {
   DEVICE_PANEL_IMG,
   DPW_LOGO_TRANSPARENT
 } from '../../app/constants';
-import { HomeMenu, MyPenComponent } from '../index';
+import { HomeMenu, MyPenComponent, UpdatePenComponent } from '../index';
 import { BleService, PenService } from '../../services';
 
 @Component({
@@ -165,7 +165,7 @@ export class RegisterPenComponent {
   }
 
   public readFromDevice(address, serviceUUID, characteristicUUID) {
-    this._ble.read(address, { serviceUUID, characteristicUUID }, this.success, this.fail);
+    this._ble.read(address, { serviceUUID, characteristicUUID }, 'string', this.success, this.fail);
   }
 
   public writeToDevice(address, serviceUUID, characteristicUUID, rawData) {
@@ -195,6 +195,10 @@ export class RegisterPenComponent {
     } else {
       alert('Error. No clinic provided for pen!');
     }
+  }
+
+  public goPenUpdate() {
+    this.openPage(UpdatePenComponent);
   }
 
   public openPage(page) {

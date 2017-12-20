@@ -15,3 +15,4 @@ export { RegisterPenComponent } from './register-pen/register-pen';
 export { RegisterClinicAddressComponent } from './register-clinic-address/register-clinic-address';
 export { RegisterClinicContactsComponent } from './register-clinic-contacts/register-clinic-contacts';
 export { RegisterPenToClinicComponent } from './register-pen-to-clinic/register-pen-to-clinic';
+export { UpdatePenComponent } from './update-pen/update-pen';

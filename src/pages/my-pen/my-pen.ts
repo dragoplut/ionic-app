@@ -3,14 +3,14 @@ import { AlertController, NavController, NavParams } from 'ionic-angular';
 // noinspection TypeScriptCheckImport
 // import * as _ from 'lodash';
 
-import { PenService } from '../../services/index';
+import { PenService } from '../../services';
 import {
   ANGLE_IMG,
   DPW_LOGO_TRANSPARENT
 } from '../../app/constants';
 import {
   HomeMenu,
-  RegisterPenComponent,
+  UpdatePenComponent,
   RegisterPenToClinicComponent
 } from '../index';
 
@@ -60,7 +60,7 @@ export class MyPenComponent {
   public itemSelected(pen) {
     this.dependencies.newPen = false;
     this.dependencies.pen = pen;
-    this.navCtrl.push(RegisterPenComponent, { pen, dependencies: this.dependencies })
+    this.navCtrl.push(UpdatePenComponent, { pen, dependencies: this.dependencies })
   }
 
   public goBack() {
