@@ -44,11 +44,13 @@
   top: calc(50% - 25%);
   transform: scale(.87);
   transition: all .3s ease 0s;
+  text-align: center;
   height: 52%;
   width: 64%;
   img.img-card {
     @include animationHelper;
     transform: scale(0.93);
+    vertical-align: middle;
   }
 }
 .swiper-slide-active {

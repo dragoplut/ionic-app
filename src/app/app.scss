@@ -29,17 +29,20 @@
 
 .content {
   background: url('../assets/img/background_app.png') no-repeat center top fixed;
-  background-size: cover;
+  background-size: 100% 100%;
 }
 .content .auth {
   background: url('../assets/img/background_login.png') no-repeat center top fixed;
-  background-size: cover;
+  background-size: 100% 100%;
 }
 
 /**********************************
           COMMON STYLES
 ***********************************/
 
+.ion-page > ion-content {
+  position: relative !important;
+}
 .text-bold {
   font-weight: 600;
 }
@@ -291,7 +294,7 @@
   .header-action-icon {
     position: absolute;
     right: 4px;
-    top: 6px;
+    bottom: 6px;
   }
 }
 
