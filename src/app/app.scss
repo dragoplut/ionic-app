@@ -55,6 +55,14 @@ ion-header.header-md::after {
 ion-content {
   display: block;
   //padding: 0 16px !important;
+  /* Status bar height on iOS 10 */
+  padding-top: 20px;
+
+  /* Status bar height on iOS 11.0 */
+  padding-top: constant(safe-area-inset-top);
+
+  /* Status bar height on iOS 11+ */
+  padding-top: env(safe-area-inset-top);
   height: calc(100% - 56px) !important;
 }
 .scroll-content {

@@ -70,9 +70,9 @@
     <preference name="SplashScreenDelay" value="1000" />
     <preference name="AutoHideSplashScreen" value="false" />
     <preference name="loadUrlTimeoutValue" value="700000" />
-    <preference name="StatusBarStyle" value="lightcontent" />
+    <preference name="StatusBarStyle" value="blacktranslucent" />
     <preference name="StatusBarOverlaysWebView" value="true" />
-    <preference name="StatusBarBackgroundColor" value="#F8F7F3" />
+    <preference name="StatusBarBackgroundColor" value="transparent" />
     <preference name="ShowSplashScreenSpinner" value="true" />
     <allow-navigation href="http://192.168.157.28:8100" />
     <allow-navigation href="http://192.168.156.28:8100" />
