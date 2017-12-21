@@ -40,8 +40,28 @@
           COMMON STYLES
 ***********************************/
 
+ion-header.header {
+  display: block;
+  position: relative;
+  height: 56px;
+}
+ion-header.header-md::after {
+  background-image: none !important;
+  //display: none;
+}
+ion-content {
+  display: block;
+  //padding: 0 16px !important;
+  height: calc(100% - 56px) !important;
+}
+.scroll-content {
+  margin: 0 !important;
+}
 .ion-page > ion-content {
   position: relative !important;
+}
+.back-button-text {
+  display: none !important;
 }
 .text-bold {
   font-weight: 600;
@@ -64,7 +84,7 @@
 .page-content {
   display: block;
   position: relative;
-  margin-top: 44px;
+  margin-top: 0;
   min-height: calc(100vh - 170px);
 }
 .pull-center {
@@ -281,6 +301,7 @@
   z-index: 50;
   .back-button .button-inner .back-button-icon {
     color: $col-secondary-blue;
+    margin-left: 6px;
   }
   .toolbar-content {
     padding-right: 27px;
@@ -291,6 +312,7 @@
   }
   .toolbar-background {
     background: rgba($col-primary-white, 0.7) !important;
+    border: none;
   }
   .header-action-icon {
     position: absolute;
