@@ -6,6 +6,14 @@
   transform: translateZ(0) rotate(0.01deg);
 }
 
+.home-menu {
+  .custom-header {
+    .back-button {
+      display: none;
+    }
+  }
+}
+
 .home-menu-container .scroll-content {
   padding: 16px 0 !important;
   .swiper-pagination.swiper-pagination-clickable.swiper-pagination-bullets {

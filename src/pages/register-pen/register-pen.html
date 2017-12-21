@@ -1,8 +1,9 @@
+<ion-header>
+  <ion-navbar class="custom-header">
+    <ion-title>{{ dependencies.newPen ? 'Register Pen' : 'Pen Update' }}</ion-title>
+  </ion-navbar>
+</ion-header>
 <ion-content>
-  <div class="custom-header">
-    <ion-icon class="header-action-icon pull-left" name="arrow-back" (tap)="goBack()"></ion-icon>
-    <span class="header-title title-blue">{{ dependencies.newPen ? 'Register Pen' : 'Pen Update' }}</span>
-  </div>
   <div class="create-account row center-xs middle-xs">
     <form
       ngForm

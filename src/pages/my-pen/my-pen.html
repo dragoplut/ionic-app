@@ -1,9 +1,10 @@
-<ion-content class="my-clinic-page">
-  <div class="custom-header">
-    <ion-icon class="header-action-icon pull-left" name="close" (tap)="goBack()"></ion-icon>
-    <span class="header-title title-blue">My Pen</span>
+<ion-header>
+  <ion-navbar class="custom-header">
+    <ion-title>My Pen</ion-title>
     <ion-icon class="header-action-icon pull-right" name="add" (tap)="goToNewPen()"></ion-icon>
-  </div>
+  </ion-navbar>
+</ion-header>
+<ion-content class="my-clinic-page">
   <div class="page-content">
     <div class="clear-container">
       <ion-searchbar
