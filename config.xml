@@ -67,9 +67,13 @@
         <param name="ios-package" onload="true" value="CDVStatusBar" />
     </feature>
     <preference name="SplashScreen" value="screen" />
-    <preference name="SplashScreenDelay" value="10000" />
-    <preference name="AutoHideSplashScreen" value="true" />
+    <preference name="SplashScreenDelay" value="1000" />
+    <preference name="AutoHideSplashScreen" value="false" />
     <preference name="loadUrlTimeoutValue" value="700000" />
+    <preference name="StatusBarStyle" value="lightcontent" />
+    <preference name="StatusBarOverlaysWebView" value="true" />
+    <preference name="StatusBarBackgroundColor" value="#F8F7F3" />
+    <preference name="ShowSplashScreenSpinner" value="true" />
     <allow-navigation href="http://192.168.157.28:8100" />
     <allow-navigation href="http://192.168.156.28:8100" />
     <allow-navigation href="http://192.168.156.28:8101" />
