@@ -27,13 +27,16 @@
           APP BACKGROUNDS
 ***********************************/
 
-.content {
-  background: url('../assets/img/background_app.png') no-repeat center top fixed;
-  background-size: 100vw 100vh;
+.app-root .ion-page {
+  background: url('../assets/img/background_app.png') no-repeat center top fixed !important;
+  background-size: 100vw 100vh !important;
 }
-.content .auth {
-  background: url('../assets/img/background_login.png') no-repeat center top fixed;
-  background-size: 100vw 100vh;
+.app-root signin.ion-page {
+  background: url('../assets/img/background_login.png') no-repeat center top fixed !important;
+  background-size: 100vw 100vh !important;
+}
+.content {
+  background: transparent !important;
 }
 
 /**********************************
@@ -167,7 +170,7 @@ ion-content {
 .dpw-logo-foot {
   display: block;
   position: relative;
-  margin: 40px auto;
+  margin: 32px auto;
   text-align: center;
   height: 6vw;
   width: 43vw;
@@ -296,7 +299,7 @@ ion-content {
   position: fixed;
   left: 0;
   top: 0;
-  height: 44px;
+  height: 54px;
   width: 100%;
   z-index: 50;
   .back-button .button-inner .back-button-icon {
