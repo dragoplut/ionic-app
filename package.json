@@ -39,11 +39,11 @@
     "cordova-plugin-ble-central": "git+https://github.com/fxe-gear/cordova-plugin-ble-central.git",
     "cordova-plugin-bluetooth-serial": "^0.4.7",
     "cordova-plugin-compat": "^1.2.0",
-    "cordova-plugin-device": "^1.1.4",
+    "cordova-plugin-device": "^1.1.7",
     "cordova-plugin-googlemaps": "^2.1.1",
-    "cordova-plugin-splashscreen": "^4.0.3",
-    "cordova-plugin-statusbar": "^2.2.1",
-    "cordova-plugin-whitelist": "^1.3.1",
+    "cordova-plugin-splashscreen": "^4.1.0",
+    "cordova-plugin-statusbar": "^2.4.0",
+    "cordova-plugin-whitelist": "^1.3.3",
     "ionic-angular": "3.7.1",
     "ionic-native": "^2.9.0",
     "ionic-plugin-keyboard": "^2.2.1",
@@ -52,7 +52,8 @@
     "raven-js": "^3.20.1",
     "rxjs": "5.4.3",
     "sw-toolbox": "3.6.0",
-    "zone.js": "0.8.18"
+    "zone.js": "0.8.18",
+    "cordova-ios": "~4.5.4"
   },
   "devDependencies": {
     "@angular/cli": "1.1.2",
@@ -90,12 +91,14 @@
       "cordova-plugin-ble-central": {},
       "cordova-custom-config": {},
       "cordova-plugin-googlemaps": {
-        "API_KEY_FOR_ANDROID": "AIzaSyDJYtcVzKXghryIDmQaTBDp5gWYPbTBqfU"
+        "API_KEY_FOR_ANDROID": "AIzaSyDJYtcVzKXghryIDmQaTBDp5gWYPbTBqfU",
+        "API_KEY_FOR_IOS": "AIzaSyDJYtcVzKXghryIDmQaTBDp5gWYPbTBqfU"
       }
     },
     "platforms": [
       "android",
-      "browser"
+      "browser",
+      "ios"
     ]
   }
 }
