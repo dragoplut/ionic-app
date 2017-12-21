@@ -15,7 +15,7 @@ import {
   US_CITY_NAMES
 } from '../../app/constants';
 import { MyClinicComponent } from '../index';
-import { Nav, NavController, NavParams } from 'ionic-angular';
+import {Nav, NavController, NavParams, Platform} from 'ionic-angular';
 // noinspection TypeScriptCheckImport
 import * as _ from 'lodash';
 
@@ -52,6 +52,7 @@ export class EditClinicComponent implements OnInit {
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
+    public platform: Platform,
     public _api: ApiService,
     public _clinic: ClinicService,
     public _permission: PermissionService
@@ -65,7 +66,10 @@ export class EditClinicComponent implements OnInit {
     } else if (!this.account.location) {
       this.account.location = {};
     }
-    this.getClinic(this.account.id);
+    this.platform.ready().then(() => {
+      // Okay, so the platform is ready and our plugins are available.
+      this.getClinic(this.account.id);
+    });
   }
 
   public loadMap(acc: any) {

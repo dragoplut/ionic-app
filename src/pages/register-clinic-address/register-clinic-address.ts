@@ -15,7 +15,7 @@ import {
   US_CITY_NAMES
 } from '../../app/constants';
 import { MyClinicComponent, RegisterClinicContactsComponent } from '../index';
-import { Nav, NavController, NavParams } from 'ionic-angular';
+import {Nav, NavController, NavParams, Platform} from 'ionic-angular';
 // noinspection TypeScriptCheckImport
 import * as _ from 'lodash';
 
@@ -47,6 +47,7 @@ export class RegisterClinicAddressComponent implements OnInit {
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
+    public platform: Platform,
     public _api: ApiService,
     public _clinic: ClinicService,
     public _permission: PermissionService
@@ -61,8 +62,12 @@ export class RegisterClinicAddressComponent implements OnInit {
     } else if (!this.account.location) {
       this.account.location = {};
     }
-    this.loadMap();
-    this.onChangeValidate();
+    this.platform.ready().then(() => {
+      // Okay, so the platform is ready and our plugins are available.
+      this.loadMap();
+      this.onChangeValidate();
+    });
+
   }
 
   public loadMap() {
