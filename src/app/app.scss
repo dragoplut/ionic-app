@@ -29,11 +29,11 @@
 
 .content {
   background: url('../assets/img/background_app.png') no-repeat center top fixed;
-  background-size: 100% 100%;
+  background-size: 100vw 100vh;
 }
 .content .auth {
   background: url('../assets/img/background_login.png') no-repeat center top fixed;
-  background-size: 100% 100%;
+  background-size: 100vw 100vh;
 }
 
 /**********************************
@@ -131,7 +131,7 @@
 }
 .header-action-icon-small {
   line-height: 44px;
-  margin: 12px 15px;
+  margin: 12px -12px 12px 15px;
   height: 5.6vw;
   width: 5.6vw;
   vertical-align: middle;
@@ -156,7 +156,7 @@
 .dpw-logo-head {
   @include animationHelper;
   margin: 5px auto 0;
-  width: 60%;
+  width: 65%;
 }
 .btn-nav-head {
   background-color: transparent;
@@ -225,6 +225,7 @@
   }
 }
 .custom-input-container {
+  position: relative !important;
   input {
     z-index: 5;
   }

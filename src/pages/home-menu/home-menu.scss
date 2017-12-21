@@ -45,7 +45,7 @@
   transform: scale(.87);
   transition: all .3s ease 0s;
   text-align: center;
-  height: 52%;
+  height: calc(90vw);
   width: 64%;
   img.img-card {
     @include animationHelper;
