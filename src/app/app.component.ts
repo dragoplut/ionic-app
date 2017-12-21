@@ -28,9 +28,10 @@ export class MyApp {
     //  { title: 'Page Two', component: pages.Page2 },
     //  { title: 'Sign In', component: pages.SigninComponent }
     // ];
+    this.initApp();
   }
 
-  public ionViewDidLoad() {
+  public initApp() {
     this.platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
@@ -42,20 +43,20 @@ export class MyApp {
         this.statusBar.styleBlackTranslucent();
       }
       this.splashScreen.hide();
-    });
-    this.platform.registerBackButtonAction(() => {
-      let nav = this.app.getActiveNav();
-      let activeView: ViewController = nav.getActive();
+      this.platform.registerBackButtonAction(() => {
+        let nav = this.app.getActiveNav();
+        let activeView: ViewController = nav.getActive();
 
-      if(activeView != null){
-        if(nav.canGoBack()) {
-          nav.pop();
-        } else if (typeof activeView.instance.backButtonAction === 'function') {
-          activeView.instance.backButtonAction();
-        } else {
-          nav.parent.select(0); // goes to the first tab
+        if(activeView != null){
+          if(nav.canGoBack()) {
+            nav.pop();
+          } else if (typeof activeView.instance.backButtonAction === 'function') {
+            activeView.instance.backButtonAction();
+          } else {
+            nav.parent.select(0); // goes to the first tab
+          }
         }
-      }
+      });
     });
   }
 
