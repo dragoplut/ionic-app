@@ -32,7 +32,7 @@ import * as _ from 'lodash';
 })
 export class CreateAccountClinicComponent implements OnInit {
   @ViewChild(Nav) nav: Nav;
-  @ViewChild('map') mapElement: ElementRef;
+  @ViewChild('map2') mapElement: ElementRef;
 
   public map: GoogleMap;
   public lat:any;

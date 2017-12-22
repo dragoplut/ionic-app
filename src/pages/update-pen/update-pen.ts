@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import { NavController, NavParams, Platform } from 'ionic-angular';
 import { AlertController } from 'ionic-angular';
 
 import { DPW_LOGO_TRANSPARENT } from '../../app/constants';
@@ -204,33 +204,35 @@ export class UpdatePenComponent {
   constructor(
     public _ble: BleService,
     public _pen: PenService,
+    public platform: Platform,
     public navCtrl: NavController,
     public navParams: NavParams,
     private alertCtrl: AlertController
-  ) {
-    _ble.enable();
-  }
+  ) {}
 
   public ionViewDidLoad() {
-    this.dependencies = this.navParams.get('dependencies') || {};
-    this.dpDevice = { name: '' };
-    if (this.dependencies && this.dependencies.pen && !this.dependencies.clinic) {
-      if (this.dpDevice) {
-        this.dpDevice.name = this.dependencies.pen.serialNumber;
-        this.dpDevice.id = this.dependencies.pen.serialNumber;
+    this.platform.ready().then(() => {
+      this._ble.enable();
+      this.dependencies = this.navParams.get('dependencies') || {};
+      this.dpDevice = { name: '' };
+      if (this.dependencies && this.dependencies.pen && !this.dependencies.clinic) {
+        if (this.dpDevice) {
+          this.dpDevice.name = this.dependencies.pen.serialNumber;
+          this.dpDevice.id = this.dependencies.pen.serialNumber;
+        } else {
+          this.dpDevice = {
+            id: this.dependencies.pen.serialNumber,
+            name: this.dependencies.pen.serialNumber
+          };
+        }
+        this.initConnectionChecker();
+        this._ble.scan((resp: any) => {
+          this._ble.connect(this.dpDevice, this.connected, false);
+        }, this._ble.stopScan);
       } else {
-        this.dpDevice = {
-          id: this.dependencies.pen.serialNumber,
-          name: this.dependencies.pen.serialNumber
-        };
+        this.startScanning();
       }
-      this.initConnectionChecker();
-      this._ble.scan((resp: any) => {
-        this._ble.connect(this.dpDevice, this.connected, false);
-      }, this._ble.stopScan);
-    } else {
-      this.startScanning();
-    }
+    });
   }
 
   public startScanning() {

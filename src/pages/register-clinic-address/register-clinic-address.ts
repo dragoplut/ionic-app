@@ -25,7 +25,7 @@ import * as _ from 'lodash';
 })
 export class RegisterClinicAddressComponent implements OnInit {
   @ViewChild(Nav) nav: Nav;
-  @ViewChild('map') mapElement: ElementRef;
+  @ViewChild('map3') mapElement: ElementRef;
 
   public map: GoogleMap;
   public lat:any;

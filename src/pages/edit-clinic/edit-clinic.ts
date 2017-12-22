@@ -25,7 +25,7 @@ import * as _ from 'lodash';
 })
 export class EditClinicComponent implements OnInit {
   @ViewChild(Nav) nav: Nav;
-  @ViewChild('map') mapElement: ElementRef;
+  @ViewChild('map1') mapElement: ElementRef;
 
   public map: GoogleMap;
   public lat:any;
