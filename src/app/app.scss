@@ -138,7 +138,7 @@ ion-content {
 }
 .header-title {
   position: absolute;
-  top: 14px;
+  bottom: 0;
   left: calc(50% - 35%);
   text-align: center;
   width: 70%;
@@ -148,8 +148,8 @@ ion-content {
   line-height: 32px;
   font-size: 32px;
   margin: 6px 10px 9px 15px;
-  height: 6.5vw;
-  width: 6.5vw;
+  height: 6vw;
+  width: 6vw;
   vertical-align: middle;
 }
 .header-action-icon-small {
@@ -177,8 +177,9 @@ ion-content {
 }
 .dpw-logo-head {
   @include animationHelper;
-  margin: 5px auto 0;
+  margin: 0 auto;
   width: 65%;
+  vertical-align: middle;
 }
 .btn-nav-head {
   background-color: transparent;
@@ -307,6 +308,7 @@ ion-content {
   }
   .toolbar-content {
     position: absolute;
+    bottom: 0;
     height: 56px;
     width: 100%;
     text-align: center;
@@ -547,7 +549,7 @@ ion-content {
   background: transparent !important;
 }
 
-@media screen and (min-height: 2435px) {
+@media screen and (min-height: 2433px) {
   .scroll-content {
     margin-top: 30px !important;
   }
