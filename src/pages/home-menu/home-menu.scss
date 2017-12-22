@@ -17,7 +17,7 @@
 .home-menu-container .scroll-content {
   padding: 16px 0 !important;
   .swiper-pagination.swiper-pagination-clickable.swiper-pagination-bullets {
-    bottom: calc(15vh);
+    bottom: 16%;
     .swiper-pagination-bullet {
       background-color: $col-primary-blue;
       border: 3px solid $col-primary-blue;
@@ -41,7 +41,7 @@
   padding: 0;
   position: absolute;
   left: calc(50% - 32%);
-  top: calc(50vh - 25vh - 56px);
+  top: calc(50% - 25% - 56px);
   transform: scale(.87);
   transition: all .3s ease 0s;
   text-align: center;
@@ -57,6 +57,6 @@
   .menu-card {
     @include animationHelper;
     transform: scale(1) !important;
-    top: calc(50vh - 25vh - 56px);
+    top: calc(50% - 25% - 56px);
   }
 }

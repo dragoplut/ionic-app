@@ -66,10 +66,7 @@ export class EditClinicComponent implements OnInit {
     } else if (!this.account.location) {
       this.account.location = {};
     }
-    this.platform.ready().then(() => {
-      // Okay, so the platform is ready and our plugins are available.
-      this.getClinic(this.account.id);
-    });
+    this.getClinic(this.account.id);
   }
 
   public loadMap(acc: any) {
@@ -102,6 +99,7 @@ export class EditClinicComponent implements OnInit {
     this.map = GoogleMaps.create(this.mapElement.nativeElement, mapOptions);
     this.map.one(GoogleMapsEvent.MAP_READY)
       .then(() => {
+        console.log('MAP_READY: ---------------');
         this.map.addMarker({
             title: acc && acc.location ? acc.location.address : 'Ionic',
             icon: 'blue',
@@ -190,7 +188,7 @@ export class EditClinicComponent implements OnInit {
       this.account.location.latitude = address.geometry.location.lat;
       this.account.location.longitude = address.geometry.location.lng;
     }
-    this.centerMap(address);
+    // this.centerMap(address);
     this.onChangeValidate();
     this.loadMap(this.account);
     // alert(JSON.stringify(address));
@@ -234,7 +232,10 @@ export class EditClinicComponent implements OnInit {
         this.updateSelectOptions(resp.location);
         this.account = resp;
         this.onChangeValidate();
-        this.loadMap(this.account);
+        this.platform.ready().then(() => {
+          // Okay, so the platform is ready and our plugins are available.
+          this.loadMap(this.account);
+        });
       },
       (err: any) => {
         console.log('err: ', err);

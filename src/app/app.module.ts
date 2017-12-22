@@ -53,12 +53,12 @@ export const mapValuesToArray = (item: any) => Object.keys(item).map((key: any) 
     ...mapValuesToArray(pages)
   ],
   providers: [
+    GoogleMaps,
+    Camera,
     BluetoothSerial,
     StatusBar,
     SplashScreen,
     BLE,
-    GoogleMaps,
-    Camera,
     ...mapValuesToArray(services),
     { provide: ErrorHandler, useClass: RavenErrorHandler }
   ],

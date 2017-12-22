@@ -78,12 +78,11 @@ export class CreateAccountClinicComponent implements OnInit {
     if (!this.account.clinic) {
       this.account.clinic = { location: {} };
     }
-    console.log('this.account: ', this.account);
     this.platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       this.loadMap();
-      this.onChangeValidate();
     });
+    this.onChangeValidate();
   }
 
   public ngOnInit() {
@@ -290,7 +289,10 @@ export class CreateAccountClinicComponent implements OnInit {
       this.account.clinic.location.latitude = address.geometry.location.lat;
       this.account.clinic.location.longitude = address.geometry.location.lng;
     }
-    this.centerMap(address);
+    this.platform.ready().then(() => {
+      // Okay, so the platform is ready and our plugins are available.
+      this.centerMap(address);
+    });
     this.onChangeValidate();
     // alert(JSON.stringify(address));
   }

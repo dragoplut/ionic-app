@@ -65,9 +65,8 @@ export class RegisterClinicAddressComponent implements OnInit {
     this.platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       this.loadMap();
-      this.onChangeValidate();
     });
-
+    this.onChangeValidate();
   }
 
   public loadMap() {
