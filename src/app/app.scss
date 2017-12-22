@@ -345,9 +345,9 @@ ion-content {
   .header-action-icon, .header-action-icon-small {
     color: $col-secondary-blue;
     font-size: 3rem !important;
-    font-weight: 400 !important;
-    font-weight: constant(600 !important);
-    font-weight: env(600 !important);
+    font-weight: 400;
+    font-weight: constant(600);
+    font-weight: env(600);
     line-height: 22px;
     margin: 12px 15px;
     position: absolute;
