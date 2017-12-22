@@ -58,7 +58,9 @@ ion-content {
   height: calc(100% - 56px) !important;
 }
 .scroll-content {
-  margin: 0 !important;
+  margin-top: 2px !important;
+  margin-top: constant(safe-area-inset-top) !important;
+  margin-top: env(safe-area-inset-top) !important;
 }
 .ion-page > ion-content {
   position: relative !important;
@@ -234,6 +236,8 @@ ion-content {
   margin-bottom: 10px;
   padding: 0 24px;
   contain: content;
+  height: auto;
+  min-height: 140px !important;
 }
 .container-half {
   display: inline-block;
@@ -344,6 +348,10 @@ ion-content {
     position: absolute;
     right: 4px;
     bottom: 6px;
+    /** iOS styles for top notch related items **/
+    top: 6px;
+    top: constant(safe-area-inset-top);
+    top: env(safe-area-inset-top);
     z-index: 5;
     //vertical-align: top !important;
   }
