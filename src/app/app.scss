@@ -302,6 +302,9 @@ ion-content {
   height: 54px;
   width: 100%;
   z-index: 50;
+  .back-button {
+    z-index: 5;
+  }
   .back-button .button-inner .back-button-icon {
     color: $col-secondary-blue;
     margin-left: 4px;
@@ -313,6 +316,7 @@ ion-content {
     width: 100%;
     text-align: center;
     padding: 0;
+    z-index: 1;
     ion-title.title .toolbar-title {
       font-weight: 400 !important;
       color: $col-secondary-blue;
@@ -328,6 +332,7 @@ ion-content {
     position: absolute;
     right: 4px;
     bottom: 6px;
+    z-index: 5;
   }
 }
 
@@ -513,18 +518,19 @@ ion-content {
   }
 }
 
-#map {
-  box-sizing: border-box;
+#map, .map-container {
+  //box-sizing: border-box;
   display: block;
-  background: transparent !important;
+  //background: transparent !important;
+  background-color: transparent !important;
   //border: 1px solid $col-neutral-label;
-  border-radius: 0.6em !important;
+  //border-radius: 0.6em !important;
   //display: flex;
   //align-items: center;
   //justify-content: center;
   position: relative;
   margin: 20px 40px;
-  overflow: hidden !important;
+  //overflow: hidden !important;
   height: 200px !important;
   min-height: 200px !important;
   width: calc(100% - 80px);
