@@ -92,7 +92,9 @@
       "cordova-custom-config": {},
       "cordova-plugin-googlemaps": {
         "API_KEY_FOR_ANDROID": "AIzaSyDJYtcVzKXghryIDmQaTBDp5gWYPbTBqfU",
-        "API_KEY_FOR_IOS": "AIzaSyCgHpBF5TgClZPji7fl8LRfE98TnPoTWUY"
+        "API_KEY_FOR_IOS": "AIzaSyCgHpBF5TgClZPji7fl8LRfE98TnPoTWUY",
+        "LOCATION_WHEN_IN_USE_DESCRIPTION": "Show your location on the map",
+        "LOCATION_ALWAYS_USAGE_DESCRIPTION": "Trace your location on the map"
       },
       "cordova-plugin-compat": {},
       "cordova-plugin-ble-central": {
