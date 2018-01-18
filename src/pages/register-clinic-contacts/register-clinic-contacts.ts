@@ -60,7 +60,7 @@ export class RegisterClinicContactsComponent implements OnInit {
     this.errorMessage = '';
   }
 
-  public back() {
+  public goBack() {
     this.openPage(RegisterClinicAddressComponent);
   }
 
@@ -76,7 +76,6 @@ export class RegisterClinicContactsComponent implements OnInit {
       !this.account.name ||
       !this.account.phoneNumber ||
       !this.account.contactPerson ||
-      !this.account.webSiteUrl ||
       !this.account.location.address ||
       !this.account.location.address.length ||
       !this.account.location.country ||

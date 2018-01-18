@@ -1,10 +1,11 @@
 <ion-header>
   <ion-navbar class="custom-header">
+    <ion-icon class="header-action-icon pull-left" name="arrow-back" (tap)="goBack()"></ion-icon>
     <ion-title>{{ dependencies.newPen ? 'Register Pen' : 'Pen Update' }}</ion-title>
   </ion-navbar>
 </ion-header>
 <ion-content>
-  <div class="create-account row center-xs middle-xs">
+  <div *ngIf="!deviceUpdated && updatePercent" class="create-account row center-xs middle-xs">
     <form
       ngForm
       name="penUpdateForm"
@@ -14,11 +15,88 @@
       <div class="info-container">
         <div class="plain-text text-left">
           <span class="secondary-blue">{{dpDevice.name}}</span>
-          <span *ngIf="dpDevice.name && !gettingDevices"> ({{ dpDevice.paired ? 'paired' : 'unpaired' }}) </span>
-          <span *ngIf="!gettingDevices" class="primary-blue pull-center" (tap)="dpDevice.paired ? disconnect() : selectDevice(dpDevice.address || dpDevice.id, dpDevice)">
-             {{ dpDevice.paired ? ' Disconnect ' : ' ' }}
-          </span>
-          <span *ngIf="!gettingDevices" class="secondary-blue pull-right" (tap)="startScanning()"> Scan <ion-icon small name="refresh"></ion-icon></span>
+        </div>
+        <br/>
+        <div class="plain-text text-left">{{ dependencies.newPen ? 'Registering and Updating Pen ...' : 'Updating Pen ...'}}</div>
+        <br/>
+      </div>
+      <div class="pen-sync-progress-container">
+        <span class="pen-sync-progress-percents">{{updatePercent}}%</span>
+        <circle-progress
+          [percent]="updatePercent"
+          [radius]="100"
+          [space]="-4"
+          [outerStrokeWidth]="4"
+          [innerStrokeWidth]="4"
+          [outerStrokeColor]="'#00adef'"
+          [innerStrokeColor]="'#e7eaec'"
+          [outerStrokeLinecap]="'butt'"
+          [showSubtitle]="false"
+          [showTitle]="false"
+          [animation]="true"
+          [animationDuration]="300"
+        ></circle-progress>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="deviceUpdated && updatePercent >= 100" class="create-account row center-xs middle-xs">
+    <form
+      ngForm
+      name="penUpdateForm"
+      class="create-account-form col-xs-6"
+      #penUpdateForm="ngForm"
+    >
+      <div class="info-container">
+        <div class="plain-text text-left">
+          <span class="secondary-blue">{{dpDevice.name}}</span> {{ dependencies.newPen ? 'connected' : ''}}
+        </div>
+        <br/>
+        <div class="plain-text text-left">Pen successfully {{ dependencies.newPen ? 'registered' : 'updated'}} !</div>
+        <br/>
+      </div>
+      <div class="actions col-xs-12">
+        <a class="link-nav pull-right" (click)="doDone()">Done</a>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="errorDescription && errorDescription.length && !deviceUpdated" class="create-account row center-xs middle-xs">
+    <form
+      ngForm
+      name="penUpdateForm"
+      class="create-account-form col-xs-6"
+      #penUpdateForm="ngForm"
+    >
+      <div class="info-container">
+        <div class="plain-text text-left">
+          <span class="secondary-blue">Error</span>
+        </div>
+        <br/>
+        <div class="plain-text text-left">{{errorDescription}}</div>
+        <br/>
+      </div>
+      <div class="actions col-xs-12">
+        <a class="link-nav pull-right" (click)="doRetry(doPenUpdate)">Retry</a>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="!errorDescription && !deviceUpdated && !updatePercent" class="create-account row center-xs middle-xs">
+    <form
+      ngForm
+      name="penUpdateForm"
+      class="create-account-form col-xs-6"
+      #penUpdateForm="ngForm"
+    >
+      <div class="info-container">
+        <div class="plain-text text-left">
+          <span class="secondary-blue">{{dpDevice.name}}</span>
+          <!--<span *ngIf="dpDevice.name && !gettingDevices"> ({{ dpDevice.paired ? 'paired' : 'unpaired' }}) </span>-->
+          <!--<span *ngIf="!gettingDevices" class="primary-blue pull-center" (tap)="dpDevice.paired ? disconnect() : selectDevice(dpDevice.address || dpDevice.id, dpDevice)">-->
+             <!--{{ dpDevice.paired ? ' Disconnect ' : ' ' }}-->
+          <!--</span>-->
+          <!--<span *ngIf="!gettingDevices" class="secondary-blue pull-right" (tap)="startScanning()"> Scan <ion-icon small name="refresh"></ion-icon></span>-->
         </div>
         <ion-spinner name="crescent" *ngIf="gettingDevices"></ion-spinner>
         <br/>
@@ -28,12 +106,15 @@
         <img alt="Device screen example" src="{{devicePanelImg}}" class="dpw-device-panel">
       </div>
       <div class="actions col-xs-12">
-        <a class="link-nav pull-right" (click)="goNext()">
+        <a *ngIf="dpDevice.paired" class="link-nav pull-right" (click)="dependencies.newPen ? goNext() : doPenUpdate()">
           {{ dependencies.newPen ? 'Register' : 'Next' }}
         </a>
-        <a class="link-nav pull-left" (click)="goPenUpdate()">
-          Pen Test Page
-        </a>
+        <!--<a class="link-nav pull-right" (click)="doPenUpdate()">-->
+          <!--Update Pen-->
+        <!--</a>-->
+        <!--<a class="link-nav pull-left" (click)="goPenUpdate()">-->
+          <!--Pen Test Page-->
+        <!--</a>-->
       </div>
     </form>
 
@@ -66,8 +147,8 @@
       <!--</ion-list>-->
     <!--</div>-->
     <!--<span class="device-details">{{pairingDevice}}</span><br/>-->
-    <span class="device-details" *ngIf="successData"><ion-icon small class="list-icon-absolute" name="close" (tap)="successData = ''"></ion-icon>Success: {{successData}}</span>
-    <span class="device-details" *ngIf="errorData"><ion-icon small class="list-icon-absolute" name="close" (tap)="errorData = ''"></ion-icon>Error: {{errorData}}</span>
+    <!--<span class="device-details" *ngIf="successData"><ion-icon small class="list-icon-absolute" name="close" (tap)="successData = ''"></ion-icon>Success: {{successData}}</span>-->
+    <!--<span class="device-details" *ngIf="errorData"><ion-icon small class="list-icon-absolute" name="close" (tap)="errorData = ''"></ion-icon>Error: {{errorData}}</span>-->
     <img alt="Dermapenworld" src="{{logoTransparent}}" class="dpw-logo-foot">
   </div>
 </ion-content>

@@ -1,6 +1,9 @@
 // tslint:disable-next-line
 export const EMAIL_REGEXP: any = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
+export const GOOGLE_MAP_API_URL: string = 'http://maps.google.com/maps/api/js';
+export const GOOGLE_API_KEY_ANDROID: string = 'AIzaSyDJYtcVzKXghryIDmQaTBDp5gWYPbTBqfU';
+
 // 10000 === 10 seconds
 // for this.snackBar.open(... ,... , { duration: DURATION_ERROR_SNACKBAR })
 export const DURATION_ERROR: number = 10000;

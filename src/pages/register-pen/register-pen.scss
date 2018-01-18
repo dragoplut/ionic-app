@@ -1,1 +1,17 @@
 @import '../../theme/variables';
+
+.pen-sync-progress-container {
+  display: block;
+  position: relative;
+  .pen-sync-progress-percents {
+    color: $col-neutral-placeholder;
+    font-size: 3em;
+    position: absolute;
+    text-align: center;
+    top: 37%;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 20;
+  }
+}

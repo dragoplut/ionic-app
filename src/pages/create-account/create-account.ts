@@ -151,7 +151,7 @@ export class CreateAccountComponent implements OnInit {
     this.formValid = isValid;
   }
 
-  public goToSignin() {
+  public goBack() {
     this.openPage(SigninComponent);
   }
 

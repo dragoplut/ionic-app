@@ -1,9 +1,29 @@
 <ion-header>
   <ion-navbar class="custom-header">
-    <ion-title>Pen Update (R/W test)</ion-title>
+    <ion-icon class="header-action-icon pull-left" name="arrow-back" (tap)="goBack()"></ion-icon>
+    <ion-title>Pen Update</ion-title>
   </ion-navbar>
 </ion-header>
 <ion-content>
+  <div *ngIf="errorDescription && errorDescription.length" class="create-account row center-xs middle-xs">
+    <form
+      ngForm
+      name="penUpdateForm"
+      class="create-account-form col-xs-6"
+      #penUpdateForm="ngForm"
+    >
+      <div class="info-container">
+        <div class="plain-text text-left">
+          <span class="secondary-blue">Error</span>
+        </div>
+        <div class="plain-text text-left">{{errorDescription}}</div>
+      </div>
+      <div class="actions col-xs-12">
+        <a class="link-nav pull-right" (click)="doRetry()">Retry</a>
+      </div>
+    </form>
+  </div>
+
   <div class="create-account row center-xs middle-xs">
     <form
       ngForm
@@ -30,6 +50,22 @@
           Please pair Pen to enable test functionality!
         </div>
       </div>
+
+      <circle-progress
+        [percent]="updatePercent"
+        [radius]="100"
+        [space]="-4"
+        [outerStrokeWidth]="4"
+        [innerStrokeWidth]="4"
+        [outerStrokeColor]="'#00adef'"
+        [innerStrokeColor]="'#e7eaec'"
+        [outerStrokeLinecap]="'butt'"
+        [showSubtitle]="false"
+        [showTitle]="false"
+        [animation]="true"
+        [animationDuration]="300"
+      ></circle-progress>
+
       <!--<div class="actions col-xs-12">-->
         <!--<a class="link-nav pull-right" (click)="goNext()">-->
           <!--{{ dependencies.newPen ? 'Register' : 'Next' }}-->
@@ -39,7 +75,24 @@
 
     <div [hidden]="!dpDevice.paired" class="create-account-form col-xs-6 ble-pair-container">
       <ion-list padding>
-        <button ion-button block (click)="startScanning()">scan</button>
+        <button
+          ion-button
+          block
+          (click)="writeWithResponse(dpDevice.id, { serviceUUID: 'a8a91000-38e9-4fbe-83f3-d82aae6ff68e', characteristicUUID: 'a8a91003-38e9-4fbe-83f3-d82aae6ff68e', type: 'fileRequest' }, [5,2,16])"
+        >
+          Data request: Device Settings - Write
+        </button>
+        <button
+          ion-button
+          block
+          (click)="writeWithResponse(dpDevice.id, { serviceUUID: 'a8a91000-38e9-4fbe-83f3-d82aae6ff68e', characteristicUUID: 'a8a91003-38e9-4fbe-83f3-d82aae6ff68e', type: 'fileRequest' }, [3,2,6])"
+        >
+          File request: Black List - Write
+        </button>
+        <br/>
+
+
+        <!--<button ion-button block (click)="startScanning()">scan</button>-->
         <!--<ion-list-header>-->
           <!--Paired Devices-->
         <!--</ion-list-header>-->
@@ -67,24 +120,24 @@
           {{item.name}}
         </button>
         <!--<ion-spinner name="crescent" *ngIf="gettingDevices"></ion-spinner>-->
-        <ion-list-header>
-          Write Values
-        </ion-list-header>
-        <div [hidden]="!item.name || !(hasProp(item.properties, 'Read') && hasProp(item.properties, 'Write'))" *ngFor="let item of deviceInterface.characteristics">
-          <button
-            ion-button
-            block
-            (click)="writeToDevice(dpDevice.id, item.service, item.characteristic, deviceValues[item.characteristic] || 0)"
-          >
-            {{item.name}} {{deviceValues[item.characteristic]}}
-          </button>
-          <ion-item>
-            <ion-range min="0" max="10" step="1" [(ngModel)]="deviceValues[item.characteristic]">
-              <!--<ion-icon range-left small name="volume-down"></ion-icon>-->
-              <!--<ion-icon range-right name="volume-up"></ion-icon>-->
-            </ion-range>
-          </ion-item>
-        </div>
+        <!--<ion-list-header>-->
+          <!--Write Values-->
+        <!--</ion-list-header>-->
+        <!--<div [hidden]="!item.name || !(hasProp(item.properties, 'Read') && hasProp(item.properties, 'Write'))" *ngFor="let item of deviceInterface.characteristics">-->
+          <!--<button-->
+            <!--ion-button-->
+            <!--block-->
+            <!--(click)="writeToDevice(dpDevice.id, item.service, item.characteristic, deviceValues[item.characteristic] || 0)"-->
+          <!--&gt;-->
+            <!--{{item.name}} {{deviceValues[item.characteristic]}}-->
+          <!--</button>-->
+          <!--<ion-item>-->
+            <!--<ion-range min="0" max="10" step="1" [(ngModel)]="deviceValues[item.characteristic]">-->
+              <!--&lt;!&ndash;<ion-icon range-left small name="volume-down"></ion-icon>&ndash;&gt;-->
+              <!--&lt;!&ndash;<ion-icon range-right name="volume-up"></ion-icon>&ndash;&gt;-->
+            <!--</ion-range>-->
+          <!--</ion-item>-->
+        <!--</div>-->
         <button
           ion-button
           block
@@ -106,6 +159,33 @@
         >
           File request: Usage List - Read
         </button>
+        <br/>
+
+        <ion-list radio-group [(ngModel)]="requestItemValue">
+          <ion-item *ngFor="let item of requestItems">
+            <ion-label>{{item.viewValue}}</ion-label>
+            <ion-radio value="{{item.value}}"></ion-radio>
+          </ion-item>
+        </ion-list>
+
+        <button
+          ion-button
+          block
+          (click)="writeWithResponse(dpDevice.id, { serviceUUID: 'a8a91000-38e9-4fbe-83f3-d82aae6ff68e', characteristicUUID: 'a8a91003-38e9-4fbe-83f3-d82aae6ff68e', type: 'fileRequest' }, [requestItemValue,6,0])"
+        >
+          File request: {{requestItems[requestItemValue].viewValue}} - Abort
+        </button>
+        <br/>
+
+        <button
+          ion-button
+          block
+          (click)="writeWithResponse(dpDevice.id, { serviceUUID: 'a8a91000-38e9-4fbe-83f3-d82aae6ff68e', characteristicUUID: 'a8a91003-38e9-4fbe-83f3-d82aae6ff68e', type: 'fileRequest' }, [requestItemValue,5,0])"
+        >
+          File request: {{requestItems[requestItemValue].viewValue}} - Done
+        </button>
+        <br/>
+
         <!--<button-->
           <!--ion-button-->
           <!--block-->

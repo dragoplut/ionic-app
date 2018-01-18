@@ -99,18 +99,9 @@ export class SigninComponent implements OnInit {
 
   public handleSuccess(resp: any) {
     this.loading = false;
-    //if (this._permission.isAllowedAction('view', 'signin')) {
     if (resp) {
       this.openPage(HomeMenu);
-      // for (const page of this.PAGES_LIST) {
-      //  if (this._permission.isAllowedAction('view', page.permissionRef)) {
-      //    console.log('handleSuccess page.routerLink: ', page.routerLink);
-      //    this.openPage(HomeMenu);
-      //    break;
-      //  }
-      // }
     } else {
-      // this._auth.signOut();
       const message: string = 'You are not allowed to sign in!';
       this.showErrorMessage(message);
     }

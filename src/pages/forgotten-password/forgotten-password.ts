@@ -49,6 +49,10 @@ export class ForgottenPasswordComponent implements OnInit {
     console.log('resendEmail');
   }
 
+  public goBack() {
+    this.openPage(SigninComponent);
+  }
+
   public goToSignin() {
     console.log('goToSignin');
     this.openPage(SigninComponent);

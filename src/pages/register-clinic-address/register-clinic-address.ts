@@ -1,10 +1,5 @@
 import {
-  GoogleMaps,
   GoogleMap,
-  GoogleMapsEvent,
-  GoogleMapOptions,
-  LatLng,
-  MarkerOptions
 } from '@ionic-native/google-maps';
 import { Component, ViewChild, ElementRef, OnInit } from '@angular/core';
 import { ApiService, ClinicService, PermissionService } from '../../services/index';
@@ -19,6 +14,8 @@ import {Nav, NavController, NavParams, Platform} from 'ionic-angular';
 // noinspection TypeScriptCheckImport
 import * as _ from 'lodash';
 
+declare let google: any;
+
 @Component({
   selector: 'register-clinic-address',
   templateUrl: `./register-clinic-address.html`
@@ -28,6 +25,7 @@ export class RegisterClinicAddressComponent implements OnInit {
   @ViewChild('map3') mapElement: ElementRef;
 
   public map: GoogleMap;
+  public markers: any[] = [];
   public lat:any;
   public lang:any;
 
@@ -64,86 +62,117 @@ export class RegisterClinicAddressComponent implements OnInit {
     }
     this.platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
-      this.loadMap();
+      this.showMap({});
     });
     this.onChangeValidate();
   }
 
-  public loadMap() {
-
-    let mapOptions: GoogleMapOptions = {
-      controls: {
-        compass: true,
-        myLocationButton: false,
-        indoorPicker: true,
-        zoom: false
-      },
-      gestures: {
-        scroll: true,
-        tilt: true,
-        rotate: true,
-        zoom: true
-      },
-      camera: {
-        target: {
-          lat: 43.0741904,
-          lng: -89.3809802
-        },
-        tilt: 30,
-        zoom: 10,
-        bearing: 50
-      }
+  public showMap(acc: any) {
+    let mapOptions = {
+      center: new google.maps.LatLng(
+        acc && acc.location && acc.location.latitude ?
+          acc.location.latitude : 43.0741904,
+        acc && acc.location && acc.location.longitude ?
+          acc.location.longitude : -89.3809802),
+      zoom: 12,
+      minZoom: 3,
+      maxZoom: 17,
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      panControl: false,
+      fullscreenControl: false,
+      mapTypeControl: false,
+      streetViewControl: false,
+      clickableIcons: false
     };
-    this.map = GoogleMaps.create(this.mapElement.nativeElement, mapOptions);
-    this.map.one(GoogleMapsEvent.MAP_READY)
-      .then(() => {
-        this.map.addMarker({
-            title: 'Ionic',
-            icon: 'blue',
-            animation: 'DROP',
-            position: {
-              lat: 43.0741904,
-              lng: -89.3809802
-            }
-          })
-          .then(marker => {
-            marker.on(GoogleMapsEvent.MARKER_CLICK)
-              .subscribe(() => {
+    this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
 
-              });
-          });
-
-      });
-  }
-
-  public centerMap(item: any) {
-
-    // create LatLng object
-    let ionic: LatLng = new LatLng(item.geometry.location.lat,item.geometry.location.lng);
-
-    // create CameraPosition
-    let position: any = {
-      target: ionic,
-      zoom: 18,
-      tilt: 30
-    };
-
-    // create new marker
-    let markerOptions: MarkerOptions = {
-      position: ionic,
-      icon: 'red',
+    this.markers[0] = new google.maps.Marker({
+      position: new google.maps.LatLng(
+        acc && acc.location && acc.location.latitude ?
+          acc.location.latitude : 43.0741904,
+        acc && acc.location && acc.location.longitude ?
+          acc.location.longitude : -89.3809802),
+      map: this.map,
       animation: 'DROP',
-      title: item.name
-    };
-
-    this.map.one(GoogleMapsEvent.MAP_READY)
-      .then(() => {
-          // Now you can add elements to the map like the marker
-          this.map.animateCamera(position);
-          this.map.addMarker(markerOptions);
-        }
-      );
+      title: acc && acc.location ? acc.location.address : 'Marker'
+    });
   }
+
+  // public loadMap() {
+  //
+  //   let mapOptions: GoogleMapOptions = {
+  //     controls: {
+  //       compass: true,
+  //       myLocationButton: false,
+  //       indoorPicker: true,
+  //       zoom: false
+  //     },
+  //     gestures: {
+  //       scroll: true,
+  //       tilt: true,
+  //       rotate: true,
+  //       zoom: true
+  //     },
+  //     camera: {
+  //       target: {
+  //         lat: 43.0741904,
+  //         lng: -89.3809802
+  //       },
+  //       tilt: 30,
+  //       zoom: 10,
+  //       bearing: 50
+  //     }
+  //   };
+  //   this.map = GoogleMaps.create(this.mapElement.nativeElement, mapOptions);
+  //   this.map.one(GoogleMapsEvent.MAP_READY)
+  //     .then(() => {
+  //       this.map.addMarker({
+  //           title: 'Ionic',
+  //           icon: 'blue',
+  //           animation: 'DROP',
+  //           position: {
+  //             lat: 43.0741904,
+  //             lng: -89.3809802
+  //           }
+  //         })
+  //         .then(marker => {
+  //           marker.on(GoogleMapsEvent.MARKER_CLICK)
+  //             .subscribe(() => {
+  //
+  //             });
+  //         });
+  //
+  //     });
+  // }
+
+  // public centerMap(item: any) {
+  //
+  //   // create LatLng object
+  //   let ionic: LatLng = new LatLng(item.geometry.location.lat,item.geometry.location.lng);
+  //
+  //   // create CameraPosition
+  //   let position: any = {
+  //     target: ionic,
+  //     zoom: 18,
+  //     tilt: 30
+  //   };
+  //
+  //   // create new marker
+  //   let markerOptions: MarkerOptions = {
+  //     position: ionic,
+  //     icon: 'red',
+  //     animation: 'DROP',
+  //     title: item.name
+  //   };
+  //
+  //   this.map.one(GoogleMapsEvent.MAP_READY)
+  //     .then(() => {
+  //         // Now you can add elements to the map like the marker
+  //         this.map.animateCamera(position);
+  //         this.map.addMarker(markerOptions);
+  //       }
+  //     );
+  // }
 
   public detail(address: any) {
     let street: string = '';
@@ -183,7 +212,8 @@ export class RegisterClinicAddressComponent implements OnInit {
       this.account.location.latitude = address.geometry.location.lat;
       this.account.location.longitude = address.geometry.location.lng;
     }
-    this.centerMap(address);
+    // this.centerMap(address);
+    this.showMap(this.account);
     this.onChangeValidate();
     //alert(JSON.stringify(address));
   }
@@ -219,7 +249,7 @@ export class RegisterClinicAddressComponent implements OnInit {
     this.errorMessage = '';
   }
 
-  public back() {
+  public goBack() {
     this.openPage(MyClinicComponent);
   }
 

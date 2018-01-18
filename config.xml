@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="io.ionic.starter" version="00.00.50" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>Dpworld</name>
-    <description>Dermapenworld Ionic/Cordova app.</description>
+<widget id="io.ionic.starter" version="00.00.53" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Dermapen</name>
+    <description>DermapenWorld</description>
     <author email="alastin.t@gmail.com" href="http://regen-dev.azurewebsites.net/">PI Team</author>
     <content src="index.html" />
     <access origin="*" />
@@ -118,4 +118,7 @@
     <plugin name="cordova-plugin-ble-central" spec="^1.1.4">
         <variable name="BLUETOOTH_USAGE_DESCRIPTION" value="Bluetooth is used for connection and data transfer with BLE Dermapen device." />
     </plugin>
+    <allow-navigation href="http://192.168.157.149:8100" />
+    <allow-navigation href="http://172.18.0.1:8100" />
+    <plugin name="cordova-plugin-network-information" spec="^2.0.1" />
 </widget>

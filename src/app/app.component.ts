@@ -4,6 +4,7 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
 import * as pages from '../pages/index';
+import { GOOGLE_API_KEY_ANDROID, GOOGLE_MAP_API_URL } from "./constants";
 
 @Component({
   templateUrl: 'app.html'
@@ -58,7 +59,17 @@ export class MyApp {
           }
         }
       });
+      this.initGoogleMaps();
     });
+  }
+
+  public initGoogleMaps() {
+
+    let script = document.createElement("script");
+    script.id = 'googleMaps';
+    script.src = `${GOOGLE_MAP_API_URL}?key=${GOOGLE_API_KEY_ANDROID}&callback=mapInited`;
+
+    document.body.appendChild(script);
   }
 
   public openPage(page) {

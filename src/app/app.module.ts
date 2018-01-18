@@ -9,6 +9,9 @@ import { MyApp } from './app.component';
 import { GoogleMaps } from '@ionic-native/google-maps';
 import { Camera } from '@ionic-native/camera';
 
+import { MomentModule } from 'angular2-moment';
+import { NgCircleProgressModule } from 'ng-circle-progress';
+
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
@@ -41,10 +44,20 @@ export const mapValuesToArray = (item: any) => Object.keys(item).map((key: any) 
     ...mapValuesToArray(pages)
   ],
   imports: [
+    MomentModule,
     BrowserModule,
     CommonModule,
     HttpModule,
-    IonicModule.forRoot(MyApp, {}, { links: [] })
+    IonicModule.forRoot(MyApp, {}, { links: [] }),
+    NgCircleProgressModule.forRoot({
+      // set defaults here
+      radius: 100,
+      outerStrokeWidth: 6,
+      innerStrokeWidth: 6,
+      outerStrokeColor: "#24408e",
+      innerStrokeColor: "#b3b3b3",
+      animationDuration: 300
+    })
   ],
   bootstrap: [IonicApp],
   entryComponents: [

@@ -168,6 +168,8 @@ export class BleService {
       data[0] = rawData;
     }
 
+    // alert('write uuid: ' + JSON.stringify(uuid));
+    // alert('write rawData: ' + JSON.stringify(rawData));
     // alert('write data: ' + JSON.stringify(data));
     this.ble.write(address, uuid.serviceUUID, uuid.characteristicUUID, data.buffer)
       .then(onSuccess, onErr);
@@ -176,7 +178,7 @@ export class BleService {
   public startNotification(address: any, uuid: any, onSuccess: any, onErr: any) {
     // alert('startNotification: ' + uuid.characteristicUUID);
     this.ble.startNotification(address, uuid.serviceUUID, uuid.characteristicUUID)
-      .subscribe((buffer: any) => onSuccess(this.arrFromBufferByType('fileResponse', buffer)), onErr);
+      .subscribe((buffer: any) => onSuccess(this.arrFromBufferByType(uuid.type, buffer)), onErr);
   }
 
   public stopNotification(address: any, uuid: any, onSuccess: any, onErr: any) {
@@ -208,13 +210,37 @@ export class BleService {
   private bufferFromArrByType(type: string, arr: any) {
     let result: any;
     switch (type) {
+      case 'fileWrite':
       case 'fileRequest':
         let uint8arr2: any = new Uint8Array(2);
         let uint32arr: any = new Uint32Array(4);
         uint8arr2[0] = arr[0];
         uint8arr2[1] = arr[1];
-        uint32arr[0] = arr[2];
+        uint32arr[3] = arr[2];
         result = this.concatTypedArrays(uint8arr2, uint32arr);
+        // alert('bufferFromArrByType result: ' + JSON.stringify(result, null, 2));
+        break;
+      case 'writeBuffer':
+        let uint16arr: any = new Uint16Array(1);
+        let uint32arr2: any = new Uint32Array(4);
+        uint16arr[0] = arr[0];
+        uint32arr2[0] = arr[1];
+        uint32arr2[0] = arr[2];
+        uint32arr2[0] = arr[3];
+        uint32arr2[0] = arr[4];
+        result = this.concatTypedArrays(uint16arr, uint32arr2);
+        // alert('result: ' + JSON.stringify(result, null, 2));
+        break;
+      case 'fileWriteBuffer':
+        result = new Uint8Array(arr);
+        // let uint8x2arrBuffer: any = new Uint8Array(2);
+        // let uint8x18arrBuffer: any = new Uint8Array(18);
+        // uint8x2arrBuffer[0] = arr[0];
+        // uint8x2arrBuffer[1] = arr[1];
+        // for (let i = 2; i < arr.length; i++) {
+        //   uint8x18arrBuffer[i-2] = arr[i];
+        // }
+        // result = this.concatTypedArrays(uint8x2arrBuffer, uint8x2arrBuffer);
         // alert('result: ' + JSON.stringify(result, null, 2));
         break;
       default:
@@ -227,15 +253,35 @@ export class BleService {
     // alert('startNotification arrFromBufferByType ' + type + ': ' + JSON.stringify(new Uint8Array(buffer)));
     let result: any;
     switch (type) {
+      case 'fileRequest':
       case 'fileResponse':
         // result = new ArrayBuffer(20);
         result = {
           idx: new Uint8Array(buffer, 0, 2),
           data: new Uint8Array(buffer, 2, 18)
         };
-        // alert('arrFromBufferByType result: ' + JSON.stringify(result, null, 2));
+        // alert('arrFromBufferByType fileRequest result: ' + JSON.stringify(result, null, 2));
+        break;
+      case 'fileWrite':
+        // result = new ArrayBuffer(20);
+        result = {
+          data: new Uint8Array(buffer)
+        };
+        // alert('arrFromBufferByType fileWrite result: ' + JSON.stringify(result, null, 2));
         break;
       default:
+        const bufferUint: any = new Uint8Array(buffer);
+        // alert('arrFromBufferByType default bufferUint: ' + JSON.stringify(bufferUint, null, 2));
+        if (buffer && buffer.length === 20) {
+          result = {
+            idx: new Uint8Array(buffer, 0, 2),
+            data: new Uint8Array(buffer, 2, 18)
+          };
+        } else {
+          result = {
+            data: bufferUint
+          };
+        }
         break;
     }
     return result;

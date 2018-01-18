@@ -10,7 +10,8 @@ import {
 } from '../../app/constants';
 import {
   HomeMenu,
-  UpdatePenComponent,
+  // UpdatePenComponent,
+  RegisterPenComponent,
   RegisterPenToClinicComponent
 } from '../index';
 
@@ -60,7 +61,7 @@ export class MyPenComponent {
   public itemSelected(pen) {
     this.dependencies.newPen = false;
     this.dependencies.pen = pen;
-    this.navCtrl.push(UpdatePenComponent, { pen, dependencies: this.dependencies })
+    this.navCtrl.push(RegisterPenComponent, { pen, dependencies: this.dependencies });
   }
 
   public goBack() {

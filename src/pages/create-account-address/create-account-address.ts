@@ -112,7 +112,7 @@ export class CreateAccountAddressComponent implements OnInit {
     this.formValid = isValid;
   }
 
-  public back() {
+  public goBack() {
     this.openPage(CreateAccountComponent);
   }
 
