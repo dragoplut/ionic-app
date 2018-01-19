@@ -17,7 +17,7 @@
 .home-menu-container .scroll-content {
   padding: 16px 0 !important;
   .swiper-pagination.swiper-pagination-clickable.swiper-pagination-bullets {
-    bottom: 16%;
+    bottom: 12%;
     .swiper-pagination-bullet {
       background-color: $col-primary-blue;
       border: 3px solid $col-primary-blue;
@@ -46,6 +46,7 @@
   transition: all .3s ease 0s;
   text-align: center;
   height: calc(90vw);
+  max-height: calc(57vh);
   width: 64%;
   img.img-card {
     @include animationHelper;

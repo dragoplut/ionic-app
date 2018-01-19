@@ -16,9 +16,7 @@
   <script src="cordova.js"></script>
 
   <script>
-      window.mapInited = function() {
-          console.log('mapInited');
-      };
+      window.mapInited = function() { console.log('mapInited'); };
       if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js')
         .then(() => console.log('service worker installed'))

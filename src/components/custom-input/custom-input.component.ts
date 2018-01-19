@@ -17,7 +17,7 @@ export class CustomInputComponent {
   @Input() public itemValue: string = '';
   @Input() public itemType: string = '';
   @Input() public itemDisabled: boolean = true;
-  @Output() public itemChange = new EventEmitter();
+  @Output() public itemChange: EventEmitter<any> = new EventEmitter();
 
   public valueChange() {
     this.itemChange.next(this.itemValue ? this.itemValue.trim() : this.itemValue);

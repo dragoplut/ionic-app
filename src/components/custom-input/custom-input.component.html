@@ -1,7 +1,7 @@
 <div class="custom-input-container" [ngClass]="itemClass">
   <label
     #inputLabel
-    for="customInput"
+    for="customInput{{itemLabel}}"
     class="custom-input-label {{itemValue && itemValue.length ? 'input-not-empty' : ''}} {{inputLabel.isActive ? 'input-active' : ''}}"
   >
     {{itemLabel}}
@@ -17,7 +17,7 @@
     (keyup)="valueChange()"
     [(ngModel)]="itemValue"
     autoComplete="new-password"
-    id="customInput"
+    id="customInput{{itemLabel}}"
   >
   <span *ngIf="!inputLabel.isActive && itemValue" class="custom-input-error">{{itemError}}</span>
 </div>

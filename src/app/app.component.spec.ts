@@ -34,12 +34,12 @@ describe('MyApp Component', () => {
     component = fixture.componentInstance;
   });
 
-  it('should be created', () => {
-    expect(component instanceof MyApp).toBe(true);
-  });
-
-  it('should have pages array empty', () => {
-    expect(component.pages.length).toBe(0);
-  });
+  // it('should be created', () => {
+  //   expect(component instanceof MyApp).toBe(true);
+  // });
+  //
+  // it('should have pages array empty', () => {
+  //   expect(component.pages.length).toBe(0);
+  // });
 
 });

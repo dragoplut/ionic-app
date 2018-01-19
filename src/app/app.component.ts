@@ -4,7 +4,7 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
 import * as pages from '../pages/index';
-import { GOOGLE_API_KEY_ANDROID, GOOGLE_MAP_API_URL } from "./constants";
+import { GoogleService } from '../services/index';
 
 @Component({
   templateUrl: 'app.html'
@@ -20,20 +20,16 @@ export class MyApp {
     public platform: Platform,
     public statusBar: StatusBar,
     public splashScreen: SplashScreen,
-    private app: App
+    private app: App,
+    private _google: GoogleService
   ) {
-    // used for an example of ngFor and navigation
     this.pages = [];
-    // this.pages = [
-    //  { title: 'Main page', component: pages.HomeMenu },
-    //  { title: 'Page Two', component: pages.Page2 },
-    //  { title: 'Sign In', component: pages.SigninComponent }
-    // ];
     this.initApp();
   }
 
   public initApp() {
     this.platform.ready().then(() => {
+      this._google.initGoogleMaps();
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
       this.statusBar.overlaysWebView(true);
@@ -59,17 +55,7 @@ export class MyApp {
           }
         }
       });
-      this.initGoogleMaps();
     });
-  }
-
-  public initGoogleMaps() {
-
-    let script = document.createElement("script");
-    script.id = 'googleMaps';
-    script.src = `${GOOGLE_MAP_API_URL}?key=${GOOGLE_API_KEY_ANDROID}&callback=mapInited`;
-
-    document.body.appendChild(script);
   }
 
   public openPage(page) {

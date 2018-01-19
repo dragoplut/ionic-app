@@ -7,7 +7,6 @@ import { HomeMenu } from '../index';
 import { AccountService, BleService, PenService } from '../../services';
 
 import * as moment from 'moment';
-// import * as varint from 'varint';
 // noinspection TypeScriptCheckImport
 import * as _ from 'lodash';
 

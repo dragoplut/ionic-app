@@ -3,20 +3,23 @@ import { ApiService, BleService } from '../index';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import * as moment from 'moment';
+
+import { T_DEVICE_INTERFACE } from '../../app/types';
+
 // noinspection TypeScriptCheckImport
 import * as _ from 'lodash';
 
 @Injectable()
 export class PenService {
   public path: string = '/Pen';
-  public penAllowedFields: any[] = [
+  public penAllowedFields: string[] = [
     'id',
     'name',
     'serialNumber',
     'clinicId'
   ];
 
-  public deviceInterface: any = {
+  public deviceInterface: T_DEVICE_INTERFACE = {
     services: [ '1800', '1801', 'a8a91000-38e9-4fbe-83f3-d82aae6ff68e', '180a' ],
     characteristics: [
       {
@@ -222,7 +225,7 @@ export class PenService {
   };
 
   public timeNowSeconds: number = moment().diff(moment().year(2017).startOf('year'), 'seconds');
-  public dummyWhiteBlackList: any[] = [0,0,1,1,2,3,4,6,7,300];
+  public dummyWhiteBlackList: number[] = [0,0,1,1,2,3,4,6,7,300];
   public dummySettings: any[] = [
     123456,
     this.timeNowSeconds,
@@ -273,7 +276,7 @@ export class PenService {
       .map((res: any) => res);
   }
 
-  public getSettings(serialNumber: any): Observable<any> {
+  public getSettings(serialNumber: string): Observable<any> {
     /** Resp example **/
     // {
     //   "userId": 0,
@@ -318,7 +321,7 @@ export class PenService {
       .map((res: any) => res);
   }
 
-  public updateWhiteBlacklist(data: any[]): Observable<any> {
+  public updateWhiteBlacklist(data: number[]): Observable<any> {
     /** Resp example **/
     // [0,2,1,8,3,200]
     return this.api.post(`${this.path}/getWhiteBlacklist`, data)
@@ -397,30 +400,6 @@ export class PenService {
             { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91004-38e9-4fbe-83f3-d82aae6ff68e', type: item.type },
             (data: any) => this.onFileResponse(data, address, item, rawData, success),
             (err: any) => this._ble.stopNotification(address, { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91004-38e9-4fbe-83f3-d82aae6ff68e' }, true, err));
-          // let onReadData: any[] = _.clone(rawData);
-          // /** Set notification action as "3" - read **/
-          // onReadData[1] = 3;
-          // this._ble.startNotification(
-          //   address,
-          //   { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91004-38e9-4fbe-83f3-d82aae6ff68e' },
-          //   (data: any) => this.onFileResponse(data, address, item, onReadData),
-          //   (err: any) => this._ble.stopNotification(address, { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91004-38e9-4fbe-83f3-d82aae6ff68e' }, true, err));
-          // let onDoneData: any[] = _.clone(rawData);
-          // /** Set notification action as "5" - done **/
-          // onDoneData[1] = 5;
-          // this._ble.startNotification(
-          //   address,
-          //   { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91004-38e9-4fbe-83f3-d82aae6ff68e' },
-          //   (data: any) => this.onFileResponse(data, address, item, onDoneData),
-          //   (err: any) => this._ble.stopNotification(address, { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91004-38e9-4fbe-83f3-d82aae6ff68e' }, true, err));
-          // let onErrorData: any[] = _.clone(rawData);
-          // /** Set notification action as "8" - error **/
-          // onErrorData[1] = 8;
-          // this._ble.startNotification(
-          //   address,
-          //   { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91004-38e9-4fbe-83f3-d82aae6ff68e' },
-          //   (data: any) => this.onFileResponse(data, address, item, onErrorData),
-          //   (err: any) => this._ble.stopNotification(address, { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91004-38e9-4fbe-83f3-d82aae6ff68e' }, true, err));
           break;
         case 3:
           this._ble.startNotification(
@@ -434,16 +413,15 @@ export class PenService {
       }
     }
 
-    let resultViktor: any = [];
+    let resultArrVarints128: any = [];
     const rangesArr: any[] = this.dummyWhiteBlackList;
     _.forEach(rangesArr, (num: any) => {
-      resultViktor = resultViktor.concat(this.intToVarints128(num));
+      resultArrVarints128 = resultArrVarints128.concat(this.intToVarints128(num));
     });
-    let resultViktorUint8: any = new Uint8Array(resultViktor);
+    let resultArrUint8: any = new Uint8Array(resultArrVarints128);
 
     if (rawData[0] === 3 && rawData[1] === 2) {
-      rawData[2] = resultViktorUint8.length;
-      // rawData[2] = 18;
+      rawData[2] = resultArrUint8.length;
     } else if (rawData[0] === 5 && rawData[1] === 2) {
       rawData[2] = 16;
     }
@@ -452,11 +430,11 @@ export class PenService {
       if (rawData[1] === 2) {
         switch (rawData[0]) {
           case 3:
-            // alert('write 3 done: ' + JSON.stringify(done, null, 2));
+
             let bufferItems: any[] = [];
-            const packagesAmount: number = Math.ceil(resultViktor.length / 18);
+            const packagesAmount: number = Math.ceil(resultArrVarints128.length / 18);
             for (let i = 0; i < packagesAmount; i++) {
-              const rawPackageData: any = resultViktorUint8.slice(i ? 18 * i - 1 : i, 18 * (i + 1));
+              const rawPackageData: any = resultArrUint8.slice(i ? 18 * i - 1 : i, 18 * (i + 1));
               let packageData: any = new Uint8Array(18);
               _.forEach(rawPackageData, (item: any, idx: number) => packageData[idx] = item);
               const packageNumber: any = new Uint8Array(2);
@@ -464,35 +442,17 @@ export class PenService {
               packageNumber[1] = i;
               const packageBuffer: any = this.concatTypedArrays(packageNumber, packageData);
               bufferItems.push(packageBuffer);
-              // alert('packagesAmount i: ' + i + ' packageBuffer: ' + JSON.stringify(packageBuffer, null, 2));
-
-              // this._ble.write(
-              //   address,
-              //   { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91006-38e9-4fbe-83f3-d82aae6ff68e', type: 'fileWriteBuffer' },
-              //   packageBuffer,
-              //   (done: any) => {
-              //     // alert('sendBuffPackage done: ' + JSON.stringify(done, null, 2));
-              //     // success(done, 'Write buffer ' + JSON.stringify(rawData));
-              //   },
-              //   fail
-              // );
-
             }
             this.buffWriteStatus.data = bufferItems;
-            // alert('this.buffWriteStatus: ' + JSON.stringify(this.buffWriteStatus, null, 2));
-
-            // this.checkBuffAndSend(address, item);
 
             break;
           case 4:
             break;
           case 5:
-            // alert('write 5 done: ' + JSON.stringify(done, null, 2));
+
             let zeroPad: any = new Uint8Array(2);
             let dataBuffer: any = new Uint8Array(2);
             dataBuffer[0] = 128;
-
-            // alert(JSON.stringify(this.dummySettings, null, 2));
 
             _.forEach(this.dummySettings, (item: any) => {
               const convertedUint32: any = this.uint32to8arr(item);
@@ -501,18 +461,7 @@ export class PenService {
 
             dataBuffer = this.concatTypedArrays(dataBuffer, zeroPad);
             this.buffWriteStatus.buffer = dataBuffer;
-            // alert('write 5 done, send buffer:' + JSON.stringify(dataBuffer, null, 2));
-            // setTimeout(() => {
-            //   this._ble.write(
-            //     address,
-            //     { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91006-38e9-4fbe-83f3-d82aae6ff68e', type: 'fileWriteBuffer' },
-            //     dataBuffer,
-            //     (done: any) => {
-            //       success(done, 'Write buffer settings ' + JSON.stringify(rawData));
-            //     },
-            //     fail
-            //   );
-            // }, 200);
+
             break;
         }
       }
@@ -598,7 +547,7 @@ export class PenService {
   }
 
   public onFileResponse(data: any, address: string, item: any, rawData: any, callback?: any) {
-    // alert('onFileResponse ' + JSON.stringify(data, null, 2));
+
     if (data && data.data) {
       switch (data.data['0']) {
         case 3:
@@ -615,7 +564,6 @@ export class PenService {
               break;
             case 5:
               this.buffWriteStatus.status = data[1];
-              // alert('write DONE!!!!!!!');
               callback(data);
               break;
             case 8:
@@ -632,15 +580,13 @@ export class PenService {
               let dataBuffer: any = new Uint8Array(2);
               dataBuffer[0] = 128;
 
-              // alert(JSON.stringify(this.dummySettings, null, 2));
-
               _.forEach(this.dummySettings, (settingsItem: any) => {
                 const convertedUint32: any = this.uint32to8arr(settingsItem);
                 dataBuffer = this.concatTypedArrays(dataBuffer, convertedUint32);
               });
 
               dataBuffer = this.concatTypedArrays(dataBuffer, zeroPad);
-              // alert('!!!!!!! 5 dataBuffer: ' + JSON.stringify(dataBuffer, null, 2));
+
               this._ble.write(
                 address,
                 { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91006-38e9-4fbe-83f3-d82aae6ff68e', type: 'fileWriteBuffer' },

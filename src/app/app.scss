@@ -158,6 +158,8 @@ ion-content {
   line-height: 44px;
   height: 5.6vw;
   width: 5.6vw;
+  max-height: 32px;
+  max-width: 32px;
   vertical-align: middle;
 }
 .dpw-device-panel {
@@ -181,6 +183,7 @@ ion-content {
   @include animationHelper;
   margin: 0 auto;
   width: 65%;
+  max-width: 350px;
   vertical-align: middle;
 }
 .btn-nav-head {
@@ -340,7 +343,9 @@ ion-content {
     }
     ion-icon.header-action-icon.pull-left {
       background-color: white;
-      right: 84vw !important;
+      left: 0 !important;
+      font-size: constant(2.5rem !important);
+      font-size: env(2.5rem !important);
     }
   }
   .toolbar-background {
@@ -354,7 +359,7 @@ ion-content {
     font-weight: constant(600);
     font-weight: env(600);
     line-height: 22px;
-    margin: 12px 15px;
+    margin: 10px 15px;
     position: absolute;
     right: 4px;
     bottom: 6px;

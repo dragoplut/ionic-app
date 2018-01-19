@@ -16,7 +16,7 @@
       <div class="clear-container">
         <input-select
           *ngFor="let field of updateAccInputs"
-          [itemDisabled]="field.disabled"
+          [itemDisabled]="field.disabled || loading"
           [itemValue]="user[field.modelName]"
           [itemLabel]="field.placeholder"
           [itemType]="field.type"

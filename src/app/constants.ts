@@ -3,6 +3,7 @@ export const EMAIL_REGEXP: any = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s
 
 export const GOOGLE_MAP_API_URL: string = 'http://maps.google.com/maps/api/js';
 export const GOOGLE_API_KEY_ANDROID: string = 'AIzaSyDJYtcVzKXghryIDmQaTBDp5gWYPbTBqfU';
+export const GOOGLE_API_KEY_IOS: string = 'AIzaSyCgHpBF5TgClZPji7fl8LRfE98TnPoTWUY';
 
 // 10000 === 10 seconds
 // for this.snackBar.open(... ,... , { duration: DURATION_ERROR_SNACKBAR })

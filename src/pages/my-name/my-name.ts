@@ -25,6 +25,7 @@ export class MyNameComponent {
     phoneNumber: ''
   };
   public formValid: boolean = false;
+  public loading: boolean = false;
 
   public updateAccInputs: any = [
     { modelName: 'firstName', placeholder: 'First Name', type: 'text', required: false },
@@ -39,12 +40,15 @@ export class MyNameComponent {
   ) {}
 
   public ionViewDidLoad() {
+    this.loading = true;
     this._account.getAccountInfo().subscribe(
       (resp: any) => {
         this.user = resp;
+        this.loading = false;
         this.getCompanies();
       },
       (err: any) => {
+        this.loading = false;
         console.log('err: ', err);
       }
     );
@@ -63,17 +67,19 @@ export class MyNameComponent {
   }
 
   public getCompanies() {
+    this.loading = true;
     this._account.getAllCompanies().subscribe(
       (resp: any) => {
-        console.log('getCompanies resp: ', resp);
         _.forEach(this.updateAccInputs, (option: any) => {
           if (option.modelName === 'companyId') {
             option.options = resp;
           }
         });
         this.onChangeValidate();
+        this.loading = false;
       },
       (err: any) => {
+        this.loading = false;
         alert(err);
       }
     );
