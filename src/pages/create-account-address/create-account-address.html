@@ -17,22 +17,31 @@
         <ion-spinner name="crescent" *ngIf="loading"></ion-spinner>
         <span *ngIf="account.created && !loading" class="text-center red">Account created and can be change only after sign in!</span>
         <custom-select
-          [itemDisabled]="account.created"
+          [itemDisabled]="account.created || loading"
           [itemValue]="account.location.country"
           [itemLabel]="'Country'"
-          [itemOptions]="['United States']"
+          [itemOptions]="countryNamesArr || []"
           [itemType]="'text'"
           [itemError]="''"
-          (itemChange)="account.location.country = $event; onChangeValidate()"
+          (itemChange)="account.location.country = $event; onChangeValidate('country')"
         ></custom-select>
         <custom-select
-          [itemDisabled]="!account.location.country || account.created"
-          [itemValue]="account.location.city"
-          [itemLabel]="'City'"
-          [itemOptions]="usCityNames"
+          [itemDisabled]="!account.location.country || account.created || loading"
+          [itemValue]="account.location.state || ''"
+          [itemLabel]="'State'"
+          [itemOptions]="stateNamesArr || []"
           [itemType]="'text'"
           [itemError]="''"
-          (itemChange)="account.location.city = $event; onChangeValidate()"
+          (itemChange)="account.location.state = $event; onChangeValidate('state')"
+        ></custom-select>
+        <custom-select
+          [itemDisabled]="!account.location.state || account.created || loading"
+          [itemValue]="account.location.city"
+          [itemLabel]="'City'"
+          [itemOptions]="cityNamesArr || []"
+          [itemType]="'text'"
+          [itemError]="''"
+          (itemChange)="account.location.city = $event; onChangeValidate('city')"
         ></custom-select>
       </div>
       <div class="actions col-xs-12">

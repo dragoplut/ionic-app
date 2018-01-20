@@ -35,6 +35,9 @@ export class AccountService {
   }
 
   public createAccount(data: any): Observable<any> {
+    if (data && data.location && data.location.state) {
+      delete data.location.state;
+    }
     const accData: any = _.pick(data, this.accountAllowedFields);
     // {
     //  "email": "string",

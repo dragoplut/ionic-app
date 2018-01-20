@@ -6,16 +6,18 @@ import {
   AuthService,
   ApiService,
   ClinicService,
-  PermissionService
+  GoogleService,
+  PermissionService,
+  UtilService
 } from '../../services/index';
 import {
   ANGLE_IMG,
   DEFAULT_ERROR_MESSAGE,
   DPW_LOGO_TRANSPARENT,
   EMAIL_REGEXP,
-  PAGES_LIST,
-  US_CITY_NAMES
+  PAGES_LIST
 } from '../../app/constants';
+import { T_LOCATION_PARAMS } from '../../app/types';
 import { CreateAccountAddressComponent, SigninComponent, HomeMenu } from '../index';
 import {Nav, NavController, NavParams, Platform} from 'ionic-angular';
 // noinspection TypeScriptCheckImport
@@ -36,9 +38,9 @@ export class CreateAccountClinicComponent implements OnInit {
   public lat:any;
   public lang:any;
 
-  public usCityNames: any[] = US_CITY_NAMES;
-  public countriesList: any[] = ['United States','Ukraine'];
-  public statesList: any[] = ['California'];
+  public countryNamesArr: any[] = ['United States','Ukraine'];
+  public stateNamesArr: any[] = ['California'];
+  public cityNamesArr: any[] = [];
 
   public account: any = { clinic: { location: {} } };
   public user: any = { email: '', password: '' };
@@ -68,7 +70,9 @@ export class CreateAccountClinicComponent implements OnInit {
     public _api: ApiService,
     public _auth: AuthService,
     public _clinic: ClinicService,
-    public _permission: PermissionService
+    public _google: GoogleService,
+    public _permission: PermissionService,
+    public _util: UtilService
   ) {}
 
   public ionViewDidLoad() {
@@ -80,7 +84,7 @@ export class CreateAccountClinicComponent implements OnInit {
       // Okay, so the platform is ready and our plugins are available.
       this.showMap({});
     });
-    this.onChangeValidate();
+    this.onChangeValidate('update');
   }
 
   public ngOnInit() {
@@ -118,106 +122,6 @@ export class CreateAccountClinicComponent implements OnInit {
     });
   }
 
-  // public loadMap() {
-  //
-  //   let mapOptions: GoogleMapOptions = {
-  //     controls: {
-  //       compass: true,
-  //       myLocationButton: false,
-  //       indoorPicker: true,
-  //       zoom: false
-  //     },
-  //     gestures: {
-  //       scroll: true,
-  //       tilt: true,
-  //       rotate: true,
-  //       zoom: true
-  //     },
-  //     camera: {
-  //       target: {
-  //         lat: 43.0741904,
-  //         lng: -89.3809802
-  //       },
-  //       tilt: 30,
-  //       zoom: 10,
-  //       bearing: 50
-  //     }
-  //   };
-  //   this.map = GoogleMaps.create(this.mapElement.nativeElement, mapOptions);
-  //   this.map.one(GoogleMapsEvent.MAP_READY)
-  //     .then(() => {
-  //       this.map.addMarker({
-  //           title: 'Ionic',
-  //           icon: 'blue',
-  //           animation: 'DROP',
-  //           position: {
-  //             lat: 43.0741904,
-  //             lng: -89.3809802
-  //           }
-  //         })
-  //         .then(marker => {
-  //           marker.on(GoogleMapsEvent.MARKER_CLICK)
-  //             .subscribe(() => {
-  //
-  //             });
-  //         });
-  //
-  //     });
-  // }
-
-  // public centerMap(item: any) {
-  //
-  //   // create LatLng object
-  //   let ionic: LatLng = new LatLng(item.geometry.location.lat,item.geometry.location.lng);
-  //
-  //   // create CameraPosition
-  //   let position: any = {
-  //     target: ionic,
-  //     zoom: 18,
-  //     tilt: 30
-  //   };
-  //
-  //   // create new marker
-  //   let markerOptions: MarkerOptions = {
-  //     position: ionic,
-  //     icon: 'red',
-  //     animation: 'DROP',
-  //     title: item.name
-  //   };
-  //
-  //   this.map.one(GoogleMapsEvent.MAP_READY)
-  //     .then(() => {
-  //       // Now you can add elements to the map like the marker
-  //       this.map.animateCamera(position);
-  //       this.map.addMarker(markerOptions);
-  //     }
-  //   );
-  //
-  //   //this.map.one(GoogleMapsEvent.MAP_READY)
-  //   //  .then(() => {
-  //   //    this.map.animateCamera({
-  //   //      target: item.geometry.location,
-  //   //      zoom: 15
-  //   //    });
-  //   //    this.map.addMarker({
-  //   //        title: item.name,
-  //   //        icon: 'red',
-  //   //        animation: 'DROP',
-  //   //        position: {
-  //   //          lat: item.geometry.location.lat,
-  //   //          lng: item.geometry.location.lng
-  //   //        }
-  //   //      })
-  //   //      .then(marker => {
-  //   //        marker.on(GoogleMapsEvent.MARKER_CLICK)
-  //   //          .subscribe(() => {
-  //   //
-  //   //          });
-  //   //      });
-  //   //
-  //   //  });
-  // }
-
   public showErrorMessage(message?: string) {
     this.errorMessage = message ? message : DEFAULT_ERROR_MESSAGE;
   }
@@ -230,7 +134,40 @@ export class CreateAccountClinicComponent implements OnInit {
     this.errorMessage = '';
   }
 
-  public onChangeValidate() {
+  public onChangeValidate(target?: string) {
+    /** Clear child items if parent changed **/
+    switch (target) {
+      case 'country':
+        this.account.clinic.location.state = '';
+        this.account.clinic.location.city = '';
+        this.stateNamesArr = [];
+        this.cityNamesArr = [];
+        break;
+      case 'state':
+        this.account.clinic.location.city = '';
+        this.cityNamesArr = [];
+        break;
+      default:
+        break;
+    }
+
+    if (target && target !== 'city') {
+      /** Prepare location params before request update **/
+      const params: T_LOCATION_PARAMS = {
+        countryName: this.account.clinic.location.country || '',
+        stateName: this.account.clinic.location.state || '',
+      };
+      this.updateLocationParams(params);
+    }
+
+    if (target && target !== 'update') {
+      const searchAddress: string =
+        this.account.clinic.location.country + ' ' +
+        this.account.clinic.location.state + ' ' +
+        this.account.clinic.location.city;
+      this.predictLatLng(searchAddress);
+    }
+
     let isValid = true;
     if (!this.account.location ||
       !this.account.clinic.name ||
@@ -286,18 +223,18 @@ export class CreateAccountClinicComponent implements OnInit {
     address.address_components.forEach((el: any) => {
       switch (el.types[0]) {
         case 'country':
-          this.countriesList.push(el.long_name);
-          this.countriesList = _.uniq(this.countriesList);
+          this.countryNamesArr.push(el.long_name);
+          this.countryNamesArr = _.uniq(this.countryNamesArr);
           this.account.clinic.location.country = el.long_name;
           break;
         case 'administrative_area_level_1':
-          this.statesList.push(el.long_name);
-          this.statesList = _.uniq(this.statesList);
-          this.account.clinic.location.state = el.short_name;
+          this.stateNamesArr.push(el.long_name);
+          this.stateNamesArr = _.uniq(this.stateNamesArr);
+          this.account.clinic.location.state = el.long_name;
           break;
         case 'locality':
-          this.usCityNames.push(el.long_name);
-          this.usCityNames = _.uniq(this.usCityNames);
+          this.cityNamesArr.push(el.long_name);
+          this.cityNamesArr = _.uniq(this.cityNamesArr);
           this.account.clinic.location.city = el.short_name;
           break;
         case 'postal_code':
@@ -321,9 +258,9 @@ export class CreateAccountClinicComponent implements OnInit {
     this.platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // this.centerMap(address);
+      this.onChangeValidate('update');
       this.showMap(this.account.clinic);
     });
-    this.onChangeValidate();
     // alert(JSON.stringify(address));
   }
 
@@ -364,6 +301,56 @@ export class CreateAccountClinicComponent implements OnInit {
       JSON.parse(err._body) : { error: { message: DEFAULT_ERROR_MESSAGE } };
     alert(message.error.message);
     return err && err._body ? JSON.parse(err._body) : message;
+  }
+
+  /**
+   * Request "Countries/States/Cities" by params
+   * update "address" drop-downs with received items
+   * @param {T_LOCATION_PARAMS} params
+   * @param callback
+   */
+  public updateLocationParams(params: T_LOCATION_PARAMS, callback?: any) {
+    this.loading = true;
+    this._util.getLocation(params).subscribe(
+      (resp: any) => {
+        this.loading = false;
+        /** TODO: change "counties" to "countries" after API fix typo **/
+        if (resp && resp.counties && resp.counties.length) {
+          this.countryNamesArr = resp.counties.map((item: any) => item.name);
+          this.stateNamesArr = resp.states.map((item: any) => item.name);
+          this.cityNamesArr = resp.cities.map((item: any) => item.name);
+        }
+        if (callback) { callback(); }
+      },
+      (err: any) => {
+        this.loading = false;
+        if (callback) { callback(); }
+        alert(JSON.stringify(err));
+      }
+    );
+  }
+
+  public predictLatLng(input: string) {
+    if (input && input.length) {
+      this._google.predictAddress(input).subscribe(
+        (item: any) => {
+          this._google.predictLatLng(item).subscribe(
+            (resp: any) => {
+              if (resp && resp.lat) {
+                this.account.clinic.location.latitude = resp.lat;
+                this.account.clinic.location.longitude = resp.lng;
+                if (resp.postal_code && resp.postal_code.length) {
+                  this.account.clinic.location.zip = resp.postal_code;
+                }
+                this.showMap(this.account.clinic);
+              }
+            },
+            (err: any) => console.log(err)
+          );
+        },
+        (err: any) => console.log(err)
+      );
+    }
   }
 
   public openPage(page) {

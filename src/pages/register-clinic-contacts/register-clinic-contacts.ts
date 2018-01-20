@@ -23,7 +23,7 @@ export class RegisterClinicContactsComponent implements OnInit {
   public errorMessage: any = '';
 
   public emailRegExp: any = EMAIL_REGEXP;
-  public usCityNames: any[] = US_CITY_NAMES;
+  public cityNamesArr: any[] = US_CITY_NAMES;
 
   public createAccInputs: any = [
     { modelName: 'phoneNumber', placeholder: 'Phone Number', type: 'text', required: false },

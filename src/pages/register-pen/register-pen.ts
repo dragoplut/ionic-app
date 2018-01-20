@@ -8,7 +8,7 @@ import {
   DPW_LOGO_TRANSPARENT
 } from '../../app/constants';
 import { HomeMenu, MyPenComponent, UpdatePenComponent } from '../index';
-import { AccountService, BleService, PenService } from '../../services';
+import { ApiService, AccountService, BleService, FirmwareService, PenService } from '../../services';
 
 import * as moment from 'moment';
 // noinspection TypeScriptCheckImport
@@ -24,9 +24,12 @@ export class RegisterPenComponent {
   public angleImg: string = ANGLE_IMG;
   public devicePanelImg: string = DEVICE_PANEL_IMG;
 
+  public firmwareBlob: any;
+
   public userInfo: any = {};
   public usageData: any = {};
   public dpDevice: any = { name: '' };
+  public firmwareVersion: any = '0.1.2';
   public errorData: any = '';
   public successData: any = '';
   public pairingDevice: any = 'No data yet!';
@@ -63,7 +66,9 @@ export class RegisterPenComponent {
     public navCtrl: NavController,
     public navParams: NavParams,
     public platform: Platform,
+    public _api: ApiService,
     public _account: AccountService,
+    public _firmware: FirmwareService,
     public _pen: PenService,
     public _ble: BleService,
     private alertCtrl: AlertController
@@ -433,10 +438,49 @@ export class RegisterPenComponent {
       (resp: any) => {
         this.userInfo = resp;
         this.dummySettings[0] = this.userInfo.accountId;
+
+        /** Firmware version check and firmware update. Postponed functionality **/
+        // this.isNewFirmwareAvailable();
+        // this.getLastFirmwareVersion();
       },
       (err: any) => this.fail(err)
     );
   }
+
+  /** Firmware version check and firmware update. Postponed functionality **/
+  // public isNewFirmwareAvailable() {
+  //   this._firmware.isNewVersionAvailable(this.firmwareVersion + '.hex').subscribe(
+  //     (resp: any) => {
+  //       alert('isNewFirmwareAvailable: ' + JSON.stringify(resp));
+  //     },
+  //     (err: any) => this.fail(err)
+  //   );
+  // }
+  //
+  // public getLastFirmwareVersion() {
+  //   this._firmware.getLastVersionDownloadInfo().subscribe(
+  //     (resp: any) => {
+  //       alert('getLastFirmwareVersion: ' + JSON.stringify(resp));
+  //       if (resp && resp.downloadLink) {
+  //         this._api.getByUrl(resp.downloadLink).subscribe(
+  //           (data: any) => {
+  //             this.firmwareBlob = new Blob(data);
+  //             const firmwareBuffer: any = new Uint8Array(this.firmwareBlob);
+  //             if (firmwareBuffer && firmwareBuffer.length) {
+  //               alert('firmwareBuffer[0]: ' + JSON.stringify(firmwareBuffer[0]));
+  //             } else {
+  //               alert('firmwareBuffer is not an array!');
+  //             }
+  //           },
+  //           (err: any) => {
+  //             console.log(err);
+  //           }
+  //         );
+  //       }
+  //     },
+  //     (err: any) => this.fail(err)
+  //   );
+  // }
 
   private startErrTimeout(sec: number) {
     this.errTimeout = setTimeout(() => {

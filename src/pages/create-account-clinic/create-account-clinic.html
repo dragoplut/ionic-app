@@ -29,36 +29,36 @@
         <div class="clear-container additional-content-block">
           <div class="container-half pull-left">
             <custom-select
-              [itemDisabled]="false"
+              [itemDisabled]="loading"
               [itemValue]="account.clinic.location.country"
               [itemLabel]="'Country'"
-              [itemOptions]="countriesList"
+              [itemOptions]="countryNamesArr"
               [itemType]="'text'"
               [itemError]="''"
-              (itemChange)="account.clinic.location.country = $event; onChangeValidate()"
+              (itemChange)="account.clinic.location.country = $event; onChangeValidate('country')"
             ></custom-select>
             <custom-select
-              [itemDisabled]="!account.clinic.location.state"
+              [itemDisabled]="!account.clinic.location.state || loading"
               [itemValue]="account.clinic.location.city"
               [itemLabel]="'City'"
-              [itemOptions]="usCityNames"
+              [itemOptions]="cityNamesArr"
               [itemType]="'text'"
               [itemError]="''"
-              (itemChange)="account.clinic.location.city = $event; onChangeValidate()"
+              (itemChange)="account.clinic.location.city = $event; onChangeValidate('city')"
             ></custom-select>
           </div>
           <div class="container-half pull-right">
             <custom-select
-              [itemDisabled]="!account.clinic.location.country"
+              [itemDisabled]="!account.clinic.location.country || loading"
               [itemValue]="account.clinic.location.state"
               [itemLabel]="'State'"
-              [itemOptions]="statesList"
+              [itemOptions]="stateNamesArr"
               [itemType]="'text'"
               [itemError]="''"
-              (itemChange)="account.clinic.location.state = $event; onChangeValidate()"
+              (itemChange)="account.clinic.location.state = $event; onChangeValidate('state')"
             ></custom-select>
             <custom-input
-              [itemDisabled]="false"
+              [itemDisabled]="loading"
               [itemValue]="account.clinic.location.zip"
               [itemLabel]="'ZIP'"
               [itemType]="'number'"

@@ -38,6 +38,14 @@ export class ApiService implements OnInit {
       .map(this.getJson);
   }
 
+  public getByUrl(url: string): Observable<any> {
+    return this.http.get(`${url}`)
+      .map((resp: any) => {
+        console.log(resp);
+        return resp;
+      });
+  }
+
   public post(path, body): Observable<any> {
     return this.http.post(
       `${this.endpoint}${path}`,
