@@ -337,9 +337,11 @@ ion-content {
     padding: 0;
     z-index: 6;
     ion-title.title .toolbar-title {
+      box-sizing: border-box;
       font-weight: 400 !important;
       color: $col-secondary-blue;
       line-height: 56px;
+      height: 56px;
     }
     ion-icon.header-action-icon.pull-left {
       background-color: white;
@@ -364,7 +366,7 @@ ion-content {
     right: 4px;
     bottom: 6px;
     /** iOS styles for top notch related items **/
-    top: 6px;
+    top: 10px;
     top: constant(safe-area-inset-top);
     top: env(safe-area-inset-top);
     z-index: 5;
