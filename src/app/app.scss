@@ -71,8 +71,9 @@ ion-content {
 .text-bold {
   font-weight: 600;
 }
-.bold {
-  font-weight: 600 !important;
+.bold-ios {
+  font-weight: constant(600 !important);
+  font-weight: env(600 !important);
 }
 .cursor-pointer {
   cursor: pointer;
@@ -351,6 +352,8 @@ ion-content {
       color: $col-secondary-blue;
       line-height: 18px;
       padding: 16px 0 !important;
+      margin-bottom: constant(16px);
+      margin-bottom: env(16px);
       vertical-align: top;
     }
     ion-icon.header-action-icon.pull-left {
