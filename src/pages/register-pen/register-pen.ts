@@ -477,8 +477,10 @@ export class RegisterPenComponent {
               }
             },
             (err: any) => {
-              this.errorDescription = 'Fail to update Pen record with device serial number.';
-              this.fail(err);
+              // this.errorDescription = 'Fail to update Pen record with device serial number.';
+              if (callback) {
+                callback();
+              }
             }
           );
         }
