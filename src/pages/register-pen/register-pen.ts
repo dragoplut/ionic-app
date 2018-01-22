@@ -60,6 +60,7 @@ export class RegisterPenComponent {
     this._ble.isConnected(this.dpDevice, () => this.dpDevice.paired = true, () => this.dpDevice.paired = false);
   }, 1000);
 
+  public showButton: string = '';
   public errTimeout: any;
 
   constructor(
@@ -83,6 +84,7 @@ export class RegisterPenComponent {
       this._ble.enable();
       this.dependencies = this.navParams.get('dependencies') || {};
       this.dpDevice = { name: '' };
+      this.showButton = '';
       if (this.dependencies && this.dependencies.pen && !this.dependencies.clinic) {
         if (this.dpDevice) {
           this.dpDevice.name = this.dependencies.pen.serialNumber;
@@ -111,6 +113,7 @@ export class RegisterPenComponent {
   }
 
   public startScanning() {
+    this.showButton = '';
     setTimeout(() => this.initConnectionChecker(), 300);
 
     // this.gettingDevices = true;
@@ -240,7 +243,8 @@ export class RegisterPenComponent {
           if (resp) {
             this.doPenUpdate();
           } else {
-            alert('Error. This pen is already registered to other clinic!');
+            this.showButton = 'done';
+            this.errorDescription = 'Error. This pen is already registered to other clinic!';
           }
         },
         (err: any) => alert(err)
@@ -363,6 +367,7 @@ export class RegisterPenComponent {
   }
 
   public doRetry(callback: any) {
+    this.showButton = '';
     /** Retry steps: 1) disconnect; 2) start connection checker; 3) scan; 4) connect; **/
     /** Disconnect if connection was established **/
     this._ble.disconnect(this.dpDevice, this.disconnected, this.fail);

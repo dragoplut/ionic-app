@@ -70,14 +70,15 @@
     >
       <div class="info-container">
         <div class="plain-text text-left">
-          <span class="secondary-blue">Error</span>
+          <span class="secondary-blue">{{ showButton === 'done' ? dpDevice.name || dpDevice.id : 'Error' }}</span>
         </div>
         <br/>
         <div class="plain-text text-left">{{errorDescription}}</div>
         <br/>
       </div>
       <div class="actions col-xs-12">
-        <a class="link-nav pull-right" (click)="doRetry(doPenUpdate)">Retry</a>
+        <a *ngIf="showButton !== 'done'" class="link-nav pull-right" (click)="doRetry(doPenUpdate)">Retry</a>
+        <a *ngIf="showButton === 'done'" class="link-nav pull-right" (click)="doDone()">Done</a>
       </div>
     </form>
   </div>
