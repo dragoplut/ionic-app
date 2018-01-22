@@ -186,8 +186,9 @@ ion-content {
   @include animationHelper;
   margin: 0 auto;
   width: 65%;
-  max-width: 350px;
+  //max-width: 350px;
   vertical-align: middle;
+  max-width: 50vw;
 }
 .btn-nav-head {
   background-color: transparent;
@@ -344,6 +345,19 @@ ion-content {
       line-height: 52px;
       height: 52px !important;
       vertical-align: top;
+      //position: relative;
+      .toolbar-title-ios {
+        position: absolute;
+        text-align: center;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 0;
+        //max-width: 80%;
+      }
+    }
+    ion-title.title.title-ios {
+
     }
     ion-title.title .toolbar-title {
       box-sizing: border-box;
@@ -351,7 +365,7 @@ ion-content {
       color: $col-secondary-blue;
       line-height: 18px;
       padding: 0 !important;
-      margin: 20px 0 !important;
+      margin: 16px 0 !important;
       vertical-align: top;
     }
     ion-icon.header-action-icon.pull-left {
