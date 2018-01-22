@@ -227,7 +227,7 @@ export class RegisterPenComponent {
   }
 
   public goBack() {
-    this._ble.disconnect(this.dpDevice, true, true);
+    // this._ble.disconnect(this.dpDevice, true, true);
     this.openPage(HomeMenu);
     // this.navCtrl.pop();
   }
