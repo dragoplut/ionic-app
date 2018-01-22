@@ -256,12 +256,12 @@ export class PenService {
   }
 
   public updatePen(data: any): Observable<any> {
-    const penData: any = _.pick(data, this.penAllowedFields);
+    // const penData: any = _.pick(data, this.penAllowedFields);
     // {
     //   "id": 0,
     //   "serialNumber": "string"
     // }
-    return this.api.post(`${this.path}/update`, penData);
+    return this.api.post(`${this.path}/update`, data);
   }
 
   public getPens(): Observable<any> {
@@ -438,7 +438,7 @@ export class PenService {
               let packageData: any = new Uint8Array(18);
               _.forEach(rawPackageData, (item: any, idx: number) => packageData[idx] = item);
               const packageNumber: any = new Uint8Array(2);
-              packageNumber[0] = packagesAmount < 2 || i + 1 === packagesAmount ? 128 : i;
+              packageNumber[0] = packagesAmount < 2 || i + 1 === packagesAmount ? 128 : 0;
               packageNumber[1] = i;
               const packageBuffer: any = this.concatTypedArrays(packageNumber, packageData);
               bufferItems.push(packageBuffer);

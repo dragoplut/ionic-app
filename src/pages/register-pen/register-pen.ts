@@ -466,8 +466,7 @@ export class RegisterPenComponent {
       (resp: any) => {
         if (resp) {
           const updatedDevice: any = {
-            id: dpDevice.id,
-            serial: dpDevice.serial,
+            serialNumber: this.dpDevice.serialNumber || this.dpDevice.serial || this.dpDevice.id,
             name: resp
           };
           this._pen.updatePen(updatedDevice).subscribe(
