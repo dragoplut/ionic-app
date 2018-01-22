@@ -55,7 +55,7 @@ ion-header.header-md::after {
 ion-content {
   display: block;
   //padding: 0 16px !important;
-  height: calc(100% - 60px) !important;
+  height: calc(100% - 58px) !important;
 }
 .scroll-content {
   margin-top: 2px !important;
@@ -622,7 +622,7 @@ ion-content {
 
 @media screen and (min-height: 2433px) {
   .scroll-content {
-    padding-top: 56px !important;
+    padding-top: 60px !important;
   }
 }
 
