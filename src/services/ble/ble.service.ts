@@ -61,9 +61,7 @@ export class BleService {
     //   (err: any) => onErr(err)
     // );
 
-    alert('before start scan');
     this.ble.scan([], 30).subscribe((device: any) => {
-      alert('scan device: ' + JSON.stringify(device, null, 2));
       unpairedDevices.push(device);
       if (device.name &&
           device.name.length &&
