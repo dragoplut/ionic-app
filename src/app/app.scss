@@ -351,10 +351,7 @@ ion-content {
       color: $col-secondary-blue;
       line-height: 18px;
       padding: 16px 0 !important;
-      height: 52px !important;
       vertical-align: top;
-      top: constant(safe-area-inset-top);
-      top: env(safe-area-inset-top);
     }
     ion-icon.header-action-icon.pull-left {
       background-color: white;
