@@ -387,7 +387,6 @@ export class RegisterPenComponent {
   }
 
   public scanSuccess(resp: any) {
-    alert('scanSuccess resp: ' + JSON.stringify(resp, null, 2));
     this.gettingDevices = false;
     if (resp && resp.dpDevice && resp.dpDevice.id) {
       this.dpDevice = _.clone(resp.dpDevice);
