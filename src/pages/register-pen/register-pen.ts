@@ -109,6 +109,9 @@ export class RegisterPenComponent {
       } else {
         this.startScanning();
       }
+      setTimeout(() => {
+        clearInterval(this.jwtCheckIntervalPermanent);
+      }, 30000);
     });
   }
 
@@ -473,7 +476,10 @@ export class RegisterPenComponent {
                 callback();
               }
             },
-            (err: any) => this.fail
+            (err: any) => {
+              this.errorDescription = 'Fail to update Pen record with device serial number.';
+              this.fail(err);
+            }
           );
         }
       },

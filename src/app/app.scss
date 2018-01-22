@@ -55,7 +55,7 @@ ion-header.header-md::after {
 ion-content {
   display: block;
   //padding: 0 16px !important;
-  height: calc(100% - 56px) !important;
+  height: calc(100% - 54px) !important;
 }
 .scroll-content {
   margin-top: 2px !important;
@@ -349,11 +349,12 @@ ion-content {
       box-sizing: border-box;
       font-weight: 400 !important;
       color: $col-secondary-blue;
-      line-height: 52px;
+      line-height: 18px;
+      padding: 16px 0 !important;
       height: 52px !important;
       vertical-align: top;
-      padding-bottom: constant(20px !important);
-      padding-bottom: env(20px !important);
+      top: constant(safe-area-inset-top);
+      top: env(safe-area-inset-top);
     }
     ion-icon.header-action-icon.pull-left {
       background-color: white;
