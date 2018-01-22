@@ -306,18 +306,21 @@ export class RegisterPenComponent {
     this.updateDeviceSettings(
       device,
       (done: any) => {
-        this.updatePercent = 75;
+        this.updatePercent = 70;
         // alert('2 doUpdateBlackListAndSettings done' + JSON.stringify(done, null, 2) + ' device: ' + JSON.stringify(device, null, 2));
         /** Write new "Black List" to BLE device **/
         this.updateDeviceBlacklist(
           device,
           (resp: any) => {
-            this.updatePercent = 100;
-            setTimeout(() => {
-              this.deviceUpdated = true;
-              clearInterval(this.errTimeout);
-              // this._ble.disconnect(this.dpDevice, this.disconnected, this.fail);
-            }, 100);
+            this.updatePercent = 85;
+            this.updateDeviceSerialNumber(this.dpDevice, () => {
+              this.updatePercent = 100;
+              setTimeout(() => {
+                this.deviceUpdated = true;
+                clearInterval(this.errTimeout);
+                // this._ble.disconnect(this.dpDevice, this.disconnected, this.fail);
+              }, 100);
+            });
           },
           (errDescription: string) => this.errorData = errDescription
         )
@@ -450,6 +453,31 @@ export class RegisterPenComponent {
       },
       (err: any) => this.fail(err)
     );
+  }
+
+  public updateDeviceSerialNumber(dpDevice: any, callback?: any) {
+    this._ble.read(
+      dpDevice.id,
+      { serviceUUID: '180a', characteristicUUID: '2a25' },
+      'string',
+      (resp: any) => {
+        if (resp) {
+          const updatedDevice: any = {
+            id: dpDevice.id,
+            serial: dpDevice.serial,
+            name: resp
+          };
+          this._pen.updatePen(updatedDevice).subscribe(
+            (done: any) => {
+              if (callback) {
+                callback();
+              }
+            },
+            (err: any) => this.fail
+          );
+        }
+      },
+      this.fail)
   }
 
   /** Firmware version check and firmware update. Postponed functionality **/
