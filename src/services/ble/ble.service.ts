@@ -66,7 +66,7 @@ export class BleService {
       if (device.name &&
           device.name.length &&
           (device.name.toLowerCase().indexOf('dp4') !== -1 ||
-           device.name.indexOf('derma') !== -1)) {
+           device.name.toLowerCase().indexOf('derma') !== -1)) {
         for (let item in device) {
           dpDevice[item] = device[item];
         }
