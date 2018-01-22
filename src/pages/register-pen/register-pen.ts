@@ -244,6 +244,7 @@ export class RegisterPenComponent {
       this._pen.registerPen(pen).subscribe(
         (resp: any) => {
           if (resp) {
+            alert('registerPen resp: ' + JSON.stringify(resp, null, 2));
             this.doPenUpdate();
           } else {
             this.showButton = 'done';
