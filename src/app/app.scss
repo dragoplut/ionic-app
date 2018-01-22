@@ -71,6 +71,9 @@ ion-content {
 .text-bold {
   font-weight: 600;
 }
+.bold {
+  font-weight: 600 !important;
+}
 .cursor-pointer {
   cursor: pointer;
 }
@@ -338,15 +341,19 @@ ion-content {
     z-index: 6;
     ion-title.title {
       box-sizing: border-box;
-      line-height: 56px;
-      height: 56px !important;
+      line-height: 52px;
+      height: 52px !important;
+      vertical-align: top;
     }
     ion-title.title .toolbar-title {
       box-sizing: border-box;
       font-weight: 400 !important;
       color: $col-secondary-blue;
-      line-height: 56px;
-      height: 56px !important;
+      line-height: 52px;
+      height: 52px !important;
+      vertical-align: top;
+      padding-bottom: constant(20px !important);
+      padding-bottom: env(20px !important);
     }
     ion-icon.header-action-icon.pull-left {
       background-color: white;
