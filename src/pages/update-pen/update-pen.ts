@@ -251,14 +251,16 @@ export class UpdatePenComponent {
         if (this.dpDevice) {
           this.dpDevice.name = this.dependencies.pen.serialNumber;
           this.dpDevice.id = this.dependencies.pen.serialNumber;
+          this.dpDevice.serialNumber = this.dependencies.pen.serialNumber;
         } else {
           this.dpDevice = {
             id: this.dependencies.pen.serialNumber,
-            name: this.dependencies.pen.serialNumber
+            name: this.dependencies.pen.serialNumber,
+            serialNumber: this.dependencies.pen.serialNumber
           };
         }
         this.initConnectionChecker();
-        this._ble.scan((resp: any) => {
+        this._ble.scan(this.dpDevice || {}, (resp: any) => {
           // this._ble.discoverableSec(60);
           this._ble.connect(this.dpDevice, this.connected, false);
         }, this._ble.stopScan);
@@ -268,11 +270,11 @@ export class UpdatePenComponent {
     });
   }
 
-  public startScanning() {
+  public startScanning(existingDevice?: any) {
     this.initConnectionChecker();
 
     this._ble.stopScan();
-    this._ble.scan((resp: any) => this.scanSuccess(resp), this.fail);
+    this._ble.scan(existingDevice || {}, (resp: any) => this.scanSuccess(resp), this.fail);
   }
 
   public connected = (data: any) => {
@@ -671,7 +673,7 @@ export class UpdatePenComponent {
     /** Start connection checker **/
     this.initConnectionChecker();
     /** Scan for available "Dermapen" BLE device **/
-    this._ble.scan((resp: any) => {
+    this._ble.scan(this.dpDevice || {}, (resp: any) => {
       /** Connect to BLE device and invoke provided function **/
       this._ble.connect(this.dpDevice, callback, false);
     }, this._ble.stopScan);
