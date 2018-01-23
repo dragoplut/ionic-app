@@ -24,7 +24,7 @@ export class BleService {
     this.bluetoothSerial.setDiscoverable(sec);
   }
   
-  public scan(onSuccess: any, onErr: any) {
+  public scan(existingDevice: any, onSuccess: any, onErr: any) {
     /** Stop previous scan if it was active **/
     this.ble.stopScan();
     // this.ble.stopScan().then(
@@ -67,13 +67,48 @@ export class BleService {
           device.name.length &&
           (device.name.toLowerCase().indexOf('dp4') !== -1 ||
            device.name.toLowerCase().indexOf('derma') !== -1)) {
-        for (let item in device) {
-          dpDevice[item] = device[item];
+
+        if (existingDevice && (existingDevice.serialNumber || existingDevice.name)) {
+          this.connect(device, (done: any) => {
+            // alert('connected to: ' + JSON.stringify(device, null, 2));
+            this.read(
+              device.id,
+              { serviceUUID: '180a', characteristicUUID: '2a25' },
+              'string',
+              (resp: any) => {
+                // alert('scan --> read --> existingDevice --> resp: ' + resp + ' existingDevice: ' + JSON.stringify(existingDevice, null, 2));
+                if (resp && (resp === existingDevice.serialNumber || resp === existingDevice.name || resp === existingDevice.id)) {
+                  for (let item in device) {
+                    dpDevice[item] = device[item];
+                  }
+                  dpDevice.paired = false;
+                  const result = { dpDevice, pairedDevices, unpairedDevices };
+                  onSuccess(result);
+                  this.stopScan();
+                } else {
+                  this.isConnected(device, (isConnected: any) => {
+                    // alert('isConnected: ' + JSON.stringify(isConnected, null, 2));
+                    if (isConnected) {
+                      this.disconnect(device, () => {
+                        // alert('disconnected from device: ' + JSON.stringify(device, null, 2));
+                      }, false);
+                    }
+                  }, false);
+                }
+              },
+              false)
+          }, false);
+
+        } else {
+          for (let item in device) {
+            dpDevice[item] = device[item];
+          }
+          dpDevice.paired = false;
+          const result = { dpDevice, pairedDevices, unpairedDevices };
+          onSuccess(result);
+          this.stopScan();
         }
-        dpDevice.paired = false;
-        const result = { dpDevice, pairedDevices, unpairedDevices };
-        onSuccess(result);
-        this.ble.stopScan();
+
       }
     }, onErr);
 
@@ -168,9 +203,6 @@ export class BleService {
       data[0] = rawData;
     }
 
-    // alert('write uuid: ' + JSON.stringify(uuid));
-    // alert('write rawData: ' + JSON.stringify(rawData));
-    // alert('write data: ' + JSON.stringify(data));
     this.ble.write(address, uuid.serviceUUID, uuid.characteristicUUID, data.buffer)
       .then(onSuccess, onErr);
   }

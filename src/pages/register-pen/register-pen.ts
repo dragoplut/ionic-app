@@ -87,25 +87,33 @@ export class RegisterPenComponent {
       this.showButton = '';
       if (this.dependencies && this.dependencies.pen && !this.dependencies.clinic) {
         if (this.dpDevice) {
-          this.dpDevice.name = this.dependencies.pen.serialNumber;
+          this.dpDevice.name = this.dependencies.pen.name;
           this.dpDevice.id = this.dependencies.pen.serialNumber;
+          this.dpDevice.serialNumber = this.dependencies.pen.serialNumber;
         } else {
           this.dpDevice = {
             id: this.dependencies.pen.serialNumber,
-            name: this.dependencies.pen.serialNumber
+            name: this.dependencies.pen.name,
+            serialNumber: this.dependencies.pen.serialNumber
           };
         }
-        this._ble.isConnected(
-          this.dpDevice,
-          (resp: any) => {
-          this.dpDevice.paired = true;
-          },
-          () => {
-            setTimeout(() => this.initConnectionChecker(), 300);
-            this._ble.scan((resp: any) => {
-              this._ble.connect(this.dpDevice, this.connected, false);
-            }, this._ble.stopScan);
-          });
+        this.startScanning(this.dpDevice);
+        // this._ble.isConnected(
+        //   this.dpDevice,
+        //   (resp: any) => {
+        //     if (resp) {
+        //       this.dpDevice.paired = true;
+        //     } else {
+        //       setTimeout(() => this.initConnectionChecker(), 300);
+        //       this._ble.scan(this.dpDevice || {}, (resp: any) => {
+        //         if (resp && resp.dpDevice) {
+        //           this._ble.connect(resp.dpDevice, this.connected, false);
+        //         }
+        //       }, this._ble.stopScan);
+        //     }
+        //   },
+        //   () => {
+        //   });
       } else {
         this.startScanning();
       }
@@ -115,35 +123,37 @@ export class RegisterPenComponent {
     });
   }
 
-  public startScanning() {
+  public startScanning(existingDevice?: any) {
     this.showButton = '';
     setTimeout(() => this.initConnectionChecker(), 300);
 
     // this.gettingDevices = true;
     this._ble.stopScan();
-    this._ble.scan((resp: any) => this.scanSuccess(resp), this.fail);
+    this._ble.scan(existingDevice || {}, (resp: any) => this.scanSuccess(resp), this.fail);
   }
 
   public onScanError(err: any) {
     this.fail(err);
   }
 
-  public connected = (data: any) => {
-    this.successData = JSON.stringify(data);
+  public connected = (device: any) => {
+    this.successData = JSON.stringify(device);
     this.errorData = '';
-    if (data) {
-      this.dpDevice = data;
+    if (device) {
+      if (this.dependencies.newPen) {
+        this.dpDevice = device;
+      } else {
+        this.dpDevice.id = device.id;
+      }
     }
     this._ble.isConnected(
-      this.dpDevice,
+      device,
       (resp: any) => {
-        this.dpDevice.paired = true;
+        this.dpDevice.paired = !!resp;
         // setTimeout(() => {
         //   this.writeToDevice(this.dpDevice, '180a', '2a26', 0);
         // }, 100);
-      }, (err: any) => {
-        this.dpDevice.paired = false;
-      });
+      }, (err: any) => false);
   };
 
   public disconnected = (data: any) => {
@@ -234,24 +244,26 @@ export class RegisterPenComponent {
 
   public goNext() {
     if (this.dependencies.clinic && this.dependencies.newPen) {
-      let pen = {
-        name: this.dpDevice.name || this.dpDevice.id,
-        clinicId: this.dependencies.clinic.id,
-        serialNumber: this.dpDevice.id
-      };
-      // alert(JSON.stringify(pen));
-      this.startErrTimeout(60);
-      this._pen.registerPen(pen).subscribe(
-        (resp: any) => {
-          if (resp) {
-            this.doPenUpdate();
-          } else {
-            this.showButton = 'done';
-            this.errorDescription = 'Error. This pen is already registered to other clinic!';
-          }
-        },
-        (err: any) => alert(err)
-      );
+      this.updateDeviceSerialNumber(this.dpDevice, (device: any) => {
+        let pen = {
+          name: device.serialNumber || this.dpDevice.id,
+          clinicId: this.dependencies.clinic.id,
+          serialNumber: device.serialNumber
+        };
+        // alert(JSON.stringify(pen));
+        this.startErrTimeout(60);
+        this._pen.registerPen(pen).subscribe(
+          (resp: any) => {
+            if (resp) {
+              this.doPenUpdate();
+            } else {
+              this.showButton = 'done';
+              this.errorDescription = 'Error. This pen is already registered to other clinic!';
+            }
+          },
+          (err: any) => alert(err)
+        );
+      });
     } else {
       alert('Error. No clinic provided for pen!');
     }
@@ -309,21 +321,22 @@ export class RegisterPenComponent {
     this.updateDeviceSettings(
       device,
       (done: any) => {
-        this.updatePercent = 70;
+        this.updatePercent = 80;
         // alert('2 doUpdateBlackListAndSettings done' + JSON.stringify(done, null, 2) + ' device: ' + JSON.stringify(device, null, 2));
         /** Write new "Black List" to BLE device **/
         this.updateDeviceBlacklist(
           device,
           (resp: any) => {
-            this.updatePercent = 85;
-            this.updateDeviceSerialNumber(this.dpDevice, () => {
-              this.updatePercent = 100;
-              setTimeout(() => {
-                this.deviceUpdated = true;
-                clearInterval(this.errTimeout);
-                // this._ble.disconnect(this.dpDevice, this.disconnected, this.fail);
-              }, 100);
-            });
+            this.updatePercent = 100;
+            setTimeout(() => {
+              this.deviceUpdated = true;
+              clearInterval(this.errTimeout);
+              this._ble.isConnected(this.dpDevice, (isConnected: any) => {
+                if (isConnected) {
+                  this._ble.disconnect(this.dpDevice, false, false);
+                }
+              }, false)
+            }, 100);
           },
           (errDescription: string) => this.errorData = errDescription
         )
@@ -355,8 +368,8 @@ export class RegisterPenComponent {
   }
 
   public requestDeviceSettings(device: any, callback: any, fail: any) {
-    // alert('3 updateDeviceBlacklist device: ' + JSON.stringify(device, null, 2));
-    this._pen.getSettings(device.id).subscribe(callback, fail);
+    // alert('updateDeviceBlacklist device: ' + JSON.stringify(device, null, 2));
+    this._pen.getSettings(this.dpDevice.serialNumber || this.dpDevice.name).subscribe(callback, fail);
   }
 
   public goPenUpdate() {
@@ -380,7 +393,7 @@ export class RegisterPenComponent {
     /** Start connection checker **/
     setTimeout(() => this.initConnectionChecker(callback), 300);
     /** Scan for available "Dermapen" BLE device **/
-    this._ble.scan((resp: any) => {
+    this._ble.scan(this.dpDevice || {}, (resp: any) => {
       /** Connect to BLE device and invoke provided function **/
       this._ble.connect(this.dpDevice, true, false);
     }, this._ble.stopScan);
@@ -389,7 +402,11 @@ export class RegisterPenComponent {
   public scanSuccess(resp: any) {
     this.gettingDevices = false;
     if (resp && resp.dpDevice && resp.dpDevice.id) {
-      this.dpDevice = _.clone(resp.dpDevice);
+      if (this.dependencies.newPen) {
+        this.dpDevice = _.clone(resp.dpDevice);
+      } else {
+        this.dpDevice.id = resp.dpDevice.id;
+      }
     }
     this.pairedDevices = resp.pairedDevices && resp.pairedDevices.length ?
       resp.pairedDevices : [];
@@ -465,23 +482,27 @@ export class RegisterPenComponent {
       'string',
       (resp: any) => {
         if (resp) {
-          const updatedDevice: any = {
-            serialNumber: this.dpDevice.serialNumber || this.dpDevice.serial || this.dpDevice.id,
-            name: resp
-          };
-          this._pen.updatePen(updatedDevice).subscribe(
-            (done: any) => {
-              if (callback) {
-                callback();
-              }
-            },
-            (err: any) => {
-              // this.errorDescription = 'Fail to update Pen record with device serial number.';
-              if (callback) {
-                callback();
-              }
-            }
-          );
+          dpDevice.serialNumber = resp;
+          if (callback) {
+            callback(dpDevice);
+          }
+          // const updatedDevice: any = {
+          //   serialNumber: this.dpDevice.serialNumber || this.dpDevice.serial || this.dpDevice.id,
+          //   name: resp
+          // };
+          // this._pen.updatePen(updatedDevice).subscribe(
+          //   (done: any) => {
+          //     if (callback) {
+          //       callback();
+          //     }
+          //   },
+          //   (err: any) => {
+          //     // this.errorDescription = 'Fail to update Pen record with device serial number.';
+          //     if (callback) {
+          //       callback();
+          //     }
+          //   }
+          // );
         }
       },
       this.fail)
