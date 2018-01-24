@@ -70,13 +70,13 @@ export class BleService {
 
         if (existingDevice && (existingDevice.serialNumber || existingDevice.name)) {
           this.connect(device, (done: any) => {
-            // alert('connected to: ' + JSON.stringify(device, null, 2));
+            alert('existingDevice connected to: ' + JSON.stringify(device, null, 2));
             this.read(
               device.id,
               { serviceUUID: '180a', characteristicUUID: '2a25' },
               'string',
               (resp: any) => {
-                // alert('scan --> read --> existingDevice --> resp: ' + resp + ' existingDevice: ' + JSON.stringify(existingDevice, null, 2));
+                alert('scan --> read --> existingDevice --> resp: ' + resp + ' existingDevice: ' + JSON.stringify(existingDevice, null, 2));
                 if (resp && (resp === existingDevice.serialNumber || resp === existingDevice.name || resp === existingDevice.id)) {
                   for (let item in device) {
                     dpDevice[item] = _.clone(device[item]);
@@ -104,7 +104,7 @@ export class BleService {
 
         } else {
           this.connect(device, (done: any) => {
-            // alert('connected to: ' + JSON.stringify(device, null, 2));
+            alert('new device connected to: ' + JSON.stringify(device, null, 2));
             this.read(
               device.id,
               { serviceUUID: '180a', characteristicUUID: '2a25' },
@@ -117,6 +117,7 @@ export class BleService {
                 dpDevice.mac = device.id;
                 dpDevice.serialNumber = resp;
                 dpDevice.paired = false;
+                alert('new device resp: ' + resp + ' dpDevice ' + JSON.stringify(dpDevice, null, 2));
                 const result = { dpDevice, pairedDevices, unpairedDevices };
                 onSuccess(result);
                 this.stopScan();
