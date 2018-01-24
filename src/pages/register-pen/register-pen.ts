@@ -246,7 +246,7 @@ export class RegisterPenComponent {
     if (this.dependencies.clinic && this.dependencies.newPen) {
       this.updateDeviceSerialNumber(this.dpDevice, (device: any) => {
         let pen = {
-          name: device.serialNumber || this.dpDevice.id,
+          name: device.serialNumber,
           clinicId: this.dependencies.clinic.id,
           serialNumber: device.serialNumber
         };
@@ -281,7 +281,7 @@ export class RegisterPenComponent {
       }
       /** Read "Usage List" **/
       this._pen.writeWithResponse(
-        this.dpDevice.id,
+        this.dpDevice.mac || this.dpDevice.id,
         { serviceUUID: 'a8a91000-38e9-4fbe-83f3-d82aae6ff68e', characteristicUUID: 'a8a91003-38e9-4fbe-83f3-d82aae6ff68e', type: 'fileRequest' },
         [1,3,0],
         (resp: any) => {
@@ -289,7 +289,7 @@ export class RegisterPenComponent {
 
           /** saveSyncListData **/
           const syncListData: any = {
-            serialNumber: this.dpDevice.id,
+            serialNumber: this.dpDevice.serialNumber,
             penUsageLists: resp.result,
             penErrorLists: []
           };
@@ -348,7 +348,7 @@ export class RegisterPenComponent {
   public updateDeviceSettings(device: any, callback: any, fail: any) {
     // alert('4 updateDeviceSettings device: ' + JSON.stringify(device, null, 2));
     this._pen.writeWithResponse(
-      device.id,
+      device.mac || device.id,
       { serviceUUID: 'a8a91000-38e9-4fbe-83f3-d82aae6ff68e', characteristicUUID: 'a8a91003-38e9-4fbe-83f3-d82aae6ff68e', type: 'fileWrite', device },
       [5,2,16],
       callback,
@@ -359,7 +359,7 @@ export class RegisterPenComponent {
   public updateDeviceBlacklist(device: any, callback: any, fail: any) {
     // alert('3 updateDeviceBlacklist device: ' + JSON.stringify(device, null, 2));
     this._pen.writeWithResponse(
-      device.id,
+      device.mac || device.id,
       { serviceUUID: 'a8a91000-38e9-4fbe-83f3-d82aae6ff68e', characteristicUUID: 'a8a91003-38e9-4fbe-83f3-d82aae6ff68e', type: 'fileWrite', device },
       [3,2,0],
       callback,
@@ -481,7 +481,7 @@ export class RegisterPenComponent {
 
   public updateDeviceSerialNumber(dpDevice: any, callback?: any) {
     this._ble.read(
-      dpDevice.id,
+      dpDevice.mac || dpDevice.id,
       { serviceUUID: '180a', characteristicUUID: '2a25' },
       'string',
       (resp: any) => {
