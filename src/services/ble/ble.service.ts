@@ -5,7 +5,7 @@ import { BluetoothSerial } from '@ionic-native/bluetooth-serial';
 import { BLE } from '@ionic-native/ble';
 
 // noinspection TypeScriptCheckImport
-// import * as _ from 'lodash';
+import * as _ from 'lodash';
 
 @Injectable()
 export class BleService {
@@ -79,8 +79,9 @@ export class BleService {
                 // alert('scan --> read --> existingDevice --> resp: ' + resp + ' existingDevice: ' + JSON.stringify(existingDevice, null, 2));
                 if (resp && (resp === existingDevice.serialNumber || resp === existingDevice.name || resp === existingDevice.id)) {
                   for (let item in device) {
-                    dpDevice[item] = device[item];
+                    dpDevice[item] = _.clone(device[item]);
                   }
+                  dpDevice.id = resp;
                   dpDevice.mac = device.id;
                   dpDevice.serialNumber = resp;
                   dpDevice.paired = false;
@@ -110,8 +111,9 @@ export class BleService {
               'string',
               (resp: any) => {
                 for (let item in device) {
-                  dpDevice[item] = device[item];
+                  dpDevice[item] = _.clone(device[item]);
                 }
+                dpDevice.id = resp;
                 dpDevice.mac = device.id;
                 dpDevice.serialNumber = resp;
                 dpDevice.paired = false;
