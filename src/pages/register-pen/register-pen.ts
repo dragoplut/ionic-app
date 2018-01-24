@@ -394,6 +394,9 @@ export class RegisterPenComponent {
     setTimeout(() => this.initConnectionChecker(callback), 300);
     /** Scan for available "Dermapen" BLE device **/
     this._ble.scan(this.dpDevice || {}, (resp: any) => {
+      if (resp && resp.dpDevice && resp.dpDevice.mac) {
+        this.dpDevice.mac = resp.dpDevice.mac;
+      }
       /** Connect to BLE device and invoke provided function **/
       this._ble.connect(this.dpDevice, true, false);
     }, this._ble.stopScan);
@@ -405,6 +408,7 @@ export class RegisterPenComponent {
       if (this.dependencies.newPen) {
         this.dpDevice = _.clone(resp.dpDevice);
       } else {
+        this.dpDevice.mac = resp.dpDevice.mac || '';
         this.dpDevice.id = resp.dpDevice.id;
       }
     }

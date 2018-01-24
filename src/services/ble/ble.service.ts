@@ -81,6 +81,8 @@ export class BleService {
                   for (let item in device) {
                     dpDevice[item] = device[item];
                   }
+                  dpDevice.mac = device.id;
+                  dpDevice.serialNumber = resp;
                   dpDevice.paired = false;
                   const result = { dpDevice, pairedDevices, unpairedDevices };
                   onSuccess(result);
@@ -100,13 +102,25 @@ export class BleService {
           }, false);
 
         } else {
-          for (let item in device) {
-            dpDevice[item] = device[item];
-          }
-          dpDevice.paired = false;
-          const result = { dpDevice, pairedDevices, unpairedDevices };
-          onSuccess(result);
-          this.stopScan();
+          this.connect(device, (done: any) => {
+            // alert('connected to: ' + JSON.stringify(device, null, 2));
+            this.read(
+              device.id,
+              { serviceUUID: '180a', characteristicUUID: '2a25' },
+              'string',
+              (resp: any) => {
+                for (let item in device) {
+                  dpDevice[item] = device[item];
+                }
+                dpDevice.mac = device.id;
+                dpDevice.serialNumber = resp;
+                dpDevice.paired = false;
+                const result = { dpDevice, pairedDevices, unpairedDevices };
+                onSuccess(result);
+                this.stopScan();
+              },
+              false)
+          }, false);
         }
 
       }
@@ -165,17 +179,17 @@ export class BleService {
   public connect(device: any, onSuccess: any, onErr: any) {
     // let makeConnection = () => this.ble.connect(device.id).subscribe(onSuccess, onErr);
     // this.ble.scan([], 5).subscribe(makeConnection, onErr);
-    this.ble.connect(device.id).subscribe(onSuccess, onErr);
+    this.ble.connect(device.mac || device.id).subscribe(onSuccess, onErr);
   }
   
   public disconnect(device: any, onSuccess: any, onErr: any) {
-    let disconnect = () => this.ble.disconnect(device.id || device.address)
+    let disconnect = () => this.ble.disconnect(device.mac || device.id || device.address)
       .then(onSuccess, onErr);
     this.ble.scan([], 5).subscribe(disconnect, onErr);
   }
 
   public isConnected(device: any, onSuccess: any, onErr: any) {
-    this.ble.isConnected(device.id).then(onSuccess, onErr);
+    this.ble.isConnected(device.mac || device.id).then(onSuccess, onErr);
   }
 
   public read(address: any, uuid: any, type: string, onSuccess: any, onErr: any) {
