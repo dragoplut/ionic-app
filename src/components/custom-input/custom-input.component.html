@@ -1,7 +1,7 @@
 <div class="custom-input-container" [ngClass]="itemClass">
   <label
     #inputLabel
-    for="customInput{{itemLabel}}"
+    for="customInput{{itemLabel.split(' ').join('')}}"
     class="custom-input-label {{itemValue && itemValue.length ? 'input-not-empty' : ''}} {{inputLabel.isActive ? 'input-active' : ''}}"
   >
     {{itemLabel}}
@@ -10,14 +10,14 @@
     ngModel
     [disabled]="itemDisabled"
     [ngClass]="itemError && !inputLabel.isActive ? 'error' : ''"
-    type="{{ itemLabel === 'Password' ? 'password' : (itemType ? itemType : 'text') }}"
-    name="password"
+    type="{{itemType ? itemType : 'text'}}"
+    name="customInput{{itemLabel.split(' ').join('')}}"
     (focus)="inputLabel.isActive=true"
     (blur)="inputLabel.isActive=false"
     (keyup)="valueChange()"
     [(ngModel)]="itemValue"
-    autoComplete="new-password"
-    id="customInput{{itemLabel}}"
+    autoComplete="new-email"
+    id="customInput{{itemLabel.split(' ').join('')}}"
   >
   <span *ngIf="!inputLabel.isActive && itemValue" class="custom-input-error">{{itemError}}</span>
 </div>

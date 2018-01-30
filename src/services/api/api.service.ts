@@ -40,6 +40,8 @@ export class ApiService implements OnInit {
 
   public getByUrl(url: string): Observable<any> {
     return this.http.get(`${url}`)
+      .map(this.checkForError)
+      .catch((err: any) => Observable.throw(err))
       .map((resp: any) => {
         console.log(resp);
         return resp;
@@ -128,5 +130,13 @@ export class ApiService implements OnInit {
     let options: RequestOptions = new RequestOptions({ headers });
     options.withCredentials = true;
     return options;
+  }
+
+  protected getAzureOptions(): RequestOptions {
+    const headers: any = new Headers({
+        'Content-type': 'application/octet-stream\n',
+        'Authorization': `SharedKeyLite`
+      });
+    return new RequestOptions({ headers });
   }
 }
