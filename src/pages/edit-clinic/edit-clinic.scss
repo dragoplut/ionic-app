@@ -85,3 +85,11 @@ signin .content .scroll-content {
     }
   }
 }
+custom-input.input-full-width {
+  display: block;
+  width: 100% !important;
+  .custom-input-container {
+    margin: 0 auto;
+    width: 80% !important;
+  }
+}

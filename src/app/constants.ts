@@ -153,3 +153,44 @@ export const US_CITY_NAMES = [
   "Austin"
 ];
 
+export const CHAR_ELEM: any = {
+  read: {
+    file: {
+      none: 0,
+      usage_list: 1,
+      error_list: 2,
+      black_list: 3,
+      firmware_image: 4,
+      settings: 5
+    },
+    action: {
+      none: 0,
+      size: 1,
+      write: 2,
+      read: 3,
+      not_used: 4,
+      done: 5,
+      abort: 6
+    }
+  },
+  write: {
+    file: {
+      0: 'none',
+      1: 'usage_list',
+      2: 'error_list',
+      3: 'black_list',
+      4: 'firmware_image',
+      5: 'settings'
+    },
+    action: {
+      1: 'size',
+      2: 'not_used1',
+      3: 'read',
+      4: 'pause',
+      5: 'done',
+      6: 'not_used2',
+      7: 'timeout',
+      8: 'error'
+    }
+  }
+};

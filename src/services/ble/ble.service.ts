@@ -16,7 +16,7 @@ export class BleService {
   ) {}
 
   public enable() {
-    this.bluetoothSerial.enable();
+    // this.bluetoothSerial.enable();
     this.ble.enable();
   }
 
@@ -93,7 +93,7 @@ export class BleService {
                     // alert('isConnected: ' + JSON.stringify(isConnected, null, 2));
                     if (isConnected) {
                       this.disconnect(device, () => {
-                        // alert('disconnected from device: ' + JSON.stringify(device, null, 2));
+                        console.log('disconnected from device: ' + JSON.stringify(device, null, 2));
                       }, false);
                     }
                   }, false);
@@ -192,7 +192,7 @@ export class BleService {
   }
 
   public isConnected(device: any, onSuccess: any, onErr: any) {
-    this.ble.isConnected(device.mac || device.id).then(onSuccess, onErr);
+    this.ble.isConnected(device.mac || device.id).then((done: any) => onSuccess(done), onErr);
   }
 
   public read(address: any, uuid: any, type: string, onSuccess: any, onErr: any) {
@@ -262,11 +262,11 @@ export class BleService {
       case 'fileWrite':
       case 'fileRequest':
         let uint8arr2: any = new Uint8Array(2);
-        let uint32arr: any = new Uint32Array(4);
+        let uint32arr: any = new Uint32Array(1);
         uint8arr2[0] = arr[0];
         uint8arr2[1] = arr[1];
-        uint32arr[3] = arr[2];
-        result = this.concatTypedArrays(uint8arr2, uint32arr);
+        uint32arr[0] = arr[2];
+        result = this.concatTypedArrays(uint8arr2, this.uint32to8arr(uint32arr));
         // alert('bufferFromArrByType result: ' + JSON.stringify(result, null, 2));
         break;
       case 'writeBuffer':
@@ -334,6 +334,15 @@ export class BleService {
         break;
     }
     return result;
+  }
+
+  private uint32to8arr(uint32: any) {
+    let resultArr: any = new Uint8Array(4);
+    resultArr[3] = uint32 & 0xff;
+    resultArr[2] = (uint32 >> 8) & 0xff;
+    resultArr[1] = (uint32 >> 16) & 0xff;
+    resultArr[0] = (uint32 >> 24) & 0xff;
+    return resultArr;
   }
 
   private concatTypedArrays(a: any, b: any) { // a, b TypedArray of same type

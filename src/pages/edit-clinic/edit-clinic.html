@@ -71,6 +71,16 @@
       </div>
     </form>
     <div #map1 id="map1" style="height:100%" class="map-container"></div>
+    <custom-input
+      class="input-full-width"
+      *ngFor="let field of createAccInputs"
+      [itemDisabled]="field.disabled"
+      [itemValue]="account[field.modelName]"
+      [itemLabel]="field.placeholder"
+      [itemType]="field.type"
+      [itemError]="''"
+      (itemChange)="account[field.modelName] = $event; onChangeValidate()"
+    ></custom-input>
     <form
       ngForm
       name="editClinicFormSecond"
@@ -79,15 +89,6 @@
       (submit)="save()"
     >
       <div class="clear-container">
-        <custom-input
-          *ngFor="let field of createAccInputs"
-          [itemDisabled]="field.disabled"
-          [itemValue]="account[field.modelName]"
-          [itemLabel]="field.placeholder"
-          [itemType]="field.type"
-          [itemError]="''"
-          (itemChange)="account[field.modelName] = $event; onChangeValidate()"
-        ></custom-input>
         <div class="row-container">
           <span class="info-text-small">Would you like to appear in our clinic finder page?</span>
           <ion-toggle name="yesNoToggle" [(ngModel)]="account.finderPageEnabled"></ion-toggle>

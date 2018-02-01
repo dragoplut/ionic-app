@@ -42,10 +42,7 @@ export class ApiService implements OnInit {
     return this.http.get(`${url}`)
       .map(this.checkForError)
       .catch((err: any) => Observable.throw(err))
-      .map((resp: any) => {
-        console.log(resp);
-        return resp;
-      });
+      .map((resp: any) => resp);
   }
 
   public post(path, body): Observable<any> {

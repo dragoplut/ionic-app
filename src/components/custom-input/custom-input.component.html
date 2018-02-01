@@ -16,7 +16,8 @@
     (blur)="inputLabel.isActive=false"
     (keyup)="valueChange()"
     [(ngModel)]="itemValue"
-    autoComplete="new-email"
+    autoComplete="false"
+    spellCheck="false"
     id="customInput{{itemLabel.split(' ').join('')}}"
   >
   <span *ngIf="!inputLabel.isActive && itemValue" class="custom-input-error">{{itemError}}</span>
