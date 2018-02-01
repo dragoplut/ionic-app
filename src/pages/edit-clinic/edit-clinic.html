@@ -73,7 +73,7 @@
     <div #map1 id="map1" style="height:100%" class="map-container"></div>
     <custom-input
       class="input-full-width"
-      *ngFor="let field of createAccInputs"
+      *ngFor="let field of createAccInputs; trackById"
       [itemDisabled]="field.disabled"
       [itemValue]="account[field.modelName]"
       [itemLabel]="field.placeholder"
