@@ -31,7 +31,7 @@ export class RegisterPenComponent {
   public userInfo: any = {};
   public usageData: any = {};
   public dpDevice: any = { name: '' };
-  public firmwareVersion: any = '0.1.3';
+  public firmwareVersion: any = '';
   public errorData: any = '';
   public successData: any = '';
   public pairingDevice: any = 'No data yet!';
@@ -48,6 +48,9 @@ export class RegisterPenComponent {
   public deviceUpdated: boolean = false;
 
   public dependencies: any = {};
+
+  // Debug log data
+  public logData: any[] = [];
 
   public updatePercent: number = 0;
   public timeNowSeconds: number = moment().diff(moment().year(2017).startOf('year'), 'seconds');
@@ -84,7 +87,7 @@ export class RegisterPenComponent {
       this.updateUserInfo();
       // const dummyBlackWhiteList: any[] = [0,0,1,1,2,200];
       // this.addBlackWhiteList(dummyBlackWhiteList);
-      this.updateBlackWhiteList();
+      // this.updateBlackWhiteList();
       this._ble.enable();
       this.dependencies = this.navParams.get('dependencies') || {};
       this.dpDevice = { name: '' };
@@ -130,6 +133,7 @@ export class RegisterPenComponent {
   public startScanning(existingDevice?: any) {
     this.showButton = '';
     setTimeout(() => this.initConnectionChecker(), 300);
+    this.logEvent('Info', 'startScanning...', '');
 
     // this.gettingDevices = true;
     this._ble.stopScan();
@@ -175,6 +179,7 @@ export class RegisterPenComponent {
     this.gettingDevices = false;
     this.errorData = JSON.stringify(error);
     this.successData = '';
+    this.logEvent('Error', this.errorData, '');
     alert('fail: ' + this.errorData);
   };
 
@@ -245,6 +250,7 @@ export class RegisterPenComponent {
 
   public goNext() {
     if (this.dependencies.clinic && this.dependencies.newPen) {
+      this.logEvent('Info', 'Start Sync', '');
       this.updateDeviceSerialNumber(this.dpDevice, (device: any) => {
         let pen = {
           name: device.serialNumber,
@@ -253,26 +259,31 @@ export class RegisterPenComponent {
         };
         // alert(JSON.stringify(pen));
         this.startErrTimeout(60);
+        this.logEvent('Info', 'Start Pen Register', JSON.stringify(pen, null, 2));
         this._pen.registerPen(pen).subscribe(
           (resp: any) => {
             if (resp) {
+              this.logEvent('Success', 'Pen Registered', '');
               this.doPenUpdate();
             } else {
               this.showButton = 'done';
               this.errorDescription = 'Error. This pen is already registered to other clinic!';
+              this.logEvent('Error', 'This pen is already registered to other clinic!', '');
             }
           },
           (err: any) => alert(err)
         );
       });
     } else {
+      this.logEvent('Error', 'No clinic provided for pen!', '');
       alert('Error. No clinic provided for pen!');
     }
   }
 
   public doPenUpdate() {
-
+    this.logEvent('Info', 'Start Pen Update', this.dpDevice.serialNumber);
     this.requestDeviceSettings(this.dpDevice,(resp: any) => {
+      this.logEvent('Success', 'Device Settings', JSON.stringify(resp, null, 2));
       /** Update device settings if exist **/
       if (resp && resp.userId) {
         this.dummySettings[0] = resp.userId;
@@ -288,6 +299,7 @@ export class RegisterPenComponent {
         penErrorLists: []
       };
 
+      this.logEvent('Info', 'read Usage List from device', '[1,3,0]');
       /** Read "Usage List" **/
       this._pen.writeWithResponse(
         this.dpDevice.mac || this.dpDevice.id,
@@ -297,7 +309,9 @@ export class RegisterPenComponent {
 
           this.updatePercent = 25;
           syncListData.penUsageLists = resp.result;
+          this.logEvent('Success', 'Usage List', JSON.stringify(syncListData.penUsageLists, null, 2));
 
+          this.logEvent('Info', 'read Error List from device', '[2,3,0]');
           /** Read "Error List" **/
           this._pen.writeWithResponse(
             this.dpDevice.mac || this.dpDevice.id,
@@ -307,21 +321,29 @@ export class RegisterPenComponent {
 
               this.updatePercent = 30;
               syncListData.penErrorLists = resp.result;
+              this.logEvent('Success', 'Error List', JSON.stringify(syncListData.penErrorLists, null, 2));
 
+              this.logEvent('Info', 'Send Usage Lists and Error Lists pen logs to server', JSON.stringify(syncListData, null, 2));
               /**
                * Send Usage Lists and Error Lists pen logs to server
                */
               this._pen.saveSyncListData(syncListData).subscribe(
-                (success: any) => console.log('saveSyncListData success: ', success),
+                (success: any) => this.logEvent('Success', 'save Sync List Data success: ', JSON.stringify(success, null, 2)),
                 this.fail
               );
 
               this.usageData = _.clone(resp.result);
               let cartridgeIds: any[] = resp.result.map((item: any) => item.catridgeId);
               cartridgeIds = _.sortBy(_.uniq(cartridgeIds));
+
+              this.logEvent('Info', 'send Usage List cartridge ids to server and request Blacklist', JSON.stringify(cartridgeIds, null, 2));
               /** Send "Cartridge" id's to server **/
               this.doUpdateApiWhiteBlackList(cartridgeIds, (data: any) => {
                 this.updatePercent = 35;
+                this.logEvent('Success', 'Blacklist received', JSON.stringify(data, null, 2));
+
+                this.logEvent('Info', 'as all data from Pen has been read, start Firmware version check', this.firmwareVersion);
+
                 this.checkFirmwareUpdate(data, (done: any) => {
                   this.updatePercent = 40;
                   this.doUpdateBlackListAndSettings(data);
@@ -347,6 +369,7 @@ export class RegisterPenComponent {
       if (updateFirmware) {
         this.getLastFirmwareVersion(data, callback);
       } else {
+        this.logEvent('Info', 'Firmware update NOT required.', '');
         callback(data);
       }
     });
@@ -364,6 +387,7 @@ export class RegisterPenComponent {
       device,
       (done: any) => {
         this.updatePercent = 80;
+        this.logEvent('Success', 'Device Settings updated', JSON.stringify(done, null, 2));
         // alert('2 doUpdateBlackListAndSettings done' + JSON.stringify(done, null, 2) + ' device: ' + JSON.stringify(device, null, 2));
         /** Write new "Black List" to BLE device **/
         this.updateDeviceBlacklist(
@@ -372,6 +396,8 @@ export class RegisterPenComponent {
             // this.checkFirmwareUpdate([], () => {
             // });
             this.updatePercent = 100;
+            this.logEvent('Success', 'Device Black List updated', JSON.stringify(resp, null, 2));
+            this.logEvent('Success', 'Sync Done!', '----------------------------------------------------');
             setTimeout(() => {
               this.deviceUpdated = true;
               clearInterval(this.errTimeout);
@@ -391,6 +417,7 @@ export class RegisterPenComponent {
   }
 
   public updateDeviceSettings(device: any, callback: any, fail: any) {
+    this.logEvent('Info', 'start Device Settings update', JSON.stringify([CHAR_ELEM.read.file.settings,CHAR_ELEM.read.action.write,16], null, 2));
     // alert('4 updateDeviceSettings device: ' + JSON.stringify(device, null, 2));
     this._pen.writeWithResponse(
       device.mac || device.id,
@@ -402,6 +429,7 @@ export class RegisterPenComponent {
   }
 
   public updateDeviceBlacklist(device: any, callback: any, fail: any) {
+    this.logEvent('Info', 'start Device Blacklist update', JSON.stringify([CHAR_ELEM.read.file.black_list,CHAR_ELEM.read.action.write,0], null, 2));
     // alert('3 updateDeviceBlacklist device: ' + JSON.stringify(device, null, 2));
     this._pen.writeWithResponse(
       device.mac || device.id,
@@ -414,6 +442,7 @@ export class RegisterPenComponent {
 
   public requestDeviceSettings(device: any, callback: any, fail: any) {
     // alert('updateDeviceBlacklist device: ' + JSON.stringify(device, null, 2));
+    this.logEvent('Info', 'Request Device Settings from API for', this.dpDevice.serialNumber);
     this._pen.getSettings(this.dpDevice.serialNumber || this.dpDevice.name).subscribe(callback, fail);
   }
 
@@ -443,7 +472,7 @@ export class RegisterPenComponent {
         this.dpDevice.mac = resp.dpDevice.mac;
       }
       /** Connect to BLE device and invoke provided function **/
-      this._ble.connect(this.dpDevice, true, false);
+      this._ble.connect(this.dpDevice, callback, false);
     }, this._ble.stopScan);
   }
 
@@ -473,6 +502,7 @@ export class RegisterPenComponent {
     let jwtCheckInterval: any = setInterval(() => {
       this._ble.isConnected(this.dpDevice, () => {
         this.dpDevice.paired = true;
+        this.logEvent('Success', 'device paired', JSON.stringify(this.dpDevice.paired, null, 2));
         clearInterval(jwtCheckInterval);
         if (callback) {
           callback();
@@ -515,7 +545,7 @@ export class RegisterPenComponent {
       (resp: any) => {
         this.userInfo = resp;
         this.dummySettings[0] = this.userInfo.accountId;
-
+        this.logEvent('Info', 'getAccountInfo success');
         /** Firmware version check and firmware update. Postponed functionality **/
         // this.isNewFirmwareAvailable();
         // this.getLastFirmwareVersion();
@@ -525,12 +555,14 @@ export class RegisterPenComponent {
   }
 
   public updateDeviceSerialNumber(dpDevice: any, callback?: any) {
+    this.logEvent('Info', 'Start read device serial number for address', dpDevice.mac || dpDevice.id);
     this._ble.read(
       dpDevice.mac || dpDevice.id,
       { serviceUUID: '180a', characteristicUUID: '2a25' },
       'string',
       (resp: any) => {
         if (resp) {
+          this.logEvent('Info', 'device serial number', resp);
           dpDevice.serialNumber = resp;
           if (callback) {
             callback(dpDevice);
@@ -559,6 +591,7 @@ export class RegisterPenComponent {
 
   /** Firmware version check and firmware update. Postponed functionality **/
   public isNewFirmwareAvailable(callback: any) {
+    this.logEvent('Info', 'read Pen Firmware version for device address', this.dpDevice.mac || this.dpDevice.id);
     this._ble.read(
       this.dpDevice.mac || this.dpDevice.id,
       { serviceUUID: '180a', characteristicUUID: '2a26' },
@@ -566,7 +599,9 @@ export class RegisterPenComponent {
       (resp: any) => {
         // console.log('isNewFirmwareAvailable writeToDevice Firmware Revision: ', resp);
         if (resp && resp.length) {
+          this.logEvent('Success', 'current Firmware version', resp);
           this.firmwareVersion = resp;
+          this.logEvent('Info', 'start check if new Firmware is available', '');
           this._firmware.isNewVersionAvailable(this.firmwareVersion + '.hex').subscribe(
             (resp: any) => {
               // alert('isNewFirmwareAvailable: ' + JSON.stringify(resp));
@@ -587,7 +622,9 @@ export class RegisterPenComponent {
         // alert('getLastFirmwareVersion: ' + JSON.stringify(resp));
         // console.log('getLastFirmwareVersion: ', resp);
         if (resp && resp.downloadLink && resp.version !== this.firmwareVersion + '.hex') {
+          this.logEvent('Info', 'new Firmware is available! Request firmware image.', '');
           // if (resp && resp.downloadLink && resp.version) {
+          this.logEvent('Info', 'start download Firmware image by url', resp.downloadLink);
           this._api.getByUrl(resp.downloadLink).subscribe(
             (resp: any) => {
               // console.log('getLastFirmwareVersion this._api.getByUrl resp: ', resp);
@@ -595,10 +632,12 @@ export class RegisterPenComponent {
               // console.log('------------ firmwareHexStr: ', firmwareHexStr);
               const firmwareData: any = this._util.getFirmwareHexBuffer(firmwareHexStr);
               // console.log('------------ firmwareBuffer: ', firmwareBuffer);
+              this.logEvent('Success', 'Firmware image received and prepared for transfer to device!', '');
 
               if (firmwareData.buffer && firmwareData.buffer.length) {
                 this.firmwareBuffer = _.clone(firmwareData.buffer);
                 this.dpDevice.firmwareBuffer = this.firmwareBuffer;
+                this.logEvent('Info', 'start Firmware image transfer to device', JSON.stringify([CHAR_ELEM.read.file.firmware_image,CHAR_ELEM.read.action.write,firmwareData.bytesLength || 0], null, 2));
                 this._pen.writeWithResponse(
                   this.dpDevice.mac || this.dpDevice.id,
                   { serviceUUID: 'a8a91000-38e9-4fbe-83f3-d82aae6ff68e', characteristicUUID: 'a8a91003-38e9-4fbe-83f3-d82aae6ff68e', type: 'fileWrite', device: this.dpDevice },
@@ -621,6 +660,7 @@ export class RegisterPenComponent {
             }
           );
         } else {
+          this.logEvent('Info', 'Firmware update NOT required.', '');
           callback(data);
         }
       },
@@ -628,10 +668,16 @@ export class RegisterPenComponent {
     );
   }
 
+  private logEvent(logType: string, logDescription: string, logData?: any) {
+    const log: string = `${(new Date()).toISOString()} ${logType}: ${logDescription} ${logData || ''}`;
+    this.logData.push(log);
+  }
+
   private startErrTimeout(sec: number) {
     this.errTimeout = setTimeout(() => {
       this.errorDescription = 'Communication to the pen error';
       this.updatePercent = 0;
+      this.logEvent('Error', 'Communication to the pen error by timeout', '');
     }, sec * 1000)
   }
 }
