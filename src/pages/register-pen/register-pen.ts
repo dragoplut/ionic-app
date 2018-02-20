@@ -397,17 +397,27 @@ export class RegisterPenComponent {
             // });
             this.updatePercent = 100;
             this.logEvent('Success', 'Device Black List updated', JSON.stringify(resp, null, 2));
-            this.logEvent('Success', 'Sync Done!', '----------------------------------------------------');
-            setTimeout(() => {
-              this.deviceUpdated = true;
-              clearInterval(this.errTimeout);
-              this._ble.isConnected(this.dpDevice, (isConnected: any) => {
-                // console.log('isConnected: ', isConnected);
-                if (isConnected) {
-                  this._ble.disconnect(this.dpDevice, (done: any) => console.log('disconnect done: ', done), false);
-                }
-              }, false)
-            }, 100);
+            this.deviceUpdated = true;
+            clearInterval(this.errTimeout);
+            this._ble.isConnected(this.dpDevice, (isConnected: any) => {
+              console.log('isConnected: ', isConnected);
+              if (isConnected) {
+                this._ble.disconnect(this.dpDevice, (done: any) => {
+                  console.log('disconnect done: ', done);
+                  this.logEvent('Success', 'Disconnect: ', done);
+                  this._ble.isConnected(
+                    this.dpDevice,
+                    (connected: any) => {
+                      this.logEvent('Err', 'Check if still connected: ', connected);
+                    },
+                    (notConnected: any) => {
+                      this.logEvent('Success', 'Check if still connected: ', notConnected);
+                      this.logEvent('Success', 'Sync Done!', '----------------------------------------------------');
+                    },
+                  );
+                }, false);
+              }
+            }, false)
           },
           (errDescription: string) => this.errorData = errDescription
         )
@@ -441,7 +451,6 @@ export class RegisterPenComponent {
   }
 
   public requestDeviceSettings(device: any, callback: any, fail: any) {
-    // alert('updateDeviceBlacklist device: ' + JSON.stringify(device, null, 2));
     this.logEvent('Info', 'Request Device Settings from API for', this.dpDevice.serialNumber);
     this._pen.getSettings(this.dpDevice.serialNumber || this.dpDevice.name).subscribe(callback, fail);
   }

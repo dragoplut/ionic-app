@@ -16,3 +16,9 @@ export type T_LOCATION_PARAMS = {
   countryName?: string,
   stateName?: string
 };
+
+export type T_BLE_NOTIFICATION_ACTIVE = {
+  timestamp: any,
+  address: string,
+  uuid: any
+};

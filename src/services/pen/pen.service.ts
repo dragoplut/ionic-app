@@ -421,6 +421,7 @@ export class PenService {
       switch (rawData[1]) {
         case CHAR_ELEM.read.action.write:
           // alert('writeWithResponse rawData: ' + JSON.stringify(rawData));
+
           this._ble.startNotification(
             address,
             { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91004-38e9-4fbe-83f3-d82aae6ff68e', type: item.type },
@@ -625,6 +626,7 @@ export class PenService {
               this.bleWriteEmitter.emit('write', this.bleWriteEmitter, writeBufferItem);
               break;
             case 5:
+              this.buffWriteStatus.idx = 0;
               this.buffWriteStatus.status = data[1];
               callback(data);
               break;
@@ -660,6 +662,7 @@ export class PenService {
               );
               break;
             case 5:
+              this.buffWriteStatus.idx = 0;
               // alert('write DONE!!!!!!!');
               callback(data);
               break;

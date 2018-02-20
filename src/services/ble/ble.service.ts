@@ -7,8 +7,12 @@ import { BLE } from '@ionic-native/ble';
 // noinspection TypeScriptCheckImport
 import * as _ from 'lodash';
 
+import { T_BLE_NOTIFICATION_ACTIVE } from '../../app/types';
+
 @Injectable()
 export class BleService {
+
+  private activeNotifications: T_BLE_NOTIFICATION_ACTIVE[] = [];
 
   constructor(
     private ble: BLE,
@@ -17,7 +21,7 @@ export class BleService {
 
   public enable() {
     // this.bluetoothSerial.enable();
-    this.ble.enable();
+    // this.ble.enable();
   }
 
   public discoverableSec(sec: number) {
@@ -69,6 +73,9 @@ export class BleService {
            device.name.toLowerCase().indexOf('derma') !== -1)) {
 
         if (existingDevice && (existingDevice.serialNumber || existingDevice.name)) {
+          console.log('1 this.connect(device', device);
+          // this.isConnected(device, (connected: any) => console.log(connected), false);
+          this.stopScan();
           this.connect(device, (done: any) => {
             // alert('existingDevice connected to: ' + JSON.stringify(device, null, 2));
             this.read(
@@ -87,7 +94,6 @@ export class BleService {
                   dpDevice.paired = false;
                   const result = { dpDevice, pairedDevices, unpairedDevices };
                   onSuccess(result);
-                  this.stopScan();
                 } else {
                   this.isConnected(device, (isConnected: any) => {
                     // alert('isConnected: ' + JSON.stringify(isConnected, null, 2));
@@ -103,6 +109,9 @@ export class BleService {
           }, false);
 
         } else {
+          console.log('2 this.connect(device', device);
+          // this.isConnected(device, (connected: any) => console.log(connected), false);
+          this.stopScan();
           this.connect(device, (done: any) => {
             // alert('new device connected to: ' + JSON.stringify(device, null, 2));
             this.read(
@@ -120,7 +129,6 @@ export class BleService {
                 // alert('new device resp: ' + resp + ' dpDevice ' + JSON.stringify(dpDevice, null, 2));
                 const result = { dpDevice, pairedDevices, unpairedDevices };
                 onSuccess(result);
-                this.stopScan();
               },
               false)
           }, false);
@@ -132,7 +140,11 @@ export class BleService {
   }
 
   public stopScan(onSuccess?: any, onErr?: any) {
-    this.ble.stopScan().then(onSuccess, onErr);
+    this.ble.stopScan().then((done: any) => {
+      if (onSuccess) {
+        onSuccess(done);
+      }
+    }, onErr);
   }
 
   public discoverUnpaired(onSuccess: any, onErr: any) {
@@ -186,9 +198,63 @@ export class BleService {
   }
   
   public disconnect(device: any, onSuccess: any, onErr: any) {
-    let disconnect = () => this.ble.disconnect(device.mac || device.id || device.address)
-      .then(onSuccess, onErr);
-    this.ble.scan([], 5).subscribe(disconnect, onErr);
+    // this.clearNotificationsQueue();
+    // this.ble.scan([], 5).subscribe(() => true, () => false);
+    // setTimeout(() => {
+    //   console.log('disconnect device: ', device);
+    //   this.ble.disconnect(device.id)
+    //     .then((done: any) => {
+    //       console.log('this.ble.disconnect done: ', done);
+    //       if (onSuccess) {
+    //         onSuccess(done);
+    //       }
+    //     }, onErr);
+    //   // this.bluetoothSerial.disconnect()
+    //   //   .then(
+    //   //     (done: any) => {
+    //   //       console.log('this.bluetoothSerial.disconnect done: ', done);
+    //   //     }, (err: any) => {
+    //   //       console.log('this.bluetoothSerial.disconnect err: ', err);
+    //   //     });
+    // }, 200);
+
+    this.clearNotificationsQueue();
+    let disconnect = () => {
+      setTimeout(() => {
+        console.log('disconnect device: ', device);
+        this.ble.disconnect(device.id || device.address || device.mac)
+          .then((done: any) => {
+            this.stopScan();
+            onSuccess(done);
+          }, onErr);
+        this.bluetoothSerial.disconnect().then(
+          (done: any) => {
+            console.log('this.bluetoothSerial.disconnect done: ', done);
+            this.isConnected(
+              device,
+              (connectedDone: any) => {
+                console.log('this.bluetoothSerial.disconnect this.isConnected connectedDone: ', connectedDone);
+              },
+              (connectedErr: any) => {
+                console.log('this.bluetoothSerial.disconnect this.isConnected connectedErr: ', connectedErr);
+              },
+              )
+          },
+          (err: any) => {
+            console.log('this.bluetoothSerial.disconnect err: ', err);
+          }
+        );
+      }, 100);
+    };
+    disconnect();
+    // this.ble.scan([], 5).subscribe(() => , onErr);
+    // this.isConnected(device, (isConnected: any) => {
+    //   console.log('isConnected: ', isConnected);
+    //   if (isConnected) {
+    //     disconnect();
+    //     // this.ble.scan([], 5).subscribe(disconnect, onErr);
+    //   }
+    // }, false);
   }
 
   public isConnected(device: any, onSuccess: any, onErr: any) {
@@ -226,6 +292,7 @@ export class BleService {
 
   public startNotification(address: any, uuid: any, onSuccess: any, onErr: any) {
     // alert('startNotification: ' + uuid.characteristicUUID);
+    this.addActiveNotification(address, uuid);
     this.ble.startNotification(address, uuid.serviceUUID, uuid.characteristicUUID)
       .subscribe((buffer: any) => onSuccess(this.arrFromBufferByType(uuid.type, buffer)), onErr);
   }
@@ -233,6 +300,30 @@ export class BleService {
   public stopNotification(address: any, uuid: any, onSuccess: any, onErr: any) {
     this.ble.stopNotification(address, uuid.serviceUUID, uuid.characteristicUUID)
       .then(onSuccess, onErr);
+  }
+
+  private addActiveNotification(address: string, uuid: any) {
+    const notificationDetails: T_BLE_NOTIFICATION_ACTIVE = {
+      timestamp: new Date().toISOString(),
+      address,
+      uuid
+    };
+    this.activeNotifications.push(notificationDetails);
+  }
+
+  private removeActiveNotification(timestamp: any) {
+    this.activeNotifications = _.filter(this.activeNotifications, (item: T_BLE_NOTIFICATION_ACTIVE) => item.timestamp !== timestamp);
+  }
+
+  private clearNotificationsQueue() {
+    _.forEach(this.activeNotifications, (item: T_BLE_NOTIFICATION_ACTIVE) => {
+      setTimeout(() => {
+        this.stopNotification(item.address, item.uuid, () => {
+          console.log('stopNotification', item);
+          this.removeActiveNotification(item.timestamp);
+        }, false);
+      }, 0);
+    });
   }
 
   private handleBufferByType(type: string, buffer: any) {
