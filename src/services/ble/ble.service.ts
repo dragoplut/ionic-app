@@ -27,7 +27,7 @@ export class BleService {
   public discoverableSec(sec: number) {
     this.bluetoothSerial.setDiscoverable(sec);
   }
-  
+
   public scan(existingDevice: any, onSuccess: any, onErr: any) {
     /** Stop previous scan if it was active **/
     this.ble.stopScan();
@@ -73,11 +73,23 @@ export class BleService {
            device.name.toLowerCase().indexOf('derma') !== -1)) {
 
         if (existingDevice && (existingDevice.serialNumber || existingDevice.name)) {
-          console.log('1 this.connect(device', device);
+          // console.log('1 this.connect(device', device);
           // this.isConnected(device, (connected: any) => console.log(connected), false);
           this.stopScan();
           this.connect(device, (done: any) => {
             // alert('existingDevice connected to: ' + JSON.stringify(device, null, 2));
+            // this.disconnect(device,
+            //     (resp: any) => {
+            //       console.log('disconnect resp: ', resp);
+            //       this.stopScan((stopScanDone: any) => { console.log('stopScanDone: ', stopScanDone); });
+            //       onSuccess(resp);
+            //     },
+            //     (err: any) => {
+            //       console.log('disconnect err: ', err);
+            //       onErr(err);
+            //     }
+            //   );
+
             this.read(
               device.id,
               { serviceUUID: '180a', characteristicUUID: '2a25' },
@@ -194,9 +206,19 @@ export class BleService {
   public connect(device: any, onSuccess: any, onErr: any) {
     // let makeConnection = () => this.ble.connect(device.id).subscribe(onSuccess, onErr);
     // this.ble.scan([], 5).subscribe(makeConnection, onErr);
-    this.ble.connect(device.mac || device.id).subscribe(onSuccess, onErr);
+    this.isConnected(device,
+      (connected: any) => {
+        console.log('already connected: ', connected);
+      },
+      (notConnected: any) => {
+        console.log('not connected: ', notConnected);
+        console.log('ble.service.ts connect device: ', device);
+        this.ble.connect(device.mac || device.id).subscribe(onSuccess, onErr);
+      },
+    );
+    // this.bluetoothSerial.connect(device.mac || device.id).subscribe(onSuccess, onErr);
   }
-  
+
   public disconnect(device: any, onSuccess: any, onErr: any) {
     // this.clearNotificationsQueue();
     // this.ble.scan([], 5).subscribe(() => true, () => false);
@@ -219,34 +241,121 @@ export class BleService {
     // }, 200);
 
     this.clearNotificationsQueue();
-    let disconnect = () => {
-      setTimeout(() => {
-        console.log('disconnect device: ', device);
-        this.ble.disconnect(device.id || device.address || device.mac)
-          .then((done: any) => {
-            this.stopScan();
-            onSuccess(done);
-          }, onErr);
-        this.bluetoothSerial.disconnect().then(
-          (done: any) => {
-            console.log('this.bluetoothSerial.disconnect done: ', done);
-            this.isConnected(
-              device,
-              (connectedDone: any) => {
-                console.log('this.bluetoothSerial.disconnect this.isConnected connectedDone: ', connectedDone);
-              },
-              (connectedErr: any) => {
-                console.log('this.bluetoothSerial.disconnect this.isConnected connectedErr: ', connectedErr);
-              },
-              )
-          },
-          (err: any) => {
-            console.log('this.bluetoothSerial.disconnect err: ', err);
-          }
-        );
-      }, 100);
-    };
-    disconnect();
+
+    this.isConnected(
+      device,
+      (connected: any) => {
+        console.log('isConnected (disconnection required) connected: ', connected);
+
+        this.ble.disconnect(device.mac || device.id || device.address)
+          .then(
+            (resp: any) => {
+              console.log('disconnect resp: ', resp);
+              this.stopScan((stopScanDone: any) => { console.log('stopScanDone: ', stopScanDone); });
+              onSuccess(resp);
+            },
+            (err: any) => {
+              console.log('disconnect err: ', err);
+              onErr(err);
+            }
+          );
+      },
+      (disconnected: any) => {
+        console.log('isConnected (NO disconnection required) disconnected: ', disconnected);
+      },
+    );
+
+
+    // THIS SOLUTION WORKS!
+    // this.ble.disconnect(device.mac || device.id || device.address)
+    //   .then(
+    //     (resp: any) => {
+    //       console.log('disconnect resp: ', resp);
+    //       this.stopScan((stopScanDone: any) => { console.log('stopScanDone: ', stopScanDone); });
+    //       onSuccess(resp);
+    //     },
+    //     (err: any) => {
+    //       console.log('disconnect err: ', err);
+    //       onErr(err);
+    //     }
+    //   );
+
+    // this.ble.scan([], 5).subscribe((done: any) => {
+    //   this.isConnected(
+    //     device,
+    //     (connected: any) => {
+    //       console.log('isConnected (disconnection required) connected: ', connected);
+    //
+    //       this.ble.disconnect(device.mac || device.id || device.address)
+    //         .then(
+    //           (resp: any) => {
+    //             console.log('disconnect resp: ', resp);
+    //             this.stopScan((stopScanDone: any) => { console.log('stopScanDone: ', stopScanDone); });
+    //             onSuccess(resp);
+    //           },
+    //           (err: any) => {
+    //             console.log('disconnect err: ', err);
+    //             onErr(err);
+    //           }
+    //         );
+    //     },
+    //     (disconnected: any) => {
+    //       console.log('isConnected (NO disconnection required) disconnected: ', disconnected);
+    //     },
+    //   );
+    // }, () => false);
+
+    // let disconnect = () => {
+    //   setTimeout(() => {
+    //     console.log('disconnect device: ', device);
+    //     this.ble.disconnect(device.id || device.address || device.mac)
+    //       .then(
+    //         (resp: any) => {
+    //           this.stopScan();
+    //           this.isConnected(
+    //             device,
+    //             (connectedDone: any) => {
+    //               console.log('this.ble.disconnect OK this.isConnected connectedDone: ', connectedDone);
+    //             },
+    //             (connectedErr: any) => {
+    //               console.log('this.ble.disconnect OK this.isConnected connectedErr: ', connectedErr);
+    //             },
+    //           );
+    //           onSuccess(resp);
+    //         },
+    //         (err: any) => {
+    //           this.isConnected(
+    //             device,
+    //             (connectedDone: any) => {
+    //               console.log('this.ble.disconnect ERR this.isConnected connectedDone: ', connectedDone);
+    //             },
+    //             (connectedErr: any) => {
+    //               console.log('this.ble.disconnect ERR this.isConnected connectedErr: ', connectedErr);
+    //             },
+    //           );
+    //           onErr(err);
+    //         }
+    //       );
+    //     // this.bluetoothSerial.disconnect().then(
+    //     //   (done: any) => {
+    //     //     console.log('this.bluetoothSerial.disconnect done: ', done);
+    //     //     this.isConnected(
+    //     //       device,
+    //     //       (connectedDone: any) => {
+    //     //         console.log('this.bluetoothSerial.disconnect this.isConnected connectedDone: ', connectedDone);
+    //     //       },
+    //     //       (connectedErr: any) => {
+    //     //         console.log('this.bluetoothSerial.disconnect this.isConnected connectedErr: ', connectedErr);
+    //     //       },
+    //     //       )
+    //     //   },
+    //     //   (err: any) => {
+    //     //     console.log('this.bluetoothSerial.disconnect err: ', err);
+    //     //   }
+    //     // );
+    //   }, 100);
+    // };
+    // disconnect();
     // this.ble.scan([], 5).subscribe(() => , onErr);
     // this.isConnected(device, (isConnected: any) => {
     //   console.log('isConnected: ', isConnected);
@@ -317,12 +426,10 @@ export class BleService {
 
   private clearNotificationsQueue() {
     _.forEach(this.activeNotifications, (item: T_BLE_NOTIFICATION_ACTIVE) => {
-      setTimeout(() => {
-        this.stopNotification(item.address, item.uuid, () => {
-          console.log('stopNotification', item);
-          this.removeActiveNotification(item.timestamp);
-        }, false);
-      }, 0);
+      this.stopNotification(item.address, item.uuid, () => {
+        console.log('stopNotification', item);
+        this.removeActiveNotification(item.timestamp);
+      }, false);
     });
   }
 

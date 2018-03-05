@@ -107,9 +107,10 @@
         <img alt="Device screen example" src="{{devicePanelImg}}" class="dpw-device-panel">
       </div>
       <div class="actions col-xs-12">
-        <a *ngIf="dpDevice.paired" class="link-nav pull-right" (click)="dependencies.newPen ? goNext() : doPenUpdate()">
-          {{ dependencies.newPen ? 'Register' : 'Next' }}
-        </a>
+        <!--<a *ngIf="dpDevice.paired" class="link-nav pull-right" (click)="dependencies.newPen ? goNext() : doPenUpdate()">-->
+          <!--{{ dependencies.newPen ? 'Register' : 'Next' }}-->
+        <!--</a>-->
+
         <!--<a class="link-nav pull-right" (click)="doPenUpdate()">-->
           <!--Update Pen-->
         <!--</a>-->
@@ -151,6 +152,7 @@
     <!--<span class="device-details" *ngIf="errorData"><ion-icon small class="list-icon-absolute" name="close" (tap)="errorData = ''"></ion-icon>Error: {{errorData}}</span>-->
     <img alt="Dermapenworld" src="{{logoTransparent}}" class="dpw-logo-foot">
   </div>
+  <button ion-button block (click)="disconnect()">Disconnect</button>
   <div class="create-account row center-xs middle-xs" *ngIf="logData.length">
     <ion-list class="device-details">
       <button ion-button block (click)="logData = []">Clear Log</button>

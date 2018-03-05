@@ -105,22 +105,6 @@ export class RegisterPenComponent {
           };
         }
         this.startScanning(this.dpDevice);
-        // this._ble.isConnected(
-        //   this.dpDevice,
-        //   (resp: any) => {
-        //     if (resp) {
-        //       this.dpDevice.paired = true;
-        //     } else {
-        //       setTimeout(() => this.initConnectionChecker(), 300);
-        //       this._ble.scan(this.dpDevice || {}, (resp: any) => {
-        //         if (resp && resp.dpDevice) {
-        //           this._ble.connect(resp.dpDevice, this.connected, false);
-        //         }
-        //       }, this._ble.stopScan);
-        //     }
-        //   },
-        //   () => {
-        //   });
       } else {
         this.startScanning();
       }
@@ -282,6 +266,16 @@ export class RegisterPenComponent {
 
   public doPenUpdate() {
     this.logEvent('Info', 'Start Pen Update', this.dpDevice.serialNumber);
+    // this.logEvent('Info', 'Disconnect Pen', this.dpDevice.serialNumber);
+    // this._ble.disconnect(
+    //   this.dpDevice,
+    //   (done: any) => {
+    //     console.log('Disconnect done: ', done);
+    //   },
+    //   (err: any) => {
+    //     console.log('Disconnect err: ', err);
+    //   }
+    //   );
     this.requestDeviceSettings(this.dpDevice,(resp: any) => {
       this.logEvent('Success', 'Device Settings', JSON.stringify(resp, null, 2));
       /** Update device settings if exist **/
@@ -465,6 +459,7 @@ export class RegisterPenComponent {
 
   public doDone() {
     clearInterval(this.jwtCheckIntervalPermanent);
+    this._ble.stopScan();
     this.openPage(MyPenComponent);
   }
 
@@ -505,6 +500,7 @@ export class RegisterPenComponent {
     } else if (resp.dpDevice && resp.dpDevice.id && resp.dpDevice.paired) {
       this.isConnected(resp.dpDevice);
     }
+    this.dependencies.newPen ? this.goNext() : this.doPenUpdate();
   }
 
   public initConnectionChecker(callback?: any) {
