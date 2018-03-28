@@ -707,9 +707,19 @@ export class PenService {
             break;
         }
         this.rawData = [];
-        if (callback) {
-          callback(resp);
-        }
+        this._ble.startNotification(
+          address,
+          { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91004-38e9-4fbe-83f3-d82aae6ff68e', type: item.type },
+          (done: any) => {
+            // alert(JSON.stringify(done, null, 2));
+            if (callback) {
+              // this._ble.stopNotification(address, { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91004-38e9-4fbe-83f3-d82aae6ff68e' }, true, false);
+              callback(resp);
+            }
+          },
+          (err: any) => false,
+          true
+        );
       }, false);
     }
     // const cartIdArr: any = new Uint8Array(buffer, 2, 3);

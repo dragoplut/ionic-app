@@ -399,11 +399,11 @@ export class BleService {
       .then(onSuccess, onErr);
   }
 
-  public startNotification(address: any, uuid: any, onSuccess: any, onErr: any) {
+  public startNotification(address: any, uuid: any, onSuccess: any, onErr: any, eraseResp?: boolean) {
     // alert('startNotification: ' + uuid.characteristicUUID);
     this.addActiveNotification(address, uuid);
     this.ble.startNotification(address, uuid.serviceUUID, uuid.characteristicUUID)
-      .subscribe((buffer: any) => onSuccess(this.arrFromBufferByType(uuid.type, buffer)), onErr);
+      .subscribe((buffer: any) => onSuccess(eraseResp ? buffer : this.arrFromBufferByType(uuid.type, buffer)), onErr);
   }
 
   public stopNotification(address: any, uuid: any, onSuccess: any, onErr: any) {

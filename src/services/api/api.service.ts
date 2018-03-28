@@ -18,7 +18,12 @@ export class ApiService implements OnInit {
     'Content-type': 'application/json-patch+json'
   });
   public token: string = '';
+  // Dev environment
   protected endpoint: string = 'http://regen-dev.azurewebsites.net/api/mobile';
+  // Stable environment
+  // protected endpoint: string = 'http://regen-stable.azurewebsites.net/api/mobile';
+  // Production environment
+  // protected endpoint: string = 'http://regen-production.azurewebsites.net/api/mobile';
 
   constructor(
     public http: Http
