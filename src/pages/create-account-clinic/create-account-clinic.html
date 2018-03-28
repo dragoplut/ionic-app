@@ -28,35 +28,32 @@
 
         <div class="clear-container additional-content-block">
           <div class="container-half pull-left">
-            <custom-select
+            <custom-input
               [itemDisabled]="loading"
               [itemValue]="account.clinic.location.country"
               [itemLabel]="'Country'"
-              [itemOptions]="countryNamesArr"
               [itemType]="'text'"
               [itemError]="''"
               (itemChange)="account.clinic.location.country = $event; onChangeValidate('country')"
-            ></custom-select>
-            <custom-select
-              [itemDisabled]="!account.clinic.location.state || loading"
+            ></custom-input>
+            <custom-input
+              [itemDisabled]="loading"
               [itemValue]="account.clinic.location.city"
               [itemLabel]="'City'"
-              [itemOptions]="cityNamesArr"
               [itemType]="'text'"
               [itemError]="''"
               (itemChange)="account.clinic.location.city = $event; onChangeValidate('city')"
-            ></custom-select>
+            ></custom-input>
           </div>
           <div class="container-half pull-right">
-            <custom-select
-              [itemDisabled]="!account.clinic.location.country || loading"
+            <custom-input
+              [itemDisabled]="loading"
               [itemValue]="account.clinic.location.state"
               [itemLabel]="'State'"
-              [itemOptions]="stateNamesArr"
               [itemType]="'text'"
               [itemError]="''"
               (itemChange)="account.clinic.location.state = $event; onChangeValidate('state')"
-            ></custom-select>
+            ></custom-input>
             <custom-input
               [itemDisabled]="loading"
               [itemValue]="account.clinic.location.zip"
