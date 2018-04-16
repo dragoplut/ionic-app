@@ -448,6 +448,8 @@ export class PenService {
     let resultArrUint8: any = new Uint8Array(resultArrVarints128);
 
     if (rawData[0] === 3 && rawData[1] === 2) {
+      console.log('resultArrUint8.length: ', resultArrUint8.length);
+      console.log('resultArrUint8: ', resultArrUint8);
       rawData[2] = resultArrUint8.length;
     } else if (rawData[0] === 5 && rawData[1] === 2) {
       rawData[2] = 16;
