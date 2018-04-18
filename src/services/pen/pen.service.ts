@@ -188,7 +188,7 @@ export class PenService {
   };
 
   public timeNowSeconds: number = moment().diff(moment().year(2017).startOf('year'), 'seconds');
-  public dummyWhiteBlackList: number[] = [0,0,1,1,2,3,4,6,7,300];
+  public dummyWhiteBlackList: number[] = [];
   public firmwareBuffer: any = [];
   public dummySettings: any[] = [
     123456,
@@ -212,8 +212,9 @@ export class PenService {
     private api: ApiService
   ) {
     this.bleWriteEmitter.on('write', (bleWriteEmitter: any, item: any) => {
-      if (this.buffWriteStatus.lock || this.buffWriteStatus.died) {
-        // console.log('locked or died');
+      const successStatus: number = 5;
+      if (this.buffWriteStatus.lock || this.buffWriteStatus.died || this.buffWriteStatus.status === successStatus) {
+        console.log('locked or died');
         return;
       }
 
@@ -226,7 +227,8 @@ export class PenService {
       );
 
       if (this.buffWriteStatus.idx + 1 === this.buffWriteStatus.data.length) {
-        // console.log('wrote everything');
+        console.log('wrote everything');
+        this.buffWriteStatus.status = successStatus;
         return;
       }
 
@@ -235,13 +237,15 @@ export class PenService {
       setTimeout(() => {
         let nextItem: any = _.clone(item);
         nextItem.buffer = this.buffWriteStatus.data[this.buffWriteStatus.idx];
-        this.bleWriteEmitter.emit('write', this.bleWriteEmitter, nextItem);
-      }, 50);
+        if (this.buffWriteStatus.status !== successStatus) {
+          this.bleWriteEmitter.emit('write', this.bleWriteEmitter, nextItem);
+        }
+      }, 100);
     });
 
     this.bleWriteEmitter.on('pause', () => {
       this.buffWriteStatus.lock = true;
-      // console.log('pause received');
+      console.log('pause received');
 
       setTimeout(() => {
         if (this.buffWriteStatus.lock) {
@@ -252,8 +256,9 @@ export class PenService {
     });
 
     this.bleWriteEmitter.on('resume', (bleWriteEmitter: any, item: any, resumeIndex: number) => {
+      const successStatus: number = 5;
       if (this.buffWriteStatus.died) {
-        // console.log('already decided that we died waiting');
+        console.log('already decided that we died waiting');
         return;
       }
 
@@ -263,12 +268,14 @@ export class PenService {
 
       let nexItem: any = _.clone(item);
       nexItem.buffer = this.buffWriteStatus.data[this.buffWriteStatus.idx];
-      this.bleWriteEmitter.emit('write', bleWriteEmitter, nexItem);
+      if (this.buffWriteStatus.status !== successStatus) {
+        this.bleWriteEmitter.emit('write', bleWriteEmitter, nexItem);
+      }
     });
 
     this.bleWriteEmitter.on('error', (err: any) => {
       this.buffWriteStatus.died = true;
-      // console.log('error happened: ', err);
+      console.log('error happened: ', err);
     });
   }
 
@@ -441,16 +448,14 @@ export class PenService {
     }
 
     let resultArrVarints128: any = [];
-    const rangesArr: any[] = this.dummyWhiteBlackList;
+    const rangesArr: any[] = JSON.parse(JSON.stringify(this.dummyWhiteBlackList));
     _.forEach(rangesArr, (num: any) => {
       resultArrVarints128 = resultArrVarints128.concat(this.intToVarints128(num));
     });
     let resultArrUint8: any = new Uint8Array(resultArrVarints128);
 
     if (rawData[0] === 3 && rawData[1] === 2) {
-      console.log('resultArrUint8.length: ', resultArrUint8.length);
-      console.log('resultArrUint8: ', resultArrUint8);
-      rawData[2] = resultArrUint8.length;
+      rawData[2] = resultArrUint8.byteLength;
     } else if (rawData[0] === 5 && rawData[1] === 2) {
       rawData[2] = 16;
     }
@@ -461,7 +466,7 @@ export class PenService {
           let blackListBufferItems: any[] = [];
           const packagesAmount: number = Math.ceil(resultArrVarints128.length / 18);
           for (let i = 0; i < packagesAmount; i++) {
-            const rawPackageData: any = resultArrUint8.slice(i ? 18 * i - 1 : i, 18 * (i + 1));
+            const rawPackageData: any = resultArrUint8.slice(i * 18, 18 * (i + 1));
             let packageData: any = new Uint8Array(18);
             _.forEach(rawPackageData, (item: any, idx: number) => packageData[idx] = item);
             let packageNumber: any = new Uint8Array(2);
@@ -481,9 +486,8 @@ export class PenService {
         case CHAR_ELEM.read.file.firmware_image:
 
           let bufferItems: any[] = [];
-          // console.log('item.device.firmwareBuffer: ', item.device.firmwareBuffer);
           for (let i = 0; i < item.device.firmwareBuffer.length; i++) {
-            const rawPackageData: any = resultArrUint8.slice(i ? 18 * i - 1 : i, 18 * (i + 1));
+            const rawPackageData: any = resultArrUint8.slice(i * 18, 18 * (i + 1));
             let packageData: any = new Uint8Array(18);
             _.forEach(rawPackageData, (item: any, idx: number) => packageData[idx] = item);
             let packageNumber: any = new Uint8Array(2);
@@ -498,9 +502,6 @@ export class PenService {
             bufferItems.push(this.concatTypedArrays(packageNumber, packageData));
           }
           this.buffWriteStatus.data = bufferItems;
-          // console.log('bufferItems[0]', bufferItems[0]);
-          // console.log('bufferItems[1]', bufferItems[1]);
-          // console.log('bufferItems[bufferItems.length-1]', bufferItems[bufferItems.length-1]);
           break;
         case CHAR_ELEM.read.file.settings:
 
@@ -521,7 +522,6 @@ export class PenService {
     }
 
     this._ble.write(address, { serviceUUID: item.serviceUUID, characteristicUUID: item.characteristicUUID, type: item.type }, rawData, (done: any) => {
-      // console.log('write ', JSON.stringify(rawData), ' sent');
     }, fail);
   }
 
@@ -533,7 +533,7 @@ export class PenService {
     let i = 0;
     while(iterValue !== 0) {
       if (i > 0) {
-        varints128[i - 1] = varints128[i -1] | 0x80;
+        varints128[i - 1] = varints128[i - 1] | 0x80;
       }
 
       varints128.push(iterValue & 0x7f);
@@ -604,36 +604,39 @@ export class PenService {
   }
 
   public onFileResponse(data: any, address: string, item: any, rawData: any, callback?: any) {
-    // console.log('onFileResponse data: ', data);
     if (data && data.data) {
       switch (data.data['0']) {
         case 3:
           let writeBufferItem: any = _.clone(item);
           switch (data.data['1']) {
             case 3:
-              this.buffWriteStatus.status = data[1];
+              this.buffWriteStatus.status = data.data[1];
               // this.buffWriteStatus.idx = data[2];
               writeBufferItem.type = 'fileWriteBuffer';
               // this.checkBuffAndSend(address, item);
               writeBufferItem.address = address;
               writeBufferItem.buffer = this.buffWriteStatus.data[this.buffWriteStatus.idx];
-              this.bleWriteEmitter.emit('write', this.bleWriteEmitter, writeBufferItem);
+              if (this.buffWriteStatus.status !== 5) {
+                this.bleWriteEmitter.emit('write', this.bleWriteEmitter, writeBufferItem);
+              }
               break;
             case 4:
-              this.buffWriteStatus.status = data[1];
+              this.buffWriteStatus.status = data.data[1];
               writeBufferItem.type = 'fileWriteBuffer';
               // this.checkBuffAndSend(address, item);
               writeBufferItem.address = address;
               writeBufferItem.buffer = this.buffWriteStatus.data[this.buffWriteStatus.idx];
-              this.bleWriteEmitter.emit('write', this.bleWriteEmitter, writeBufferItem);
+              if (this.buffWriteStatus.status !== 5) {
+                this.bleWriteEmitter.emit('write', this.bleWriteEmitter, writeBufferItem);
+              }
               break;
             case 5:
               this.buffWriteStatus.idx = 0;
-              this.buffWriteStatus.status = data[1];
+              this.buffWriteStatus.status = data.data[1];
               callback(data);
               break;
             case 8:
-              this.buffWriteStatus.status = data[1];
+              this.buffWriteStatus.status = data.data[1];
               break;
             default:
               break;

@@ -54,7 +54,7 @@ export class RegisterPenComponent {
 
   public updatePercent: number = 0;
   public timeNowSeconds: number = moment().diff(moment().year(2017).startOf('year'), 'seconds');
-  public dummyWhiteBlackList: any[] = [0,0,1,1,2,3,4,6,7,300];
+  public dummyWhiteBlackList: any[] = [];
   public dummySettings: any[] = [
     123456,
     this.timeNowSeconds,
@@ -394,10 +394,8 @@ export class RegisterPenComponent {
             this.deviceUpdated = true;
             clearInterval(this.errTimeout);
             this._ble.isConnected(this.dpDevice, (isConnected: any) => {
-              console.log('isConnected: ', isConnected);
               if (isConnected) {
                 this._ble.disconnect(this.dpDevice, (done: any) => {
-                  console.log('disconnect done: ', done);
                   this.logEvent('Success', 'Disconnect: ', done);
                   this._ble.isConnected(
                     this.dpDevice,
