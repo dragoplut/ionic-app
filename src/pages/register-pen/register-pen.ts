@@ -354,7 +354,16 @@ export class RegisterPenComponent {
   };
 
   public doUpdateApiWhiteBlackList(data: any[], callback: any) {
-    this._pen.updateWhiteBlacklist(data).subscribe(callback, this.fail);
+    // this._pen.updateWhiteBlacklistEncrypted(data).subscribe(
+    //   (resp: any) => {
+    //     console.log('doUpdateApiWhiteBlackList resp: ', JSON.stringify(resp));
+    //   },
+    //   (err: any) => {
+    //     console.log('doUpdateApiWhiteBlackList err: ', JSON.stringify(err));
+    //   }
+    //   );
+    this._pen.updateWhiteBlacklistEncrypted(data).subscribe(callback, this.fail);
+    // this._pen.updateWhiteBlacklist(data).subscribe(callback, this.fail);
   }
 
   public checkFirmwareUpdate(data: any[], callback: any) {

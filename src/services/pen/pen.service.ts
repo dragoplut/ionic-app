@@ -361,6 +361,13 @@ export class PenService {
       .map((res: any) => res);
   }
 
+  public updateWhiteBlacklistEncrypted(data: number[]): Observable<any> {
+    /** Resp example **/
+    // [0,2,1,8,3,200]
+    return this.api.post(`${this.path}/getEncodedAndEncryptedFlatWhiteBlacklist`, data)
+      .map((res: any) => res);
+  }
+
   public saveSyncListData(data: any): Observable<any> {
     return this.api.post(`${this.path}/saveSyncListData`, data)
       .map((res: any) => res);
@@ -447,11 +454,12 @@ export class PenService {
       }
     }
 
-    let resultArrVarints128: any = [];
-    const rangesArr: any[] = JSON.parse(JSON.stringify(this.dummyWhiteBlackList));
-    _.forEach(rangesArr, (num: any) => {
-      resultArrVarints128 = resultArrVarints128.concat(this.intToVarints128(num));
-    });
+    let resultArrVarints128: any = JSON.parse(JSON.stringify(this.dummyWhiteBlackList));
+    // let resultArrVarints128: any = [];
+    // const rangesArr: any[] = JSON.parse(JSON.stringify(this.dummyWhiteBlackList));
+    // _.forEach(rangesArr, (num: any) => {
+    //   resultArrVarints128 = resultArrVarints128.concat(this.intToVarints128(num));
+    // });
     let resultArrUint8: any = new Uint8Array(resultArrVarints128);
 
     if (rawData[0] === 3 && rawData[1] === 2) {
