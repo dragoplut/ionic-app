@@ -20,7 +20,7 @@
         <div class="plain-text text-left">{{ dependencies.newPen ? 'Registering and Updating Pen ...' : 'Updating Pen ...'}}</div>
         <br/>
       </div>
-      <div class="pen-sync-progress-container">
+      <div class="pen-sync-progress-container" *ngIf="!firmwareUpdateAvailable && !transferInfo.errorMessage && !transferInfo.percent">
         <span class="pen-sync-progress-percents">{{updatePercent}}%</span>
         <circle-progress
           [percent]="updatePercent"
@@ -28,7 +28,7 @@
           [space]="-4"
           [outerStrokeWidth]="4"
           [innerStrokeWidth]="4"
-          [outerStrokeColor]="'#00adef'"
+          [outerStrokeColor]="firmwareUpdateAvailable && !transferInfo.errorMessage && transferInfo.percent < 100 ? '#00E1FF' : '#00adef'"
           [innerStrokeColor]="'#e7eaec'"
           [outerStrokeLinecap]="'butt'"
           [showSubtitle]="false"
@@ -36,6 +36,25 @@
           [animation]="true"
           [animationDuration]="300"
         ></circle-progress>
+      </div>
+      <br/>
+      <div *ngIf="!firmwareUpdateAvailable && transferInfo.percent === 100 && !transferInfo.errorMessage"  class="progress-bar-container">
+        Firmware upgrade successful! Please unpair/forget Pen from your device in Bluetooth settings and finish Pen Sync by pressing <br/>
+        <br/>
+        <button ion-button block (click)="startScanning(dpDevice)">Finish Pen Sync</button>
+      </div>
+      <div *ngIf="firmwareUpdateAvailable"  class="progress-bar-container">Firmware update available. Please wait until download and upgrade process finish.</div>
+      <div *ngIf="firmwareUpdateAvailable && (!dpDevice.firmwareBufferLength)" class="progress-bar-container">Downloading...</div>
+      <div *ngIf="firmwareUpdateAvailable && dpDevice.firmwareBufferLength" class="progress-bar-container">
+        <custom-progress-bar
+          [itemValue]="transferInfo.percent"
+          [itemClass]="''"
+          [itemError]="transferInfo.errorMessage || ''"
+        ></custom-progress-bar>
+      </div>
+      <!--<div *ngIf="firmwareUpdateAvailable && dpDevice.firmwareBufferLength">Transfer FW to pen: {{transferInfo.percent}} %</div>-->
+      <div *ngIf="firmwareUpdateAvailable && dpDevice.firmwareBufferLength && !transferInfo.errorMessage && transferInfo.percent !== 100">
+        Estimate: ~{{transferInfo.estimateMin ? transferInfo.estimateMin : 'less then 1'}} min.
       </div>
     </form>
   </div>
@@ -152,7 +171,7 @@
     <!--<span class="device-details" *ngIf="errorData"><ion-icon small class="list-icon-absolute" name="close" tapable (click)="errorData = ''"></ion-icon>Error: {{errorData}}</span>-->
     <img alt="Dermapenworld" src="{{logoTransparent}}" class="dpw-logo-foot">
   </div>
-  <button ion-button block (click)="disconnect()">Disconnect</button>
+  <!--<button ion-button block (click)="disconnect()">Disconnect</button>-->
   <div class="create-account row center-xs middle-xs" *ngIf="logData.length">
     <ion-list class="device-details">
       <button ion-button block (click)="logData = []">Clear Log</button>

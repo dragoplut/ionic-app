@@ -18,4 +18,13 @@ export class FirmwareService {
     return this.api.get(`${this.path}/getLastVersionDownloadInfo`)
       .map((res: any) => res);
   }
+
+  public getLastVersionFirmware(keyInfo: any[]): Observable<any> {
+    let keyInfoStr: string = '?';
+    keyInfo.forEach((n: number) => {
+      keyInfoStr = keyInfoStr + (keyInfoStr.length > 1 ? '&keyInfo=' : 'keyInfo=') + n;
+    });
+    return this.api.get(`${this.path}/getLastVersionFirmware${keyInfoStr}`)
+      .map((res: any) => res);
+  }
 }

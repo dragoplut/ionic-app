@@ -76,14 +76,14 @@ export class UpdatePenComponent {
         descriptors: [ { uuid: '2902' } ]
       },
       {
-        type: 'unit8',
+        type: 'uint8',
         name: 'Brightness',
         service: 'a8a91000-38e9-4fbe-83f3-d82aae6ff68e',
         characteristic: 'a8a91001-38e9-4fbe-83f3-d82aae6ff68e',
         properties: [ 'Read', 'Write' ]
       },
       {
-        type: 'unit8',
+        type: 'uint8',
         name: 'Volume',
         service: 'a8a91000-38e9-4fbe-83f3-d82aae6ff68e',
         characteristic: 'a8a91002-38e9-4fbe-83f3-d82aae6ff68e',
@@ -120,7 +120,7 @@ export class UpdatePenComponent {
       //   properties: [ 'WriteWithoutResponse', 'Write' ]
       // },
       // {
-      //   type: 'unit8',
+      //   type: 'uint8',
       //   name: 'Key Info',
       //   service: 'a8a91000-38e9-4fbe-83f3-d82aae6ff68e',
       //   characteristic: 'a8a91007-38e9-4fbe-83f3-d82aae6ff68e',
@@ -678,7 +678,7 @@ export class UpdatePenComponent {
       this._ble.connect(this.dpDevice, callback, false);
     }, this._ble.stopScan);
   }
-  
+
   public openPage(page) {
     this.navCtrl.push(page, { dependencies: this.dependencies });
   }

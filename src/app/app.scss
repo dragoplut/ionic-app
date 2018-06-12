@@ -135,6 +135,15 @@ ion-content {
 .text-right {
   text-align: right;
 }
+.text-big-size {
+  font-size: 16px;
+}
+.text-avg-size {
+  font-size: 14px;
+}
+.text-small-size {
+  font-size: 12px;
+}
 .title-blue {
   @include animationHelper;
   font-size: 1.5em;
@@ -239,7 +248,7 @@ ion-content {
   z-index: 10;
 }
 .additional-content-block {
-  margin-top: -40px;
+  //margin-top: -40px;
   margin-bottom: 10px;
   padding: 0 24px;
   contain: content;
@@ -618,6 +627,45 @@ ion-content {
 
 .create-account, .create-account-form {
   background: transparent !important;
+}
+
+.progress-bar-container {
+  padding: 10px 5vw;
+}
+
+.custom-progress-bar-container {
+  display: block;
+  position: relative;
+  height: 32px;
+  margin: 20px auto 0;
+  padding: 12px 0 0;
+  text-align: right;
+  .bar-background, .bar-line {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+  .bar-background {
+    background-color: $col-inactive-textbox-fill;
+    height: 12px;
+    width: 100%;
+  }
+  .bar-line {
+    background-color: $col-secondary-blue;
+    height: 12px;
+    transition: width .3s ease;
+  }
+  .bar-progress-label, .custom-input-error {
+    display: inline-block;
+    font-size: $text-caption;
+    line-height: 14px;
+  }
+  .bar-progress-label {
+    color: $col-secondary-blue;
+  }
+  .custom-input-error {
+    color: $col-primary-red;
+  }
 }
 
 @media screen and (min-height: 2433px) {

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { NavController, NavParams, Platform } from 'ionic-angular';
 import { AlertController } from 'ionic-angular';
 
@@ -29,9 +29,11 @@ export class RegisterPenComponent {
   public firmwareBlob: any;
 
   public userInfo: any = {};
+  public transferInfo: any = {};
   public usageData: any = {};
-  public dpDevice: any = { name: '' };
+  public dpDevice: any = { name: '', firmwareBufferLength: 0, firmwareUpdated: false };
   public firmwareVersion: any = '';
+  public firmwareUpdateAvailable: boolean = false;
   public errorData: any = '';
   public successData: any = '';
   public pairingDevice: any = 'No data yet!';
@@ -79,15 +81,13 @@ export class RegisterPenComponent {
     public _pen: PenService,
     public _ble: BleService,
     public _util: UtilService,
-    private alertCtrl: AlertController
-  ) {}
+    private alertCtrl: AlertController,
+    private zone: NgZone )
+   {}
 
   public ionViewDidLoad() {
     this.platform.ready().then(() => {
       this.updateUserInfo();
-      // const dummyBlackWhiteList: any[] = [0,0,1,1,2,200];
-      // this.addBlackWhiteList(dummyBlackWhiteList);
-      // this.updateBlackWhiteList();
       this._ble.enable();
       this.dependencies = this.navParams.get('dependencies') || {};
       this.dpDevice = { name: '' };
@@ -115,6 +115,7 @@ export class RegisterPenComponent {
   }
 
   public startScanning(existingDevice?: any) {
+    this.transferInfo = {};
     this.showButton = '';
     setTimeout(() => this.initConnectionChecker(), 300);
     this.logEvent('Info', 'startScanning...', '');
@@ -133,7 +134,12 @@ export class RegisterPenComponent {
     this.errorData = '';
     if (device) {
       if (this.dependencies.newPen) {
-        this.dpDevice = device;
+        for (const prop in device) {
+          if (prop) {
+            this.dpDevice[prop] = device[prop];
+          }
+        }
+        // this.dpDevice = device;
       } else {
         this.dpDevice.id = device.id;
       }
@@ -218,8 +224,22 @@ export class RegisterPenComponent {
     alert.present();
   }
 
-  public readFromDevice(address, serviceUUID, characteristicUUID) {
-    this._ble.read(address, { serviceUUID, characteristicUUID }, 'string', this.success, this.fail);
+  public readFromDevice(address: any, serviceUUID: any, characteristicUUID: any, type: string, callback?: any) {
+    console.log('readFromDevice: ', address, serviceUUID, characteristicUUID, type);
+    this._ble.read(
+      address,
+      { serviceUUID, characteristicUUID },
+      type,
+      (resp: any) => {
+        // console.log('this._ble.read resp: ', resp);
+        if (callback) {
+          callback(resp);
+        } else {
+          this.success(resp);
+        }
+      },
+      this.fail
+    );
   }
 
   public writeToDevice(address: any, serviceUUID: any, characteristicUUID: any, rawData: any, callback: any) {
@@ -266,17 +286,19 @@ export class RegisterPenComponent {
 
   public doPenUpdate() {
     this.logEvent('Info', 'Start Pen Update', this.dpDevice.serialNumber);
-    // this.logEvent('Info', 'Disconnect Pen', this.dpDevice.serialNumber);
-    // this._ble.disconnect(
-    //   this.dpDevice,
-    //   (done: any) => {
-    //     console.log('Disconnect done: ', done);
-    //   },
-    //   (err: any) => {
-    //     console.log('Disconnect err: ', err);
-    //   }
-    //   );
+
     this.requestDeviceSettings(this.dpDevice,(resp: any) => {
+      // console.log('requestDeviceSettings resp: ', resp);
+
+      if (resp && resp.length) {
+        if (resp.length < 20) {
+          const settingsWithDummyMagicNumber: any[] = [1,2,3,4].concat(resp);
+          this.dpDevice.deviceSettingsEncrypted = _.clone(settingsWithDummyMagicNumber);
+        } else {
+          this.dpDevice.deviceSettingsEncrypted = _.clone(resp);
+        }
+      }
+
       this.logEvent('Success', 'Device Settings', JSON.stringify(resp, null, 2));
       /** Update device settings if exist **/
       if (resp && resp.userId) {
@@ -286,11 +308,16 @@ export class RegisterPenComponent {
         this.dummySettings[3] = resp.forceDateTime;
       }
 
-      /** saveSyncListData **/
-      const syncListData: any = {
-        serialNumber: this.dpDevice.serialNumber,
+      /** saveSyncListData with encryption **/
+      const keyInfoArr: number[] = [];
+      this.dpDevice.keyInfo.forEach((n: number) => {
+        keyInfoArr.push(n);
+      });
+      const syncData: any = {
+        serialNumber: '' + this.dpDevice.serialNumber,
         penUsageLists: [],
-        penErrorLists: []
+        penErrorLists: [],
+        keyInfo: keyInfoArr
       };
 
       this.logEvent('Info', 'read Usage List from device', '[1,3,0]');
@@ -298,30 +325,30 @@ export class RegisterPenComponent {
       this._pen.writeWithResponse(
         this.dpDevice.mac || this.dpDevice.id,
         { serviceUUID: 'a8a91000-38e9-4fbe-83f3-d82aae6ff68e', characteristicUUID: 'a8a91003-38e9-4fbe-83f3-d82aae6ff68e', type: 'fileRequest' },
-        [1,3,0],
+        [CHAR_ELEM.read.file.usage_list,CHAR_ELEM.read.action.read,0],
         (resp: any) => {
 
-          this.updatePercent = 25;
-          syncListData.penUsageLists = resp.result;
-          this.logEvent('Success', 'Usage List', JSON.stringify(syncListData.penUsageLists, null, 2));
+          this.zone.run(() => this.updatePercent = 25);
+          syncData.penUsageLists = resp.rawResult;
+          this.logEvent('Success', 'Usage List', JSON.stringify(syncData.penUsageLists, null, 2));
 
           this.logEvent('Info', 'read Error List from device', '[2,3,0]');
           /** Read "Error List" **/
           this._pen.writeWithResponse(
             this.dpDevice.mac || this.dpDevice.id,
             { serviceUUID: 'a8a91000-38e9-4fbe-83f3-d82aae6ff68e', characteristicUUID: 'a8a91003-38e9-4fbe-83f3-d82aae6ff68e', type: 'fileRequest' },
-            [2,3,0],
+            [CHAR_ELEM.read.file.error_list,CHAR_ELEM.read.action.read,0],
             (resp: any) => {
 
-              this.updatePercent = 30;
-              syncListData.penErrorLists = resp.result;
-              this.logEvent('Success', 'Error List', JSON.stringify(syncListData.penErrorLists, null, 2));
+              this.zone.run(() => this.updatePercent = 30);
+              syncData.penErrorLists = resp.rawResult;
+              this.logEvent('Success', 'Error List', JSON.stringify(syncData.penErrorLists, null, 2));
 
-              this.logEvent('Info', 'Send Usage Lists and Error Lists pen logs to server', JSON.stringify(syncListData, null, 2));
+              this.logEvent('Info', 'Send Usage Lists and Error Lists pen logs to server', JSON.stringify(syncData, null, 2));
               /**
                * Send Usage Lists and Error Lists pen logs to server
                */
-              this._pen.saveSyncListData(syncListData).subscribe(
+              this._pen.saveSyncData(syncData).subscribe(
                 (success: any) => this.logEvent('Success', 'save Sync List Data success: ', JSON.stringify(success, null, 2)),
                 this.fail
               );
@@ -333,14 +360,20 @@ export class RegisterPenComponent {
               this.logEvent('Info', 'send Usage List cartridge ids to server and request Blacklist', JSON.stringify(cartridgeIds, null, 2));
               /** Send "Cartridge" id's to server **/
               this.doUpdateApiWhiteBlackList(cartridgeIds, (data: any) => {
-                this.updatePercent = 35;
+                this.zone.run(() => this.updatePercent = 35);
                 this.logEvent('Success', 'Blacklist received', JSON.stringify(data, null, 2));
 
                 this.logEvent('Info', 'as all data from Pen has been read, start Firmware version check', this.firmwareVersion);
 
                 this.checkFirmwareUpdate(data, (done: any) => {
-                  this.updatePercent = 40;
-                  this.doUpdateBlackListAndSettings(data);
+                  this.zone.run(() => this.updatePercent = 40);
+                  if (done && done.percent === 100 && !done.errorMessage) {
+                    this.dpDevice.firmwareUpdated = true;
+                    this.firmwareUpdateAvailable = false;
+                    this.zone.run(() => this.updatePercent = 0);
+                  } else {
+                    this.doUpdateBlackListAndSettings(data);
+                  }
                 });
                 // this.doUpdateBlackListAndSettings(data);
               });
@@ -362,7 +395,7 @@ export class RegisterPenComponent {
     //     console.log('doUpdateApiWhiteBlackList err: ', JSON.stringify(err));
     //   }
     //   );
-    this._pen.updateWhiteBlacklistEncrypted(data).subscribe(callback, this.fail);
+    this._pen.updateWhiteBlacklistEncrypted(data, this.dpDevice.keyInfo).subscribe(callback, this.fail);
     // this._pen.updateWhiteBlacklist(data).subscribe(callback, this.fail);
   }
 
@@ -370,7 +403,7 @@ export class RegisterPenComponent {
     // this._pen.updateWhiteBlacklist(data).subscribe(callback, this.fail);
     this.isNewFirmwareAvailable((updateFirmware: boolean) => {
       if (updateFirmware) {
-        this.getLastFirmwareVersion(data, callback);
+        this.requestFirmwareUpgrade(this.dpDevice, data, callback);
       } else {
         this.logEvent('Info', 'Firmware update NOT required.', '');
         callback(data);
@@ -379,27 +412,34 @@ export class RegisterPenComponent {
   }
 
   public doUpdateBlackListAndSettings(data: any[]) {
-    this.updatePercent = 45;
+    this.zone.run(() => this.updatePercent = 45);
+    this.dpDevice.blackListEncrypted = _.clone(data);
     let device: any = _.clone(this.dpDevice);
     this.errorDescription = device && device.id ? '' : 'Communication to the pen error';
 
     device.dummyWhiteBlackList = data;
     device.settings = this.dummySettings;
-    /** Write new "Settings" to BLE device **/
-    this.updateDeviceSettings(
+    device.deviceSettingsEncrypted = this.dpDevice.deviceSettingsEncrypted;
+
+    const encryptedData: any = this._util.getBufferChunksOf(this.dpDevice.deviceSettingsEncrypted);
+
+    device.dataBuffer = encryptedData.buffer;
+    device.dataBufferLength = encryptedData.buffer.length;
+    device.dataBytesLength = encryptedData.bytesLength;
+
+    /** Write new "Black List" to BLE device **/
+    this.updateDeviceBlacklist(
       device,
-      (done: any) => {
-        this.updatePercent = 80;
-        this.logEvent('Success', 'Device Settings updated', JSON.stringify(done, null, 2));
-        // alert('2 doUpdateBlackListAndSettings done' + JSON.stringify(done, null, 2) + ' device: ' + JSON.stringify(device, null, 2));
-        /** Write new "Black List" to BLE device **/
-        this.updateDeviceBlacklist(
+      (resp: any) => {
+        this.zone.run(() => this.updatePercent = 80);
+        this.logEvent('Success', 'Device Black List updated', JSON.stringify(resp, null, 2));
+
+        /** Write new "Settings" to BLE device **/
+        this.updateDeviceSettings(
           device,
-          (resp: any) => {
-            // this.checkFirmwareUpdate([], () => {
-            // });
-            this.updatePercent = 100;
-            this.logEvent('Success', 'Device Black List updated', JSON.stringify(resp, null, 2));
+          (done: any) => {
+            this.zone.run(() => this.updatePercent = 100);
+            this.logEvent('Success', 'Device Settings updated', JSON.stringify(done, null, 2));
             this.deviceUpdated = true;
             clearInterval(this.errTimeout);
             this._ble.isConnected(this.dpDevice, (isConnected: any) => {
@@ -416,20 +456,24 @@ export class RegisterPenComponent {
                       this.logEvent('Success', 'Sync Done!', '----------------------------------------------------');
                     },
                   );
-                }, false);
+                }, (err: any) => {
+                  console.log('this.ble.disconnect err: ', err);
+                });
               }
-            }, false)
+            }, (err: any) => {
+              console.log('this._ble.isConnected err: ', err);
+            })
           },
-          (errDescription: string) => this.errorData = errDescription
-        )
+          (errDescription: any) => this.errorData = errDescription
+        );
       },
-      (errDescription: any) => this.errorData = errDescription
-    );
+      (errDescription: string) => this.errorData = errDescription
+    )
+
   }
 
   public updateDeviceSettings(device: any, callback: any, fail: any) {
     this.logEvent('Info', 'start Device Settings update', JSON.stringify([CHAR_ELEM.read.file.settings,CHAR_ELEM.read.action.write,16], null, 2));
-    // alert('4 updateDeviceSettings device: ' + JSON.stringify(device, null, 2));
     this._pen.writeWithResponse(
       device.mac || device.id,
       { serviceUUID: 'a8a91000-38e9-4fbe-83f3-d82aae6ff68e', characteristicUUID: 'a8a91003-38e9-4fbe-83f3-d82aae6ff68e', type: 'fileWrite', device },
@@ -441,7 +485,6 @@ export class RegisterPenComponent {
 
   public updateDeviceBlacklist(device: any, callback: any, fail: any) {
     this.logEvent('Info', 'start Device Blacklist update', JSON.stringify([CHAR_ELEM.read.file.black_list,CHAR_ELEM.read.action.write,0], null, 2));
-    // alert('3 updateDeviceBlacklist device: ' + JSON.stringify(device, null, 2));
     this._pen.writeWithResponse(
       device.mac || device.id,
       { serviceUUID: 'a8a91000-38e9-4fbe-83f3-d82aae6ff68e', characteristicUUID: 'a8a91003-38e9-4fbe-83f3-d82aae6ff68e', type: 'fileWrite', device },
@@ -451,9 +494,46 @@ export class RegisterPenComponent {
     );
   }
 
+  public updateFirmware(device: any, callback: any, fail: any) {
+    this.logEvent('Info', 'start Device Firmware update', JSON.stringify([CHAR_ELEM.read.file.firmware_image,CHAR_ELEM.read.action.write,device.dataBytesLength], null, 2));
+    // console.log('updateFirmware writeWithResponse: ', JSON.stringify([CHAR_ELEM.read.file.firmware_image,CHAR_ELEM.read.action.write,device.firmwareBuffer.byteLength], null, 2))
+    this._pen.writeWithResponse(
+      device.mac || device.id,
+      { serviceUUID: 'a8a91000-38e9-4fbe-83f3-d82aae6ff68e', characteristicUUID: 'a8a91003-38e9-4fbe-83f3-d82aae6ff68e', type: 'fileWrite', device },
+      [CHAR_ELEM.read.file.firmware_image,CHAR_ELEM.read.action.write,device.dataBytesLength],
+      callback,
+      fail,
+      (progressInfo: any) => {
+        // console.log(progressInfo);
+        this.zone.run(() => {
+          this.transferInfo = progressInfo;
+          if (this.transferInfo && this.transferInfo.errorMessage && callback) {
+            console.log('transferInfo Error: ', this.transferInfo.errorMessage);
+            this.logEvent('Error', 'Firmware upgrade error: ', this.transferInfo.errorMessage);
+            // setTimeout(() => {
+            //   this.zone.run(() => this.firmwareUpdateAvailable = false);
+            // }, 10000);
+            // callback();
+          } else if (this.transferInfo && this.transferInfo.percent >= 100 && callback) {
+            if (this.transferInfo.packageIdx >= this.transferInfo.packagesTotal - 1) {
+              console.log('transferInfo: Firmware Image transfer success! ', this.transferInfo);
+              this.logEvent('Success', 'Firmware Image transfer success!', '');
+              callback(this.transferInfo);
+            }
+            // setTimeout(() => {
+            //   this.zone.run(() => this.firmwareUpdateAvailable = false);
+            // }, 5000);
+            // callback();
+          }
+        });
+      }
+    );
+  }
+
   public requestDeviceSettings(device: any, callback: any, fail: any) {
     this.logEvent('Info', 'Request Device Settings from API for', this.dpDevice.serialNumber);
-    this._pen.getSettings(this.dpDevice.serialNumber || this.dpDevice.name).subscribe(callback, fail);
+    this._pen.getSettingsEncrypted(this.dpDevice.serialNumber || this.dpDevice.name, this.dpDevice.keyInfo)
+      .subscribe(callback, fail);
   }
 
   public goPenUpdate() {
@@ -483,7 +563,9 @@ export class RegisterPenComponent {
         this.dpDevice.mac = resp.dpDevice.mac;
       }
       /** Connect to BLE device and invoke provided function **/
-      this._ble.connect(this.dpDevice, callback, false);
+      this._ble.connect(this.dpDevice, callback, (err: any) => {
+        console.log('this._ble.connect err: ', err);
+      });
     }, this._ble.stopScan);
   }
 
@@ -507,7 +589,26 @@ export class RegisterPenComponent {
     } else if (resp.dpDevice && resp.dpDevice.id && resp.dpDevice.paired) {
       this.isConnected(resp.dpDevice);
     }
-    this.dependencies.newPen ? this.goNext() : this.doPenUpdate();
+
+    this.readKeyInfo(this.dpDevice, (resp: any) => {
+      this.dependencies.newPen ? this.goNext() : this.doPenUpdate();
+    })
+    // this.dependencies.newPen ? this.goNext() : this.doPenUpdate();
+  }
+
+  public readKeyInfo(device: any, callback: any, error?: any) {
+    this.readFromDevice(
+      device.mac,
+      'a8a91000-38e9-4fbe-83f3-d82aae6ff68e',
+      'a8a91007-38e9-4fbe-83f3-d82aae6ff68e',
+      'uint8',
+      (done: any) => {
+        console.log('readFromDevice Key Info done: ', done);
+        this.dpDevice.keyInfo = done;
+        if (callback) {
+          callback(done);
+        }
+      });
   }
 
   public initConnectionChecker(callback?: any) {
@@ -519,21 +620,21 @@ export class RegisterPenComponent {
         if (callback) {
           callback();
         }
-      }, false);
+      }, (err: any) => {
+        console.log('this._ble.isConnected err: ', err);
+      });
     }, 1000);
   }
 
   public isConnected(device: any) {
     this._ble.isConnected(device, (resp: any) => {
       this.dpDevice.paired = true;
-      // alert('isConnected: ' + JSON.stringify(resp));
     }, this.fail);
   }
 
   public addBlackWhiteList(dummyBlackWhiteList: any[]) {
     this._pen.addTemporaryWhitelist(dummyBlackWhiteList).subscribe(
       (resp: any) => {
-        // alert('addWhitelist: ' + JSON.stringify(resp));
         this.updateBlackWhiteList();
       },
       (err: any) => this.fail(err)
@@ -543,7 +644,6 @@ export class RegisterPenComponent {
   public updateBlackWhiteList() {
     this._pen.getTemporaryWhitelist().subscribe(
       (resp: any) => {
-        // alert('getWhitelist: ' + JSON.stringify(resp));
         if (resp && resp.length) {
           this.dummyWhiteBlackList = resp;
         }
@@ -614,11 +714,8 @@ export class RegisterPenComponent {
           this.logEvent('Success', 'current Firmware version', resp);
           this.firmwareVersion = resp;
           this.logEvent('Info', 'start check if new Firmware is available', '');
-          this._firmware.isNewVersionAvailable(this.firmwareVersion + '.hex').subscribe(
-            (resp: any) => {
-              // alert('isNewFirmwareAvailable: ' + JSON.stringify(resp));
-              callback(resp);
-            },
+          this._firmware.isNewVersionAvailable(this.firmwareVersion + '.ota').subscribe(
+            (resp: any) => callback(resp),
             (err: any) => this.fail(err)
           );
         } else {
@@ -629,48 +726,40 @@ export class RegisterPenComponent {
   }
 
   public getLastFirmwareVersion(data: any, callback: any) {
-    this._firmware.getLastVersionDownloadInfo().subscribe(
+    this._firmware.getLastVersionFirmware(this.dpDevice.keyInfo).subscribe(
       (resp: any) => {
-        // alert('getLastFirmwareVersion: ' + JSON.stringify(resp));
-        // console.log('getLastFirmwareVersion: ', resp);
-        if (resp && resp.downloadLink && resp.version !== this.firmwareVersion + '.hex') {
-          this.logEvent('Info', 'new Firmware is available! Request firmware image.', '');
-          // if (resp && resp.downloadLink && resp.version) {
-          this.logEvent('Info', 'start download Firmware image by url', resp.downloadLink);
-          this._api.getByUrl(resp.downloadLink).subscribe(
-            (resp: any) => {
-              // console.log('getLastFirmwareVersion this._api.getByUrl resp: ', resp);
-              const firmwareHexStr: string = resp._body.replace(/[\s\n:]/g, '');
-              // console.log('------------ firmwareHexStr: ', firmwareHexStr);
-              const firmwareData: any = this._util.getFirmwareHexBuffer(firmwareHexStr);
-              // console.log('------------ firmwareBuffer: ', firmwareBuffer);
-              this.logEvent('Success', 'Firmware image received and prepared for transfer to device!', '');
+        console.log('getLastFirmwareVersion: ', resp);
+        if (resp && resp.content && resp.version !== this.firmwareVersion + '.ota' && !this.dpDevice.firmwareUpdated) {
+          // this.firmwareUpdateAvailable = false; // TODO: SHOULD BE REMOVED!
+          this.firmwareUpdateAvailable = true; // TODO: UNCOMMENT TO MAKE FW UPDATE WORK!!!!!!
 
-              if (firmwareData.buffer && firmwareData.buffer.length) {
-                this.firmwareBuffer = _.clone(firmwareData.buffer);
-                this.dpDevice.firmwareBuffer = this.firmwareBuffer;
-                this.logEvent('Info', 'start Firmware image transfer to device', JSON.stringify([CHAR_ELEM.read.file.firmware_image,CHAR_ELEM.read.action.write,firmwareData.bytesLength || 0], null, 2));
-                this._pen.writeWithResponse(
-                  this.dpDevice.mac || this.dpDevice.id,
-                  { serviceUUID: 'a8a91000-38e9-4fbe-83f3-d82aae6ff68e', characteristicUUID: 'a8a91003-38e9-4fbe-83f3-d82aae6ff68e', type: 'fileWrite', device: this.dpDevice },
-                  [CHAR_ELEM.read.file.firmware_image,CHAR_ELEM.read.action.write,firmwareData.bytesLength || 0],
-                  (done: any) => {
-                    // console.log('writeWithResponse firmwareBuffer done: ', done);
-                  },
-                  this.fail
-                );
-              } else {
-                // alert('firmwareBuffer is not an array!');
-                // console.log('firmwareBuffer is not an array!');
+          this.logEvent('Info', 'new Firmware is available! Request firmware image.', '');
+          // this.logEvent('Info', 'start download Firmware image by url', resp.downloadLink);
+
+          const firmwareData: any = this._util.getBufferChunksOf(resp.content);
+          // const firmwareData: any = this._util.getFirmwareHexBuffer(firmwareHexStr);
+          // console.log('------------ dataBuffer: ', firmwareData, firmwareData.buffer, firmwareData.buffer.length);
+          this.logEvent('Success', 'Firmware image received and prepared for transfer to device!', '');
+
+          if (firmwareData.buffer && firmwareData.buffer.length) {
+            this.firmwareBuffer = _.clone(firmwareData.buffer);
+            this.dpDevice.dataBuffer = this.firmwareBuffer;
+            this.dpDevice.firmwareBufferLength = this.firmwareBuffer.length;
+            this.dpDevice.dataBytesLength = firmwareData.bytesLength;
+
+            this.updateFirmware(
+              this.dpDevice,
+              (done: any) => {
+                callback(done);
+              },
+              (error: any) => {
+                this.logEvent('Info', 'Firmware image transfer ERROR: ', JSON.stringify(error, null, 2));
+                alert('Firmware image transfer ERROR: ' + JSON.stringify(error));
               }
-              setTimeout(() => {
-                callback(data);
-              }, 20000);
-            },
-            (err: any) => {
-              console.log(err);
-            }
-          );
+            );
+          } else {
+            console.log('dataBuffer is not an array!');
+          }
         } else {
           this.logEvent('Info', 'Firmware update NOT required.', '');
           callback(data);
@@ -678,6 +767,58 @@ export class RegisterPenComponent {
       },
       (err: any) => this.fail(err)
     );
+  }
+
+  public requestFirmwareUpgrade(item: any, data?: any, callback?: any) {
+    const options: any = {
+      title: 'Confirm',
+      message: `Firmware upgrade is available. Do you want to download and upgrade now?`
+    };
+    this.showConfirm(options, 'upgradeFirmware', item, data, callback);
+  }
+
+  public showConfirm(options: any, action: string, item?: any, data?: any, callback?: any) {
+    let alert: any = this.alertCtrl.create({
+      title: options.title,
+      message: options.message,
+      buttons: [
+        {
+          text: 'No',
+          role: 'cancel',
+          handler: () => {
+            console.log('Cancel clicked');
+            this.doCanceled(action, item, data, callback);
+          }
+        },
+        {
+          text: 'Yes',
+          handler: () => {
+            this.doConfirmed(action, item, data, callback);
+          }
+        }
+      ]
+    });
+    alert.present();
+  }
+
+  public doConfirmed(action: string, item?: any, data?: any, callback?: any) {
+    switch (action) {
+      case 'upgradeFirmware':
+        this.getLastFirmwareVersion(data, callback);
+        break;
+      default:
+        break;
+    }
+  }
+
+  public doCanceled(action: string, item?: any, data?: any, callback?: any) {
+    switch (action) {
+      case 'upgradeFirmware':
+        callback(data);
+        break;
+      default:
+        break;
+    }
   }
 
   private logEvent(logType: string, logDescription: string, logData?: any) {
@@ -688,7 +829,7 @@ export class RegisterPenComponent {
   private startErrTimeout(sec: number) {
     this.errTimeout = setTimeout(() => {
       this.errorDescription = 'Communication to the pen error';
-      this.updatePercent = 0;
+      this.zone.run(() => this.updatePercent = 0);
       this.logEvent('Error', 'Communication to the pen error by timeout', '');
     }, sec * 1000)
   }

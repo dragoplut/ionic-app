@@ -112,13 +112,20 @@ export class BleService {
                     if (isConnected) {
                       this.disconnect(device, () => {
                         console.log('disconnected from device: ' + JSON.stringify(device, null, 2));
-                      }, false);
+                      }, (err: any) => {
+                        console.log('disconnect err: ', err);
+                      });
                     }
-                  }, false);
+                  }, (err: any) => {
+                    console.log('isConnected err: ', err);
+                  });
                 }
               },
               false)
-          }, false);
+            },
+            (err: any) => {
+              console.log('this.connect err: ', err);
+            });
 
         } else {
           console.log('2 this.connect(device', device);
@@ -143,7 +150,10 @@ export class BleService {
                 onSuccess(result);
               },
               false)
-          }, false);
+            },
+            (err: any) => {
+            console.log('this.connect err: ', err);
+          });
         }
 
       }
@@ -429,7 +439,10 @@ export class BleService {
       this.stopNotification(item.address, item.uuid, () => {
         console.log('stopNotification', item);
         this.removeActiveNotification(item.timestamp);
-      }, false);
+      },
+      (err: any) => {
+        console.log('clearNotificationsQueue err: ', err);
+      });
     });
   }
 
@@ -439,13 +452,13 @@ export class BleService {
       case 'string':
         result = String.fromCharCode.apply(null, new Uint8Array(buffer));
         break;
-      case 'unit8':
+      case 'uint8':
         result = new Uint8Array(buffer);
         break;
-      case 'unit16':
+      case 'uint16':
         result = new Uint16Array(buffer);
         break;
-      case 'unit32':
+      case 'uint32':
         result = new Uint32Array(buffer);
         break;
       default:

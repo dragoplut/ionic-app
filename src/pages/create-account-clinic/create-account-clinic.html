@@ -26,10 +26,15 @@
           (itemChange)="account.clinic.name = $event; onChangeValidate()"
         ></custom-input>
 
+        <div class="custom-input-container">
+          <span class="custom-input-label input-not-empty">Address</span>
+          <google-places-autocomplete types="geocode" [addressValue]="account.clinic.location.address" (callback)="detail($event[0])" (inputChanged)="account.clinic.location.address = $event; onChangeValidate()" key="AIzaSyDJYtcVzKXghryIDmQaTBDp5gWYPbTBqfU"></google-places-autocomplete>
+        </div>
+
         <div class="clear-container additional-content-block">
           <div class="container-half pull-left">
             <custom-input
-              [itemDisabled]="loading"
+              [itemDisabled]="true"
               [itemValue]="account.clinic.location.country"
               [itemLabel]="'Country'"
               [itemType]="'text'"
@@ -37,7 +42,7 @@
               (itemChange)="account.clinic.location.country = $event; onChangeValidate('country')"
             ></custom-input>
             <custom-input
-              [itemDisabled]="loading"
+              [itemDisabled]="true"
               [itemValue]="account.clinic.location.city"
               [itemLabel]="'City'"
               [itemType]="'text'"
@@ -47,7 +52,7 @@
           </div>
           <div class="container-half pull-right">
             <custom-input
-              [itemDisabled]="loading"
+              [itemDisabled]="true"
               [itemValue]="account.clinic.location.state"
               [itemLabel]="'State'"
               [itemType]="'text'"
@@ -55,7 +60,7 @@
               (itemChange)="account.clinic.location.state = $event; onChangeValidate('state')"
             ></custom-input>
             <custom-input
-              [itemDisabled]="loading"
+              [itemDisabled]="true"
               [itemValue]="account.clinic.location.zip"
               [itemLabel]="'ZIP'"
               [itemType]="'number'"
@@ -63,10 +68,6 @@
               (itemChange)="account.clinic.location.zip = $event; onChangeValidate()"
             ></custom-input>
           </div>
-        </div>
-        <div class="custom-input-container">
-          <span class="custom-input-label input-not-empty">Address</span>
-          <google-places-autocomplete types="geocode" [addressValue]="account.clinic.location.address" (callback)="detail($event[0])" (inputChanged)="account.clinic.location.address = $event; onChangeValidate()" key="AIzaSyDJYtcVzKXghryIDmQaTBDp5gWYPbTBqfU"></google-places-autocomplete>
         </div>
       </div>
     </form>

@@ -1,0 +1,6 @@
+<div class="custom-progress-bar-container" [ngClass]="itemClass">
+  <div class="bar-background"></div>
+  <div class="bar-line" [ngStyle]="{'width': 1 * itemValue + '%', 'backgroundColor': itemError ? '#ed1c24' : '#00adef'}"></div>
+  <span *ngIf="!itemError" class="bar-progress-label">Uploading {{itemValue}}%</span>
+  <span *ngIf="itemError" class="custom-input-error">{{itemError}}</span>
+</div>

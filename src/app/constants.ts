@@ -5,6 +5,13 @@ export const GOOGLE_MAP_API_URL: string = 'http://maps.google.com/maps/api/js';
 export const GOOGLE_API_KEY_ANDROID: string = 'AIzaSyDJYtcVzKXghryIDmQaTBDp5gWYPbTBqfU';
 export const GOOGLE_API_KEY_IOS: string = 'AIzaSyCgHpBF5TgClZPji7fl8LRfE98TnPoTWUY';
 
+// Dev environment
+// export const API_URL: string = 'http://regen-dev.azurewebsites.net/api/mobile';
+// Stable environment
+export const API_URL: string = 'http://regen-stable.azurewebsites.net/api/mobile';
+// Production environment
+// export const API_URL: string = 'http://regen-production.azurewebsites.net/api/mobile';
+
 // 10000 === 10 seconds
 // for this.snackBar.open(... ,... , { duration: DURATION_ERROR_SNACKBAR })
 export const DURATION_ERROR: number = 10000;
@@ -154,6 +161,9 @@ export const US_CITY_NAMES = [
 ];
 
 export const CHAR_ELEM: any = {
+  file: '0',
+  action: '1',
+  size: '2',
   read: {
     file: {
       none: 0,
@@ -175,6 +185,12 @@ export const CHAR_ELEM: any = {
   },
   write: {
     file: {
+      none: 0,
+      usage_list: 1,
+      error_list: 2,
+      black_list: 3,
+      firmware_image: 4,
+      settings: 5,
       0: 'none',
       1: 'usage_list',
       2: 'error_list',
@@ -183,6 +199,13 @@ export const CHAR_ELEM: any = {
       5: 'settings'
     },
     action: {
+      size: 1,
+      read: 3,
+      pause: 4,
+      done: 5,
+      timeout: 7,
+      error: 8,
+      unknown: 9,
       1: 'size',
       2: 'not_used1',
       3: 'read',
@@ -190,7 +213,8 @@ export const CHAR_ELEM: any = {
       5: 'done',
       6: 'not_used2',
       7: 'timeout',
-      8: 'error'
+      8: 'error',
+      9: 'unknown'
     }
   }
 };

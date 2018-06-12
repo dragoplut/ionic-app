@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ApiService, BleService } from '../index';
+import { ApiService, BleService, UtilService } from '../index';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import * as moment from 'moment';
@@ -53,14 +53,14 @@ export class PenService {
         descriptors: [ { uuid: '2902' } ]
       },
       {
-        type: 'unit8',
+        type: 'uint8',
         name: 'Brightness',
         service: 'a8a91000-38e9-4fbe-83f3-d82aae6ff68e',
         characteristic: 'a8a91001-38e9-4fbe-83f3-d82aae6ff68e',
         properties: [ 'Read', 'Write' ]
       },
       {
-        type: 'unit8',
+        type: 'uint8',
         name: 'Volume',
         service: 'a8a91000-38e9-4fbe-83f3-d82aae6ff68e',
         characteristic: 'a8a91002-38e9-4fbe-83f3-d82aae6ff68e',
@@ -97,7 +97,7 @@ export class PenService {
       //   properties: [ 'WriteWithoutResponse', 'Write' ]
       // },
       // {
-      //   type: 'unit8',
+      //   type: 'uint8',
       //   name: 'Key Info',
       //   service: 'a8a91000-38e9-4fbe-83f3-d82aae6ff68e',
       //   characteristic: 'a8a91007-38e9-4fbe-83f3-d82aae6ff68e',
@@ -189,6 +189,7 @@ export class PenService {
 
   public timeNowSeconds: number = moment().diff(moment().year(2017).startOf('year'), 'seconds');
   public dummyWhiteBlackList: number[] = [];
+  public blackListEncrypted: number[] = [];
   public firmwareBuffer: any = [];
   public dummySettings: any[] = [
     123456,
@@ -201,14 +202,29 @@ export class PenService {
 
   public buffWriteStatus: any = {
     idx: 0,
+    lastConfirmedIdx: 0,
+    lastRequestedIdx: 0,
+    packCounter: 0,
+    pauseStart: 0,
+    bufferSize: 0,
+    bufferFullTime: 0,
+    iterationTimeMs: 0,
+    transferStart: 0,
     data: [],
     status: 'ok',
     lock: false,
     died: false
   };
 
+  public config: any = {
+    packIdxStart: 2,
+    packIdxEnd: 6,
+    writeRetryTimeout: 1000
+  };
+
   constructor(
     public _ble: BleService,
+    public _util: UtilService,
     private api: ApiService
   ) {
     this.bleWriteEmitter.on('write', (bleWriteEmitter: any, item: any) => {
@@ -222,33 +238,62 @@ export class PenService {
         item.address,
         { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91006-38e9-4fbe-83f3-d82aae6ff68e', type: 'fileWriteBuffer' },
         item.buffer,
-        true,
-        false
-      );
-
-      if (this.buffWriteStatus.idx + 1 === this.buffWriteStatus.data.length) {
-        console.log('wrote everything');
-        this.buffWriteStatus.status = successStatus;
-        return;
-      }
-
-      this.buffWriteStatus.idx += 1;
-
-      setTimeout(() => {
-        let nextItem: any = _.clone(item);
-        nextItem.buffer = this.buffWriteStatus.data[this.buffWriteStatus.idx];
-        if (this.buffWriteStatus.status !== successStatus) {
-          this.bleWriteEmitter.emit('write', this.bleWriteEmitter, nextItem);
+        (done: any) => {
+          if (this.buffWriteStatus.idx + 1 === this.buffWriteStatus.data.length) {
+            console.log('wrote everything');
+            this.buffWriteStatus.status = successStatus;
+          } else if (!this.buffWriteStatus.bufferSize) {
+            this.buffWriteStatus.idx += 1;
+            let nextItem: any = item;
+            nextItem.buffer = this.buffWriteStatus.data[this.buffWriteStatus.idx];
+            if (this.buffWriteStatus.status !== successStatus && !this.buffWriteStatus.lock && !this.buffWriteStatus.died) {
+              this.buffWriteStatus.transferStart = moment().valueOf();
+              this.bleWriteEmitter.emit('write', this.bleWriteEmitter, nextItem);
+              this.buffWriteStatus.packCounter++;
+            }
+          } else if (this.buffWriteStatus.idx < this.buffWriteStatus.lastConfirmedIdx + this.buffWriteStatus.bufferSize) {
+            this.buffWriteStatus.idx += 1;
+            const timeNow: number = moment().valueOf();
+            let nextItem: any = item;
+            nextItem.buffer = this.buffWriteStatus.data[this.buffWriteStatus.idx];
+            if (this.buffWriteStatus.status !== successStatus && !this.buffWriteStatus.lock && !this.buffWriteStatus.died) {
+              if (this.buffWriteStatus.bufferSize && this.buffWriteStatus.idx === this.buffWriteStatus.lastConfirmedIdx + this.buffWriteStatus.bufferSize - 1) {
+                if (this.buffWriteStatus.bufferFullTime) {
+                  this.buffWriteStatus.iterationTimeMs = timeNow - this.buffWriteStatus.bufferFullTime;
+                }
+                this.buffWriteStatus.bufferFullTime = timeNow;
+              }
+              this.bleWriteEmitter.emit('write', this.bleWriteEmitter, nextItem);
+            }
+          }
+        },
+        (err: any) => {
+          console.log('bleWriteEmitter this._ble.write err: ', err, ' index failed: ', this.buffWriteStatus.idx);
+          if (this.buffWriteStatus.status !== 5) {
+            this.bleWriteEmitter.emit('pause');
+            const errPackIdx: number = this.buffWriteStatus.idx;
+            let nextItem: any = _.clone(item);
+            setTimeout(() => {
+              console.log('Write retry invoke: ', errPackIdx > this.buffWriteStatus.lastConfirmedIdx, ' from index ', errPackIdx, ' last confirmed: ', this.buffWriteStatus.lastConfirmedIdx, ' last resume: ', this.buffWriteStatus.lastRequestedIdx);
+              if (errPackIdx > this.buffWriteStatus.lastConfirmedIdx && this.buffWriteStatus.status !== successStatus && !this.buffWriteStatus.died) {
+                nextItem.buffer = this.buffWriteStatus.data[errPackIdx];
+                this.buffWriteStatus.lock = false;
+                this.bleWriteEmitter.emit('write', this.bleWriteEmitter, nextItem);
+                console.log('Buffer transfer write retry from index: ', errPackIdx);
+              }
+            }, this.config.writeRetryTimeout);
+          }
         }
-      }, 100);
+      );
     });
 
     this.bleWriteEmitter.on('pause', () => {
       this.buffWriteStatus.lock = true;
-      console.log('pause received');
+      this.buffWriteStatus.lockIndex = this.buffWriteStatus.idx + (this.buffWriteStatus.bufferSize || 64);
+      this.buffWriteStatus.pauseStart = moment().valueOf();
 
       setTimeout(() => {
-        if (this.buffWriteStatus.lock) {
+        if (this.buffWriteStatus.lock && this.buffWriteStatus.lockIndex < this.buffWriteStatus.idx) {
           this.buffWriteStatus.died = true;
           this.bleWriteEmitter.emit('error', 'died waiting for resume');
         }
@@ -263,12 +308,17 @@ export class PenService {
       }
 
       this.buffWriteStatus.lock = false;
-
       this.buffWriteStatus.idx = resumeIndex;
+      this.buffWriteStatus.pauseStart = 0;
+
+      if (!this.buffWriteStatus.bufferSize && this.buffWriteStatus.packCounter) {
+        this.buffWriteStatus.bufferSize = resumeIndex;
+      }
 
       let nexItem: any = _.clone(item);
-      nexItem.buffer = this.buffWriteStatus.data[this.buffWriteStatus.idx];
+      nexItem.buffer = this.buffWriteStatus.data[resumeIndex];
       if (this.buffWriteStatus.status !== successStatus) {
+        this.buffWriteStatus.lastRequestedIdx = resumeIndex;
         this.bleWriteEmitter.emit('write', bleWriteEmitter, nexItem);
       }
     });
@@ -288,14 +338,14 @@ export class PenService {
     return this.api.post(`${this.path}/register`, penData);
   }
 
-  public updatePen(data: any): Observable<any> {
-    // const penData: any = _.pick(data, this.penAllowedFields);
-    // {
-    //   "id": 0,
-    //   "serialNumber": "string"
-    // }
-    return this.api.post(`${this.path}/update`, data);
-  }
+  // public updatePen(data: any): Observable<any> {
+  //   // const penData: any = _.pick(data, this.penAllowedFields);
+  //   // {
+  //   //   "id": 0,
+  //   //   "serialNumber": "string"
+  //   // }
+  //   return this.api.post(`${this.path}/update`, data);
+  // }
 
   public getPens(): Observable<any> {
     /** Resp example **/
@@ -318,6 +368,15 @@ export class PenService {
     //   "forceDateTime": 0
     // }
     return this.api.get(`${this.path}/getSettings?serialNumber=${serialNumber}`)
+      .map((res: any) => res);
+  }
+
+  public getSettingsEncrypted(serialNumber: string, keyInfo: any[]): Observable<any> {
+    let keyInfoStr: string = '';
+    keyInfo.forEach((n: number) => {
+      keyInfoStr = keyInfoStr + '&keyInfo=' + n;
+    });
+    return this.api.get(`${this.path}/getSettingsEncrypted?serialNumber=${serialNumber}${keyInfoStr}`)
       .map((res: any) => res);
   }
 
@@ -354,22 +413,33 @@ export class PenService {
       .map((res: any) => res);
   }
 
-  public updateWhiteBlacklist(data: number[]): Observable<any> {
+  // public updateWhiteBlacklist(data: number[]): Observable<any> {
+  //   /** Resp example **/
+  //   // [0,2,1,8,3,200]
+  //   return this.api.post(`${this.path}/getWhiteBlacklist`, data)
+  //     .map((res: any) => res);
+  // }
+
+  public updateWhiteBlacklistEncrypted(data: number[], keyInfo: number[]): Observable<any> {
     /** Resp example **/
     // [0,2,1,8,3,200]
-    return this.api.post(`${this.path}/getWhiteBlacklist`, data)
+    let keyInfoStr: string = '?';
+    let keyInfoArr: number[] = [];
+    keyInfo.forEach((n: number) => {
+      keyInfoStr = keyInfoStr + (keyInfoStr.length > 1 ? '&keyInfo=' : 'keyInfo=') + n;
+      keyInfoArr.push(n);
+    });
+    return this.api.post(`${this.path}/getEncodedAndEncryptedFlatWhiteBlacklist${keyInfoStr}`, keyInfoArr)
       .map((res: any) => res);
   }
 
-  public updateWhiteBlacklistEncrypted(data: number[]): Observable<any> {
-    /** Resp example **/
-    // [0,2,1,8,3,200]
-    return this.api.post(`${this.path}/getEncodedAndEncryptedFlatWhiteBlacklist`, data)
-      .map((res: any) => res);
-  }
+  // public saveSyncListData(data: any): Observable<any> {
+  //   return this.api.post(`${this.path}/saveSyncListData`, data)
+  //     .map((res: any) => res);
+  // }
 
-  public saveSyncListData(data: any): Observable<any> {
-    return this.api.post(`${this.path}/saveSyncListData`, data)
+  public saveSyncData(data: any): Observable<any> {
+    return this.api.post(`${this.path}/saveSyncData`, data)
       .map((res: any) => res);
   }
 
@@ -377,69 +447,25 @@ export class PenService {
     return this.api.post(`${this.path}/delete`, { id });
   }
 
-  public sendBuffPackage(address: string, item: any, buffer: any[]) {
-    // alert('sendBuffPackage buffer: ' + JSON.stringify(buffer, null, 2));
-    // const buffDuplicate: any = new Uint8Array(buffer);
-    // alert('sendBuffPackage buffDuplicate: ' + JSON.stringify(buffDuplicate, null, 2));
-    this.buffWriteStatus.idx = buffer[1] + 1;
-    setTimeout(() => {
-      this._ble.write(
-        address,
-        { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91006-38e9-4fbe-83f3-d82aae6ff68e', type: 'fileWriteBuffer' },
-        buffer,
-        true,
-        false
-      );
-    }, 50);
-  }
-
-  public checkBuffAndSend(address: string, item: any) {
-    // alert('this.buffWriteStatus: ' + JSON.stringify(this.buffWriteStatus, null, 2));
-    for (let j = 0; j < this.buffWriteStatus.data.length; j++) {
-      // alert('checkBuffAndSend iteration this.buffWriteStatus.data[j]: ' + JSON.stringify(this.buffWriteStatus.data[j], null, 2));
-      this.sendBuffPackage(address, item, this.buffWriteStatus.data[j]);
-    }
-
-    // if (this.buffWriteStatus.status === 'ok') {
-    //   // let buff: any = this.buffWriteStatus.data[0];
-    //   // buff[0] = 1;
-    //   // this.sendBuffPackage(address, item, buff)
-    //   for (let j = 0; j < this.buffWriteStatus.data.length; j++) {
-    //     alert('checkBuffAndSend iteration this.buffWriteStatus.data[j]: ' + this.buffWriteStatus.data[j]);
-    //     this.sendBuffPackage(address, item, this.buffWriteStatus.data[j]);
-    //   }
-    // } else if (this.buffWriteStatus.status === 3) {
-    //   alert('checkBuffAndSend from index: ' + this.buffWriteStatus.idx);
-    //   for (let j = this.buffWriteStatus.idx; j < this.buffWriteStatus.data.length; j++) {
-    //     const buffer: any = this.buffWriteStatus.data[j];
-    //     this.sendBuffPackage(address, item, buffer)
-    //   }
-    // } else {
-    //   alert('FAIL: ' + JSON.stringify(this.buffWriteStatus, null, 2));
-    // }
-  }
-
-  public writeWithResponse(address: string, item: any, rawData: any, success: any, fail: any) {
+  public writeWithResponse(address: string, item: any, rawData: any, success: any, fail: any, progressInfo?: any) {
 
     if (item && item.device && item.device.settings) {
       this.dummySettings = item.device.settings;
     }
-    if (item && item.device && item.device.dummyWhiteBlackList) {
-      this.dummyWhiteBlackList = item.device.dummyWhiteBlackList;
+    if (item && item.device && item.device.blackListEncrypted) {
+      this.blackListEncrypted = item.device.blackListEncrypted;
     }
-    if (item && item.device && item.device.firmwareBuffer) {
-      this.firmwareBuffer = item.device.firmwareBuffer;
+    if (item && item.device && item.device.dataBuffer) {
+      this.firmwareBuffer = item.device.dataBuffer;
     }
 
     if (rawData && rawData.length) {
-      switch (rawData[1]) {
+      switch (rawData[CHAR_ELEM.action]) {
         case CHAR_ELEM.read.action.write:
-          // alert('writeWithResponse rawData: ' + JSON.stringify(rawData));
-
           this._ble.startNotification(
             address,
             { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91004-38e9-4fbe-83f3-d82aae6ff68e', type: item.type },
-            (data: any) => this.onFileResponse(data, address, item, rawData, success),
+            (data: any) => this.onFileResponse(data, address, item, rawData, success, progressInfo),
             (err: any) => this._ble.stopNotification(address, { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91004-38e9-4fbe-83f3-d82aae6ff68e' }, true, err));
           break;
         case CHAR_ELEM.read.action.read:
@@ -454,103 +480,61 @@ export class PenService {
       }
     }
 
-    let resultArrVarints128: any = JSON.parse(JSON.stringify(this.dummyWhiteBlackList));
-    // let resultArrVarints128: any = [];
-    // const rangesArr: any[] = JSON.parse(JSON.stringify(this.dummyWhiteBlackList));
-    // _.forEach(rangesArr, (num: any) => {
-    //   resultArrVarints128 = resultArrVarints128.concat(this.intToVarints128(num));
-    // });
-    let resultArrUint8: any = new Uint8Array(resultArrVarints128);
-
-    if (rawData[0] === 3 && rawData[1] === 2) {
-      rawData[2] = resultArrUint8.byteLength;
-    } else if (rawData[0] === 5 && rawData[1] === 2) {
-      rawData[2] = 16;
+    if (rawData[CHAR_ELEM.action] === CHAR_ELEM.read.action.write) {
+      switch (rawData[CHAR_ELEM.file]) {
+        case CHAR_ELEM.read.file.black_list:
+          rawData[CHAR_ELEM.size] = this.blackListEncrypted.length;
+          break;
+        case CHAR_ELEM.read.file.firmware_image:
+        case CHAR_ELEM.read.file.settings:
+          rawData[CHAR_ELEM.size] = item.device.dataBytesLength;
+          break;
+      }
     }
 
-    if (rawData[1] === 2) {
-      switch (rawData[0]) {
+    if (rawData[CHAR_ELEM.action] === CHAR_ELEM.read.action.write) {
+      switch (rawData[CHAR_ELEM.file]) {
         case CHAR_ELEM.read.file.black_list:
-          let blackListBufferItems: any[] = [];
-          const packagesAmount: number = Math.ceil(resultArrVarints128.length / 18);
-          for (let i = 0; i < packagesAmount; i++) {
-            const rawPackageData: any = resultArrUint8.slice(i * 18, 18 * (i + 1));
-            let packageData: any = new Uint8Array(18);
-            _.forEach(rawPackageData, (item: any, idx: number) => packageData[idx] = item);
-            let packageNumber: any = new Uint8Array(2);
-            const uint8idx: any[] = this.uint16to8arr(new Uint16Array([i]));
-            if (packagesAmount < 2 || i + 1 === packagesAmount) {
-              packageNumber = new Uint8Array(uint8idx);
-              packageNumber[0] |= 128;
-            } else {
-              packageNumber = new Uint8Array(uint8idx);
-            }
-            const packageBuffer: any = this.concatTypedArrays(packageNumber, packageData);
-            blackListBufferItems.push(packageBuffer);
-          }
-          this.buffWriteStatus.data = blackListBufferItems;
+          const blackListData: any = this._util.getBufferChunksOf(item.device.blackListEncrypted);
+          this.buffWriteStatus.data = blackListData.buffer;
 
           break;
         case CHAR_ELEM.read.file.firmware_image:
-
-          let bufferItems: any[] = [];
-          for (let i = 0; i < item.device.firmwareBuffer.length; i++) {
-            const rawPackageData: any = resultArrUint8.slice(i * 18, 18 * (i + 1));
-            let packageData: any = new Uint8Array(18);
-            _.forEach(rawPackageData, (item: any, idx: number) => packageData[idx] = item);
-            let packageNumber: any = new Uint8Array(2);
-            const uint8idx: any = this.uint16to8arr(new Uint16Array([i]));
-            if (item.device.firmwareBuffer.length < 2 || i + 1 === item.device.firmwareBuffer.length) {
-              packageNumber = new Uint8Array(uint8idx);
-              packageNumber[0] |= 128;
-            } else {
-              packageNumber = new Uint8Array(uint8idx);
-            }
-
-            bufferItems.push(this.concatTypedArrays(packageNumber, packageData));
-          }
-          this.buffWriteStatus.data = bufferItems;
+          this.buffWriteStatus.data = item.device.dataBuffer;
           break;
         case CHAR_ELEM.read.file.settings:
-
-          let zeroPad: any = new Uint8Array(2);
-          let dataBuffer: any = new Uint8Array(2);
-          dataBuffer[0] = 128;
-
-          _.forEach(this.dummySettings, (item: any) => {
-            const convertedUint32: any = this.uint32to8arr(item);
-            dataBuffer = this.concatTypedArrays(dataBuffer, convertedUint32);
-          });
-
-          dataBuffer = this.concatTypedArrays(dataBuffer, zeroPad);
-          this.buffWriteStatus.buffer = dataBuffer;
-
+          const settingsData: any = this._util.getBufferChunksOf(item.device.deviceSettingsEncrypted);
+          this.buffWriteStatus.data = settingsData.buffer;
           break;
       }
     }
 
-    this._ble.write(address, { serviceUUID: item.serviceUUID, characteristicUUID: item.characteristicUUID, type: item.type }, rawData, (done: any) => {
-    }, fail);
+    this._ble.write(
+      address,
+      { serviceUUID: item.serviceUUID, characteristicUUID: item.characteristicUUID, type: item.type },
+      rawData,
+      (done: any) => {},
+      fail);
   }
 
-  public intToVarints128(value: number) {
-    if (value === 0) { return [0]; }
-    let varints128: any[] = [];
-
-    let iterValue = value;
-    let i = 0;
-    while(iterValue !== 0) {
-      if (i > 0) {
-        varints128[i - 1] = varints128[i - 1] | 0x80;
-      }
-
-      varints128.push(iterValue & 0x7f);
-      iterValue >>= 7;
-      ++i;
-    }
-
-    return varints128;
-  }
+  // public intToVarints128(value: number) {
+  //   if (value === 0) { return [0]; }
+  //   let varints128: any[] = [];
+  //
+  //   let iterValue = value;
+  //   let i = 0;
+  //   while(iterValue !== 0) {
+  //     if (i > 0) {
+  //       varints128[i - 1] = varints128[i - 1] | 0x80;
+  //     }
+  //
+  //     varints128.push(iterValue & 0x7f);
+  //     iterValue >>= 7;
+  //     ++i;
+  //   }
+  //
+  //   return varints128;
+  // }
 
   public decodeBuffer(bufferArr: any, type: string) {
     let data: any = {};
@@ -569,27 +553,6 @@ export class PenService {
         };
         break;
       case 'usageList':
-        // let exampleObj: any = {
-        //   "serialNumber": "string",
-        //   "penUsageLists": [
-        //     {
-        //       "catridgeId": 0,
-        //       "date": 0,
-        //       "runTimes": 0,
-        //       "numUses": 0,
-        //       "padding": 0
-        //     }
-        //   ],
-        //   "penErrorLists": [
-        //     {
-        //       "id": 0,
-        //       "catridgeId": 0,
-        //       "time": 0,
-        //       "errorId": 0
-        //     }
-        //   ]
-        // };
-
         const usageListBlockLength: number = 8;
         const usageListProps: any[] = [
           { name: 'catridgeId', bLen: 3 },
@@ -611,78 +574,197 @@ export class PenService {
     return data;
   }
 
-  public onFileResponse(data: any, address: string, item: any, rawData: any, callback?: any) {
+  public onFileResponse(data: any, address: string, item: any, rawData: any, callback?: any, progressInfo?: any) {
     if (data && data.data) {
-      switch (data.data['0']) {
-        case 3:
-          let writeBufferItem: any = _.clone(item);
-          switch (data.data['1']) {
-            case 3:
-              this.buffWriteStatus.status = data.data[1];
-              // this.buffWriteStatus.idx = data[2];
-              writeBufferItem.type = 'fileWriteBuffer';
-              // this.checkBuffAndSend(address, item);
+      const idx8arr4: any[] = data.data.slice(this.config.packIdxStart, this.config.packIdxEnd);
+      const index: number = this.uint8to32int(idx8arr4);
+      switch (data.data[CHAR_ELEM.file]) {
+        case CHAR_ELEM.write.file.none:
+          switch (data.data[CHAR_ELEM.action]) {
+            case CHAR_ELEM.write.action.timeout:
+            case CHAR_ELEM.write.action.error:
+            case CHAR_ELEM.write.action.unknown:
+              this.buffWriteStatus.died = true;
+              this.buffWriteStatus.status = data.data[CHAR_ELEM.action];
+              if (progressInfo) {
+                const errorMessage: string = `${CHAR_ELEM.write.action[data.data[CHAR_ELEM.action]].toUpperCase()} in transfer! Upgrade will be skipped!`;
+                progressInfo(this.getProgressObj(data, item, errorMessage));
+              }
+              console.log(`Stop buffer transfer due to ${CHAR_ELEM.write.action[data.data[CHAR_ELEM.action]]}!`);
+              this.disconnectPen(item.device);
+              break;
+            default:
+              this.buffWriteStatus.died = true;
+              alert('Some unknown error happened!');
+              break;
+          }
+          break;
+        case CHAR_ELEM.write.file.black_list:
+          let writeBufferItem: any = item;
+          switch (data.data[CHAR_ELEM.action]) {
+            case CHAR_ELEM.write.action.read:
+            case CHAR_ELEM.write.action.pause:
+              this.buffWriteStatus.idx = index;
+              this.buffWriteStatus.lastRequestedIdx = index;
+              this.buffWriteStatus.lastConfirmedIdx = index ? index - 1 : 0;
+              this.buffWriteStatus.status = data.data[CHAR_ELEM.action];
               writeBufferItem.address = address;
-              writeBufferItem.buffer = this.buffWriteStatus.data[this.buffWriteStatus.idx];
-              if (this.buffWriteStatus.status !== 5) {
-                this.bleWriteEmitter.emit('write', this.bleWriteEmitter, writeBufferItem);
+              writeBufferItem.buffer = this.buffWriteStatus.data[index];
+              if (this.buffWriteStatus.status !== CHAR_ELEM.write.action.done) {
+                if (data.data[CHAR_ELEM.action] === CHAR_ELEM.write.action.read) {
+                  if (progressInfo) {
+                    const errorMessage: string = '';
+                    progressInfo(this.getProgressObj(data, item, errorMessage));
+                  }
+                  this.bleWriteEmitter.emit(this.buffWriteStatus.lock ? 'resume' : 'write', this.bleWriteEmitter, writeBufferItem, index);
+                } else {
+                  this.bleWriteEmitter.emit('pause');
+                }
               }
               break;
-            case 4:
-              this.buffWriteStatus.status = data.data[1];
-              writeBufferItem.type = 'fileWriteBuffer';
-              // this.checkBuffAndSend(address, item);
-              writeBufferItem.address = address;
-              writeBufferItem.buffer = this.buffWriteStatus.data[this.buffWriteStatus.idx];
-              if (this.buffWriteStatus.status !== 5) {
-                this.bleWriteEmitter.emit('write', this.bleWriteEmitter, writeBufferItem);
-              }
-              break;
-            case 5:
+            case CHAR_ELEM.write.action.done:
               this.buffWriteStatus.idx = 0;
-              this.buffWriteStatus.status = data.data[1];
+              this.buffWriteStatus.status = data.data[CHAR_ELEM.action];
+              if (progressInfo) {
+                const errorMessage: string = '';
+                progressInfo(this.getProgressObj(data, item, errorMessage));
+              }
               callback(data);
               break;
-            case 8:
-              this.buffWriteStatus.status = data.data[1];
+            case CHAR_ELEM.write.action.error:
+              this.buffWriteStatus.died = true;
+              this.buffWriteStatus.status = data.data[CHAR_ELEM.action];
+              console.log(`Stop buffer transfer due to ${CHAR_ELEM.write.action[data.data[CHAR_ELEM.action]]}!`);
               break;
             default:
               break;
           }
           break;
-        case 5:
-          switch (data.data['1']) {
-            case 3:
-              let zeroPad: any = new Uint8Array(2);
-              let dataBuffer: any = new Uint8Array(2);
-              dataBuffer[0] = 128;
-
-              _.forEach(this.dummySettings, (settingsItem: any) => {
-                const convertedUint32: any = this.uint32to8arr(settingsItem);
-                dataBuffer = this.concatTypedArrays(dataBuffer, convertedUint32);
-              });
-
-              dataBuffer = this.concatTypedArrays(dataBuffer, zeroPad);
-
-              this._ble.write(
-                address,
-                { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91006-38e9-4fbe-83f3-d82aae6ff68e', type: 'fileWriteBuffer' },
-                dataBuffer,
-                (done: any) => {
-                  // callback(done);
-                },
-                false
-              );
+        case CHAR_ELEM.write.file.firmware_image:
+          let writeFWBufferItem: any = item;
+          switch (data.data[CHAR_ELEM.action]) {
+            case CHAR_ELEM.write.action.read:
+              this.buffWriteStatus.idx = index;
+              this.buffWriteStatus.lastRequestedIdx = index;
+              this.buffWriteStatus.lastConfirmedIdx = index ? index - 1 : 0;
+              this.buffWriteStatus.status = data.data[CHAR_ELEM.action];
+              writeFWBufferItem.address = address;
+              writeFWBufferItem.buffer = this.buffWriteStatus.data[index];
+              if (this.buffWriteStatus.status !== CHAR_ELEM.read.action.done) {
+                if (progressInfo) {
+                  const errorMessage: string = '';
+                  progressInfo(this.getProgressObj(data, item, errorMessage));
+                }
+                this.bleWriteEmitter.emit(this.buffWriteStatus.lock ? 'resume' : 'write', this.bleWriteEmitter, writeFWBufferItem, index);
+              }
               break;
-            case 5:
+            case CHAR_ELEM.write.action.pause:
+              this.buffWriteStatus.status = data.data[CHAR_ELEM.action];
+              writeFWBufferItem.address = address;
+              writeFWBufferItem.buffer = this.buffWriteStatus.data[this.buffWriteStatus.idx];
+              if (this.buffWriteStatus.status !== 5) {
+                this.bleWriteEmitter.emit('pause');
+              }
+              break;
+            case CHAR_ELEM.write.action.done:
               this.buffWriteStatus.idx = 0;
-              // alert('write DONE!!!!!!!');
+              this.buffWriteStatus.status = data.data[CHAR_ELEM.action];
+              if (progressInfo) {
+                const errorMessage: string = '';
+                progressInfo(this.getProgressObj(data, item, errorMessage));
+              }
               callback(data);
+              break;
+            case CHAR_ELEM.write.action.timeout:
+            case CHAR_ELEM.write.action.error:
+            case CHAR_ELEM.write.action.unknown:
+              this.buffWriteStatus.died = true;
+              this.buffWriteStatus.status = data.data[CHAR_ELEM.action];
+              if (progressInfo) {
+                const errorMessage: string = `${CHAR_ELEM.write.action[data.data[CHAR_ELEM.action]].toUpperCase()} in transfer! Upgrade will be skipped!`;
+                progressInfo(this.getProgressObj(data, item, errorMessage));
+              }
+              console.log(`Stop buffer transfer due to ${CHAR_ELEM.write.action[data.data[CHAR_ELEM.action]]}!`);
+              this.disconnectPen(item.device);
+              break;
+            default:
+              break;
+          }
+          break;
+        case CHAR_ELEM.write.file.settings:
+          let writeSettingsBufferItem: any = item;
+          switch (data.data[CHAR_ELEM.action]) {
+            case CHAR_ELEM.write.action.read:
+            case CHAR_ELEM.write.action.pause:
+              this.buffWriteStatus.idx = index;
+              this.buffWriteStatus.lastRequestedIdx = index;
+              this.buffWriteStatus.lastConfirmedIdx = index ? index - 1 : 0;
+              this.buffWriteStatus.status = data.data[CHAR_ELEM.action];
+              writeSettingsBufferItem.address = address;
+              writeSettingsBufferItem.buffer = this.buffWriteStatus.data[index];
+              if (this.buffWriteStatus.status !== CHAR_ELEM.write.action.done) {
+                if (data.data[CHAR_ELEM.action] === CHAR_ELEM.write.action.read) {
+                  if (progressInfo) {
+                    const errorMessage: string = '';
+                    progressInfo(this.getProgressObj(data, item, errorMessage));
+                  }
+                  this.bleWriteEmitter.emit(this.buffWriteStatus.lock ? 'resume' : 'write', this.bleWriteEmitter, writeSettingsBufferItem, index);
+                } else {
+                  this.bleWriteEmitter.emit('pause');
+                }
+              }
+
+              // const zeroPad: any = new Uint8Array(2);
+              // let settingsEncrypted: any = new Uint8Array(item.device.deviceSettingsEncrypted);
+              // let bufferIndex: any = new Uint8Array(2);
+              // bufferIndex[0] = 128;
+              // settingsEncrypted = this.concatTypedArrays(bufferIndex, settingsEncrypted);
+              // let dataBuffer: any = this.concatTypedArrays(settingsEncrypted, zeroPad);
+              //
+              // // _.forEach(this.dummySettings, (settingsItem: any) => {
+              // //   const convertedUint32: any = this.uint32to8arr(settingsItem);
+              // //   dataBuffer = this.concatTypedArrays(dataBuffer, convertedUint32);
+              // // });
+              // //
+              // // dataBuffer = this.concatTypedArrays(dataBuffer, zeroPad);
+              //
+              // this._ble.write(
+              //   address,
+              //   { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91006-38e9-4fbe-83f3-d82aae6ff68e', type: 'fileWriteBuffer' },
+              //   dataBuffer,
+              //   (done: any) => {
+              //     // callback(done);
+              //   },
+              //   false
+              // );
+              break;
+            case CHAR_ELEM.write.action.done:
+              this.buffWriteStatus.idx = 0;
+              this.buffWriteStatus.status = data.data[CHAR_ELEM.action];
+              if (progressInfo) {
+                const errorMessage: string = '';
+                progressInfo(this.getProgressObj(data, item, errorMessage));
+              }
+              callback(data);
+              break;
+            case CHAR_ELEM.write.action.timeout:
+            case CHAR_ELEM.write.action.error:
+            case CHAR_ELEM.write.action.unknown:
+              this.buffWriteStatus.died = true;
+              this.buffWriteStatus.status = data.data[CHAR_ELEM.action];
+              if (progressInfo) {
+                const errorMessage: string = `${CHAR_ELEM.write.action[data.data[CHAR_ELEM.action]].toUpperCase()} in transfer! Upgrade will be skipped!`;
+                progressInfo(this.getProgressObj(data, item, errorMessage));
+              }
+              console.log(`Stop buffer transfer due to ${CHAR_ELEM.write.action[data.data[CHAR_ELEM.action]]}!`);
+              this.disconnectPen(item.device);
+              break;
+            default:
               break;
           }
           break;
         default:
-          // alert('Unexpected notification data: ' + JSON.stringify(data, null, 2));
+          console.log('Unexpected data: ' + JSON.stringify(data, null, 2));
           break;
       }
     }
@@ -699,22 +781,27 @@ export class PenService {
       this.rawData.push(data.data[prop]);
     }
     if (data && data.idx && data.idx.length && data.idx[0] === lastPackIdx[0]) {
-      const dataDone: any = _.clone(rawData);
-      dataDone[1] = 5;
+      // console.log('onData dataDone rawData: ', this.rawData);
+      const dataDone: any = rawData;
+      dataDone[CHAR_ELEM.action] = CHAR_ELEM.read.action.done;
       this._ble.write(address, { serviceUUID: item.serviceUUID, characteristicUUID: item.characteristicUUID, type: item.type }, dataDone, (done: any) => {
         let resp: any = {};
-        switch (dataDone[0]) {
-          case 1:
+        switch (dataDone[CHAR_ELEM.file]) {
+          case CHAR_ELEM.read.file.usage_list:
             resp = this.decodeBuffer(this.rawData, 'usageList');
+            resp.rawResult = this.rawData;
             break;
-          case 2:
+          case CHAR_ELEM.read.file.error_list:
             resp = this.decodeBuffer(this.rawData, 'errorList');
+            resp.rawResult = this.rawData;
             break;
-          case 3:
+          case CHAR_ELEM.read.file.black_list:
             resp = this.decodeBuffer(this.rawData, 'blackList');
+            resp.rawResult = this.rawData;
             break;
-          case 5:
+          case CHAR_ELEM.read.file.settings:
             resp = this.decodeBuffer(this.rawData, 'settings');
+            resp.rawResult = this.rawData;
             break;
           default:
             break;
@@ -733,11 +820,21 @@ export class PenService {
           (err: any) => false,
           true
         );
-      }, false);
+      }, (err: any) => {
+        console.log('this._ble.write err: ', err);
+      });
     }
     // const cartIdArr: any = new Uint8Array(buffer, 2, 3);
     // const cartId: any = (cartIdArr[0] << 16) | (cartIdArr[1] << 8) | cartIdArr[2];
 
+  }
+
+  private disconnectPen(pen: any) {
+    this._ble.disconnect(
+      pen,
+      (done: any) => console.log('disconnectPen done: ', done),
+      (err: any) => console.log('disconnectPen err: ', err)
+    )
   }
 
   private parseBufferProps(bufferArr: any, listProps: any, blockLength: number) {
@@ -766,37 +863,57 @@ export class PenService {
             converted[p.name] = (item[p.name][0] << 24) | (item[p.name][1] << 16) | (item[p.name][2] << 8) | item[p.name][3];
             break;
         }
-
-        // buff = [1,2,3,4];
-        // sum = 0;
-        // for (var i = 0; i < buff.length; i++) {
-        //   sum += buff[buff.length-i-1] << (8*i)
-        // }
       });
       return converted;
     });
   }
 
-  private uint32to8arr(uint32: any) {
-    let resultArr: any = new Uint8Array(4);
-    resultArr[3] = uint32 & 0xff;
-    resultArr[2] = (uint32 >> 8) & 0xff;
-    resultArr[1] = (uint32 >> 16) & 0xff;
-    resultArr[0] = (uint32 >> 24) & 0xff;
-    return resultArr;
+  private getProgressObj(data: any, item: any, errorMessage?: string) {
+    const packagesTotal: number = item.device.firmwareBufferLength;
+    const averagePackTiming: number = this.buffWriteStatus.lastConfirmedIdx ?
+      (moment().valueOf() - this.buffWriteStatus.transferStart) / this.buffWriteStatus.lastConfirmedIdx : 300;
+    return {
+      percent: data.data[CHAR_ELEM.action] === CHAR_ELEM.read.action.done ? 100 : Math.ceil(this.buffWriteStatus.idx / packagesTotal * 1000) / 10,
+      packageIdx: this.buffWriteStatus.idx,
+      packagesTotal: packagesTotal,
+      status: data.data[CHAR_ELEM.action],
+      errorMessage,
+      iterationTimeMs: this.buffWriteStatus.iterationTimeMs,
+      estimateMin: data.data[CHAR_ELEM.action] === CHAR_ELEM.read.action.done ? 0 : Math.floor(((packagesTotal - this.buffWriteStatus.lastConfirmedIdx) * averagePackTiming) / 1000 / 60)
+    };
   }
 
-  private uint16to8arr(uint16: any) {
-    let resultArr: any = new Uint8Array(2);
-    resultArr[1] = uint16 & 0xff;
-    resultArr[0] = (uint16 >> 8) & 0xff;
-    return resultArr;
+  // private uint32to8arr(uint32: any) {
+  //   let resultArr: any = new Uint8Array(4);
+  //   resultArr[3] = uint32 & 0xff;
+  //   resultArr[2] = (uint32 >> 8) & 0xff;
+  //   resultArr[1] = (uint32 >> 16) & 0xff;
+  //   resultArr[0] = (uint32 >> 24) & 0xff;
+  //   return resultArr;
+  // }
+
+  private uint8to32int(arr: any[]) {
+    // let sum = 0;
+    // arr.reverse().forEach((n: any) => {
+    //   sum = sum * 256 + n;
+    // });
+    // return sum;
+    return arr.reduce((acc, next) => {
+      return acc * 256 + next;
+    }, 0);
   }
 
-  private concatTypedArrays(a: any, b: any) { // a, b TypedArray of same type
-    let c = new (a.constructor)(a.length + b.length);
-    c.set(a, 0);
-    c.set(b, a.length);
-    return c;
-  }
+  // private uint16to8arr(uint16: any) {
+  //   let resultArr: any = new Uint8Array(2);
+  //   resultArr[1] = uint16 & 0xff;
+  //   resultArr[0] = (uint16 >> 8) & 0xff;
+  //   return resultArr;
+  // }
+  //
+  // private concatTypedArrays(a: any, b: any) { // a, b TypedArray of same type
+  //   let c = new (a.constructor)(a.length + b.length);
+  //   c.set(a, 0);
+  //   c.set(b, a.length);
+  //   return c;
+  // }
 }
