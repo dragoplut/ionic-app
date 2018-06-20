@@ -8,7 +8,7 @@ import {
   DPW_LOGO_TRANSPARENT,
   CHAR_ELEM
 } from '../../app/constants';
-import { HomeMenu, MyPenComponent, UpdatePenComponent } from '../index';
+import { HomeMenu, MyPenComponent, UpdatePenComponent } from '../';
 import { ApiService, AccountService, BleService, FirmwareService, PenService, UtilService } from '../../services';
 
 // import hexToArrayBuffer from 'hex-to-array-buffer';
@@ -709,7 +709,6 @@ export class RegisterPenComponent {
       { serviceUUID: '180a', characteristicUUID: '2a26' },
       'string',
       (resp: any) => {
-        // console.log('isNewFirmwareAvailable writeToDevice Firmware Revision: ', resp);
         if (resp && resp.length) {
           this.logEvent('Success', 'current Firmware version', resp);
           this.firmwareVersion = resp;
@@ -738,7 +737,6 @@ export class RegisterPenComponent {
 
           const firmwareData: any = this._util.getBufferChunksOf(resp.content);
           // const firmwareData: any = this._util.getFirmwareHexBuffer(firmwareHexStr);
-          // console.log('------------ dataBuffer: ', firmwareData, firmwareData.buffer, firmwareData.buffer.length);
           this.logEvent('Success', 'Firmware image received and prepared for transfer to device!', '');
 
           if (firmwareData.buffer && firmwareData.buffer.length) {

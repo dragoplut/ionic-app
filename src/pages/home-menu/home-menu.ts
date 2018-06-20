@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 import { NavController } from 'ionic-angular';
 
@@ -9,20 +9,21 @@ import {
   DPW_LOGO_TRANSPARENT,
   USER_PROFILE_IMG
 } from '../../app/constants';
-import { AuthService } from '../../services'
+import { AccountService, AuthService } from '../../services'
 
 import {
+  LegalsComponent,
   SigninComponent,
   MyAccountComponent,
   MyClinicComponent,
   MyPenComponent
-} from '../index';
+} from '../';
 
 @Component({
   selector: 'home-menu',
   templateUrl: 'home-menu.html'
 })
-export class HomeMenu {
+export class HomeMenu implements OnInit {
 
   public logoTransparent: string = DPW_LOGO_TRANSPARENT;
   public clinicImg: string = DPW_CLINIC_CARD;
@@ -32,9 +33,23 @@ export class HomeMenu {
 
   constructor(
     public _auth: AuthService,
+    public _account: AccountService,
     public navCtrl: NavController
   ) {
 
+  }
+
+  public ngOnInit() {
+    this._account.isAgreementAgreed().subscribe(
+      (isAgreed: boolean) => {
+        if (!isAgreed) {
+          this.openPage(LegalsComponent, { isEula: true })
+        }
+      },
+      (err: any) => {
+        alert(JSON.stringify(err));
+      }
+    );
   }
 
   public ionViewDidLoad() {
@@ -73,7 +88,7 @@ export class HomeMenu {
     this.openPage(MyAccountComponent)
   }
 
-  public openPage(page) {
-    this.navCtrl.push(page);
+  public openPage(page: any, params?: any) {
+    this.navCtrl.push(page, params);
   }
 }

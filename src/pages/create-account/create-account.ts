@@ -7,7 +7,7 @@ import {
   EMAIL_REGEXP,
   PAGES_LIST
 } from '../../app/constants';
-import { CreateAccountAddressComponent, SigninComponent } from '../index';
+import { CreateAccountAddressComponent, LegalsComponent } from '../';
 import { Nav, NavController, NavParams } from 'ionic-angular';
 // noinspection TypeScriptCheckImport
 import * as _ from 'lodash';
@@ -105,7 +105,7 @@ export class CreateAccountComponent implements OnInit {
     if (this._permission.isAllowedAction('view', 'signin')) {
       for (const page of this.PAGES_LIST) {
         if (this._permission.isAllowedAction('view', page.permissionRef)) {
-          this.openPage(SigninComponent);
+          this.openPage(LegalsComponent);
           break;
         }
       }
@@ -152,7 +152,7 @@ export class CreateAccountComponent implements OnInit {
   }
 
   public goBack() {
-    this.openPage(SigninComponent);
+    this.openPage(LegalsComponent);
   }
 
   public next() {

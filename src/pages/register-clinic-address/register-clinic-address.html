@@ -57,7 +57,7 @@
               (itemChange)="account.location.state = $event; onChangeValidate('state')"
             ></custom-input>
             <custom-input
-              [itemDisabled]="true"
+              [itemDisabled]="false"
               [itemValue]="account.location.zip"
               [itemLabel]="'ZIP'"
               [itemType]="'number'"

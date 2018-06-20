@@ -4,6 +4,7 @@ import { ActionSheetController, NavController } from 'ionic-angular'
 
 import {
   API_URL,
+  APP_VERSION,
   ANGLE_IMG,
   DPW_LOGO_TRANSPARENT,
   USER_PROFILE_IMG
@@ -27,6 +28,7 @@ export class MyAccountComponent {
   public userProfileImg: string = USER_PROFILE_IMG;
   public angleImg: string = ANGLE_IMG;
   public apiUrl: string = API_URL;
+  public appVersion: string = APP_VERSION;
 
   constructor(
     public navCtrl: NavController,

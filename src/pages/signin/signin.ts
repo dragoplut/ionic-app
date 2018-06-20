@@ -11,7 +11,7 @@ import {
   EMAIL_REGEXP,
   PAGES_LIST
 } from '../../app/constants';
-import { HomeMenu, CreateAccountComponent, ForgottenPasswordComponent } from '../index';
+import { HomeMenu, LegalsComponent, ForgottenPasswordComponent } from '../';
 import { Nav, NavController } from 'ionic-angular';
 
 @Component({
@@ -100,7 +100,19 @@ export class SigninComponent implements OnInit {
   public handleSuccess(resp: any) {
     this.loading = false;
     if (resp) {
-      this.openPage(HomeMenu);
+      this._account.isAgreementAgreed().subscribe(
+        (isAgreed: boolean) => {
+          if (isAgreed) {
+            this.openPage(HomeMenu);
+          } else {
+            this.openPage(LegalsComponent, { isEula: true })
+          }
+        },
+        (err: any) => {
+          alert(JSON.stringify(err));
+        }
+      );
+
     } else {
       const message: string = 'You are not allowed to sign in!';
       this.showErrorMessage(message);
@@ -134,10 +146,10 @@ export class SigninComponent implements OnInit {
   }
 
   public goToCreateAccount() {
-    this.openPage(CreateAccountComponent);
+    this.openPage(LegalsComponent);
   }
 
-  public openPage(page) {
-    this.navCtrl.push(page, { email: this.user.email });
+  public openPage(page: any, params?: any) {
+    this.navCtrl.push(page, params ? params : { email: this.user.email });
   }
 }

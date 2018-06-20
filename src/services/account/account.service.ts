@@ -34,6 +34,26 @@ export class AccountService {
       .map((res: any) => res);
   }
 
+  public getAgreement(): Observable<any> {
+    return this.api.get(`${this.path}/getAgreement`)
+      .map((res: any) => res);
+  }
+
+  public getAgreementLink(): Observable<any> {
+    return this.api.get(`${this.path}/getAgreementLink`)
+      .map((res: any) => res);
+  }
+
+  public isAgreementAgreed(): Observable<any> {
+    return this.api.post(`${this.path}/isAgreementAgreed`, {})
+      .map((res: any) => res);
+  }
+
+  public agreeAgreement(): Observable<any> {
+    return this.api.post(`${this.path}/agreeAgreement`, {})
+      .map((res: any) => res);
+  }
+
   public createAccount(data: any): Observable<any> {
     if (data && data.location && data.location.state) {
       delete data.location.state;

@@ -18,7 +18,7 @@ import {
   CreateAccountClinicComponent,
   CreateAccountComponent,
   SigninComponent
-} from '../index';
+} from '../';
 import { Nav, NavController, NavParams } from 'ionic-angular';
 
 // noinspection TypeScriptCheckImport

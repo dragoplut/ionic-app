@@ -1,12 +1,9 @@
 @import '../../theme/variables';
 
-signin .content .scroll-content {
-  //overflow: hidden;
-}
-.create-account {
+.legals {
   height: 100%;
   width: 100%;
-  .create-account-form {
+  .legals-form {
     border: none;
     background-color: transparent;
     padding: 40px 0 0;
@@ -80,6 +77,9 @@ signin .content .scroll-content {
     .custom-input-container {
       width: 80%;
     }
+  }
+  pdf-viewer .page {
+    max-width: 100vw;
   }
 }
 .actions {

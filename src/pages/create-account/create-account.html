@@ -6,13 +6,7 @@
 </ion-header>
 <ion-content>
   <div class="create-account row center-xs middle-xs">
-    <form
-      ngForm
-      name="authForm"
-      class="create-account-form col-xs-6 shadow-2"
-      #authForm="ngForm"
-      (submit)="authenticate()"
-    >
+    <ion-grid class="create-account-form col-xs-6 shadow-2">
       <div class="clear-container">
         <span *ngIf="user.created && !loading" class="text-center red">Account created and can be change only after sign in!</span>
         <input-select
@@ -30,7 +24,7 @@
           Next
         </a>
       </div>
-    </form>
+    </ion-grid>
     <img alt="Dermapenworld" src="{{logoTransparent}}" class="dpw-logo-foot">
   </div>
 </ion-content>

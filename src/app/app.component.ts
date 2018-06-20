@@ -37,7 +37,9 @@ export class MyApp {
       if (this.platform.is('android')) {
         this.statusBar.backgroundColorByHexString("#33000000");
       } else {
-        this.statusBar.styleBlackTranslucent();
+        this.statusBar.overlaysWebView(false);
+        // this.statusBar.styleBlackTranslucent();
+        this.statusBar.styleDefault();
         this.statusBar.overlaysWebView(true);
       }
       this.splashScreen.hide();

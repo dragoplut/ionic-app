@@ -1,0 +1,56 @@
+<ion-header>
+  <ion-navbar class="custom-header">
+    <ion-icon class="header-action-icon pull-left" name="arrow-back" tapable (click)="goBack()"></ion-icon>
+    <ion-title>{{isEula ? titles.eula : titles.termsAndPrivacy}}</ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content>
+  <div class="legals row center-xs middle-xs">
+    <form
+      *ngIf="pdfSrc"
+      ngForm
+      name="authForm"
+      class="legals-form col-xs-6 shadow-2"
+      #authForm="ngForm"
+      (submit)="authenticate()"
+    >
+      <div class="clear-container">
+        <pdf-viewer
+          [src]="pdfSrc"
+          [render-text]="options.renderText"
+          [autoresize]="options.autoresize"
+          [original-size]="options.originalSize"
+          [show-all]="true"
+          [stick-to-page]="true"
+          [fit-to-page]="options.fitToPage"
+          [page]="options.page"
+          (page-rendered)="pageRendered()"
+          style="display: block; max-width: 100vw;"
+        ></pdf-viewer>
+      </div>
+      <div class="clear-container" *ngIf="pdfPageRendered">
+        <ion-item class="transparent" *ngIf="!isEula">
+          <ion-label>The Terms and Conditions</ion-label>
+          <ion-checkbox tappable [checked]="legals.terms" (click)="legals.terms = !legals.terms"></ion-checkbox>
+        </ion-item>
+        <ion-item class="transparent" *ngIf="!isEula">
+          <ion-label>The General Privacy agreement</ion-label>
+          <ion-checkbox tappable [checked]="legals.privacy" (click)="legals.privacy = !legals.privacy"></ion-checkbox>
+        </ion-item>
+        <ion-item class="transparent" *ngIf="isEula">
+          <ion-label>EULA</ion-label>
+          <ion-checkbox tappable [checked]="legals.eula" (click)="legals.eula = !legals.eula"></ion-checkbox>
+        </ion-item>
+      </div>
+      <div class="actions col-xs-12" *ngIf="pdfPageRendered">
+        <a
+          class="link-nav pull-right"
+          [ngClass]="(!isEula && (!legals.terms || !legals.privacy)) || (isEula && !legals.eula) ? 'disabled' : ''" (click)="next()"
+        >
+          Agree
+        </a>
+      </div>
+    </form>
+    <img alt="Dermapenworld" src="{{logoTransparent}}" class="dpw-logo-foot">
+  </div>
+</ion-content>

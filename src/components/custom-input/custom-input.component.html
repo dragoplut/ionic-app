@@ -1,12 +1,12 @@
 <div class="custom-input-container" [ngClass]="itemClass">
-  <label
+  <ion-label
     #inputLabel
     for="customInput{{itemLabel.split(' ').join('')}}"
     class="custom-input-label {{itemValue && itemValue.length ? 'input-not-empty' : ''}} {{inputLabel.isActive ? 'input-active' : ''}}"
   >
     {{itemLabel}}
-  </label>
-  <input
+  </ion-label>
+  <ion-input
     ngModel
     [disabled]="itemDisabled"
     [ngClass]="itemError && !inputLabel.isActive ? 'error' : ''"
@@ -19,6 +19,6 @@
     autoComplete="false"
     spellCheck="false"
     id="customInput{{itemLabel.split(' ').join('')}}"
-  >
+  ></ion-input>
   <span *ngIf="!inputLabel.isActive && itemValue" class="custom-input-error">{{itemError}}</span>
 </div>

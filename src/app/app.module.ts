@@ -14,6 +14,7 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
+import { PdfViewerModule } from 'ng2-pdf-viewer';
 
 import { BluetoothSerial } from '@ionic-native/bluetooth-serial';
 import { BLE } from '@ionic-native/ble';
@@ -30,25 +31,55 @@ Raven
 export class RavenErrorHandler implements ErrorHandler {
   handleError(err:any) : void {
     /** Uncomment only for dev testing purpose **/
-    console.error(err);
+    // console.error(err);
     Raven.captureException(err);
   }
 }
 
-export const mapValuesToArray = (item: any) => Object.keys(item).map((key: any) => item[key]);
+// export const mapValuesToArray = (item: any) => Object.keys(item).map((key: any) => item[key]);
 
 @NgModule({
   declarations: [
     MyApp,
-    ...mapValuesToArray(components),
-    ...mapValuesToArray(pages)
+    components.CustomInputComponent,
+    components.CustomProgressBarComponent,
+    components.CustomSelectComponent,
+    components.GooglePlacesAutocompleteComponent,
+    components.InputSelectComponent,
+    components.RowWithActionComponent,
+    components.RowWithInfoComponent,
+    pages.CreateAccountComponent,
+    pages.CreateAccountAddressComponent,
+    pages.CreateAccountClinicComponent,
+    pages.EditClinicComponent,
+    pages.ForgottenPasswordComponent,
+    pages.HomeMenu,
+    pages.LegalsComponent,
+    pages.MyAccountComponent,
+    pages.MyClinicComponent,
+    pages.MyNameComponent,
+    pages.MyPasswordComponent,
+    pages.MyPenComponent,
+    pages.RegisterClinicAddressComponent,
+    pages.RegisterClinicContactsComponent,
+    pages.RegisterPenComponent,
+    pages.RegisterPenToClinicComponent,
+    pages.SigninComponent,
+    pages.UpdatePenComponent
   ],
   imports: [
     MomentModule,
     BrowserModule,
+    PdfViewerModule,
     CommonModule,
     HttpModule,
-    IonicModule.forRoot(MyApp, {}, { links: [] }),
+    IonicModule.forRoot(
+      MyApp,
+      {
+        scrollAssist: true,
+        autoFocusAssist: true
+      },
+      { links: [] }),
     NgCircleProgressModule.forRoot({
       // set defaults here
       radius: 100,
@@ -62,8 +93,31 @@ export const mapValuesToArray = (item: any) => Object.keys(item).map((key: any) 
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
-    ...mapValuesToArray(components),
-    ...mapValuesToArray(pages)
+    components.CustomInputComponent,
+    components.CustomProgressBarComponent,
+    components.CustomSelectComponent,
+    components.GooglePlacesAutocompleteComponent,
+    components.InputSelectComponent,
+    components.RowWithActionComponent,
+    components.RowWithInfoComponent,
+    pages.CreateAccountComponent,
+    pages.CreateAccountAddressComponent,
+    pages.CreateAccountClinicComponent,
+    pages.EditClinicComponent,
+    pages.ForgottenPasswordComponent,
+    pages.HomeMenu,
+    pages.LegalsComponent,
+    pages.MyAccountComponent,
+    pages.MyClinicComponent,
+    pages.MyNameComponent,
+    pages.MyPasswordComponent,
+    pages.MyPenComponent,
+    pages.RegisterClinicAddressComponent,
+    pages.RegisterClinicContactsComponent,
+    pages.RegisterPenComponent,
+    pages.RegisterPenToClinicComponent,
+    pages.SigninComponent,
+    pages.UpdatePenComponent
   ],
   providers: [
     GoogleMaps,
@@ -72,7 +126,16 @@ export const mapValuesToArray = (item: any) => Object.keys(item).map((key: any) 
     StatusBar,
     SplashScreen,
     BLE,
-    ...mapValuesToArray(services),
+    services.ApiService,
+    services.AccountService,
+    services.AuthService,
+    services.BleService,
+    services.ClinicService,
+    services.FirmwareService,
+    services.GoogleService,
+    services.PenService,
+    services.PermissionService,
+    services.UtilService,
     { provide: ErrorHandler, useClass: RavenErrorHandler }
   ],
   schemas: [

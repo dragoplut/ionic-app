@@ -1,4 +1,4 @@
-<div class="row-with-action-container" [ngClass]="itemClass">
+<div class="row-with-action-container" [ngClass]="itemClass" (click)="emitAction()">
   <span class="action-label">{{itemLabel}}</span>
-  <img alt="Go" src="{{angleImg}}" class="action-button right-180" (click)="emitAction()">
+  <!--<img alt="Go" src="{{angleImg}}" class="action-button right-180" (click)="emitAction()">-->
 </div>

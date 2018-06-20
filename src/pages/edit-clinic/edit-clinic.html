@@ -57,7 +57,7 @@
               (itemChange)="account.location.state = $event; onChangeValidate('state')"
             ></custom-input>
             <custom-input
-              [itemDisabled]="true"
+              [itemDisabled]="false"
               [itemValue]="account.location.zip"
               [itemLabel]="'ZIP'"
               [itemType]="'number'"
@@ -95,7 +95,7 @@
       </div>
     </form>
     <div class="actions col-xs-12">
-      <a [ngClass]="formValid ? '' : 'disabled'" class="link-nav pull-right" tapable (click)="formValid ? save() : false">
+      <a [ngClass]="formValid ? '' : 'disabled'" class="link-nav pull-right" tapable (click)="formValid && !loading ? save() : false">
         Save
       </a>
     </div>
