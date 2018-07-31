@@ -65,7 +65,7 @@ export class SigninComponent implements OnInit {
         },
         (err: any) => {
           this.loading = false;
-          alert(err);
+          console.log(err);
         }
       );
     } else if (!this.user.email) {
@@ -100,19 +100,7 @@ export class SigninComponent implements OnInit {
   public handleSuccess(resp: any) {
     this.loading = false;
     if (resp) {
-      this._account.isAgreementAgreed().subscribe(
-        (isAgreed: boolean) => {
-          if (isAgreed) {
-            this.openPage(HomeMenu);
-          } else {
-            this.openPage(LegalsComponent, { isEula: true })
-          }
-        },
-        (err: any) => {
-          alert(JSON.stringify(err));
-        }
-      );
-
+      this.openPage(HomeMenu);
     } else {
       const message: string = 'You are not allowed to sign in!';
       this.showErrorMessage(message);
@@ -121,11 +109,12 @@ export class SigninComponent implements OnInit {
   }
 
   public handleErr(err: any) {
+    console.log('handleErr err', err);
     this.loading = false;
-    const message = err && err._body ?
+    const message = err && err._body && err._body.length ?
       JSON.parse(err._body) : { error: { message: DEFAULT_ERROR_MESSAGE } };
     this.showErrorMessage(message.error.message);
-    return err && err._body ? JSON.parse(err._body) : message;
+    return err && err._body && err._body.length ? JSON.parse(err._body) : message;
   }
 
   public authenticate() {
@@ -146,7 +135,10 @@ export class SigninComponent implements OnInit {
   }
 
   public goToCreateAccount() {
-    this.openPage(LegalsComponent);
+    this.openPage(
+      LegalsComponent,
+      { createAccount: true, email: this.user.email, shouldAgree: ['privacy', 'terms'] }
+    );
   }
 
   public openPage(page: any, params?: any) {

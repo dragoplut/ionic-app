@@ -107,6 +107,11 @@ ion-content {
   float: right;
 }
 
+.relative-inline-block, .custom-input-container.relative-inline-block {
+  display: inline-block !important;
+  position: relative !important;
+}
+
 .link-btn {
   display: inline-block;
   font-size: 22px;
@@ -442,7 +447,17 @@ ion-content {
 /**********************************
       CUSTOM INPUT CONTAINER
 ***********************************/
-
+custom-input ion-input input.text-input.text-input-md,
+custom-input ion-input input.text-input.text-input-ios {
+  position: initial !important;
+}
+.custom-input-container {
+  .input-active {
+    .input-cover {
+      display: none;
+    }
+  }
+}
 .custom-input-container, .custom-select-container {
   display: block;
   position: relative;
@@ -542,6 +557,7 @@ ion-content {
     font-size: 10px;
     position: absolute;
     bottom: -14px;
+    min-width: 80vw;
   }
 
 }
@@ -703,6 +719,13 @@ ion-col {
   position: initial;
 }
 
+my-account {
+  .dpw-logo-foot {
+    bottom: -30px;
+    margin: 0 auto !important;
+  }
+}
+
 @media screen and (min-height: 2433px) {
   .scroll-content {
     padding-top: 60px !important;
@@ -727,4 +750,7 @@ ion-col {
 }
 .back-button, .bar-button-ios, .bar-button-default, .bar-button-default-ios {
   display: none !important;
+}
+ion-grid.clear-container {
+  position: relative;
 }

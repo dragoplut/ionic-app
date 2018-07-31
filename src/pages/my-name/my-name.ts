@@ -24,14 +24,16 @@ export class MyNameComponent {
     companyId: '',
     phoneNumber: ''
   };
+  public unchangedUser: any = this.user;
   public formValid: boolean = false;
   public loading: boolean = false;
+  public changed: boolean = false;
 
   public updateAccInputs: any = [
     { modelName: 'firstName', placeholder: 'First Name', type: 'text', required: false },
     { modelName: 'lastName', placeholder: 'Last Name', type: 'text', required: false },
     { modelName: 'companyId', placeholder: 'Company Name', type: 'select', required: false, options: [] },
-    { modelName: 'phoneNumber', placeholder: 'Phone Number', type: 'text', required: false }
+    { modelName: 'phoneNumber', placeholder: 'Phone Number', type: 'number', required: false }
   ];
 
   constructor(
@@ -44,6 +46,7 @@ export class MyNameComponent {
     this._account.getAccountInfo().subscribe(
       (resp: any) => {
         this.user = resp;
+        this.unchangedUser = JSON.parse(JSON.stringify(resp));
         this.loading = false;
         this.getCompanies();
       },
@@ -61,7 +64,7 @@ export class MyNameComponent {
         this.openPage(MyAccountComponent);
       },
       (err: any) => {
-        alert(err);
+        console.log(err);
       }
     );
   }
@@ -80,7 +83,7 @@ export class MyNameComponent {
       },
       (err: any) => {
         this.loading = false;
-        alert(err);
+        console.log(err);
       }
     );
   }
@@ -96,6 +99,7 @@ export class MyNameComponent {
       isValid = false;
     }
     this.formValid = isValid;
+    this.changed = !_.eq(JSON.stringify(this.user), JSON.stringify(this.unchangedUser));
   }
 
   public goBack() {

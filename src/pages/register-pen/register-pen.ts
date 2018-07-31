@@ -8,7 +8,7 @@ import {
   DPW_LOGO_TRANSPARENT,
   CHAR_ELEM
 } from '../../app/constants';
-import { HomeMenu, MyPenComponent, UpdatePenComponent } from '../';
+import { MyPenComponent, UpdatePenComponent } from '../';
 import { ApiService, AccountService, BleService, FirmwareService, PenService, UtilService } from '../../services';
 
 // import hexToArrayBuffer from 'hex-to-array-buffer';
@@ -133,7 +133,7 @@ export class RegisterPenComponent {
     this.successData = JSON.stringify(device);
     this.errorData = '';
     if (device) {
-      if (this.dependencies.newPen) {
+      if (this.dependencies.newPen && !this.dpDevice.serialNumber) {
         for (const prop in device) {
           if (prop) {
             this.dpDevice[prop] = device[prop];
@@ -170,7 +170,7 @@ export class RegisterPenComponent {
     this.errorData = JSON.stringify(error);
     this.successData = '';
     this.logEvent('Error', this.errorData, '');
-    alert('fail: ' + this.errorData);
+    console.log('fail: ' + this.errorData);
   };
 
   public selectDevice(address: string, device?: any) {
@@ -247,8 +247,8 @@ export class RegisterPenComponent {
   }
 
   public goBack() {
-    // this._ble.disconnect(this.dpDevice, true, true);
-    this.openPage(HomeMenu);
+    this._ble.disconnect(this.dpDevice, true, true);
+    this.openPage(MyPenComponent);
     // this.navCtrl.pop();
   }
 
@@ -275,7 +275,7 @@ export class RegisterPenComponent {
               this.logEvent('Error', 'This pen is already registered to other clinic!', '');
             }
           },
-          (err: any) => alert(err)
+          (err: any) => console.log(err)
         );
       });
     } else {
@@ -510,10 +510,6 @@ export class RegisterPenComponent {
           if (this.transferInfo && this.transferInfo.errorMessage && callback) {
             console.log('transferInfo Error: ', this.transferInfo.errorMessage);
             this.logEvent('Error', 'Firmware upgrade error: ', this.transferInfo.errorMessage);
-            // setTimeout(() => {
-            //   this.zone.run(() => this.firmwareUpdateAvailable = false);
-            // }, 10000);
-            // callback();
           } else if (this.transferInfo && this.transferInfo.percent >= 100 && callback) {
             if (this.transferInfo.packageIdx >= this.transferInfo.packagesTotal - 1) {
               console.log('transferInfo: Firmware Image transfer success! ', this.transferInfo);
@@ -531,6 +527,9 @@ export class RegisterPenComponent {
   }
 
   public requestDeviceSettings(device: any, callback: any, fail: any) {
+    if (!this.dpDevice.serialNumber && this.dependencies.pen && this.dependencies.pen.serialNumber) {
+      this.dpDevice.serialNumber = this.dependencies.pen.serialNumber;
+    }
     this.logEvent('Info', 'Request Device Settings from API for', this.dpDevice.serialNumber);
     this._pen.getSettingsEncrypted(this.dpDevice.serialNumber || this.dpDevice.name, this.dpDevice.keyInfo)
       .subscribe(callback, fail);
@@ -612,17 +611,23 @@ export class RegisterPenComponent {
   }
 
   public initConnectionChecker(callback?: any) {
+    let bleErr: boolean = false;
     let jwtCheckInterval: any = setInterval(() => {
-      this._ble.isConnected(this.dpDevice, () => {
-        this.dpDevice.paired = true;
-        this.logEvent('Success', 'device paired', JSON.stringify(this.dpDevice.paired, null, 2));
-        clearInterval(jwtCheckInterval);
-        if (callback) {
-          callback();
-        }
-      }, (err: any) => {
-        console.log('this._ble.isConnected err: ', err);
-      });
+      if (!bleErr) {
+        this._ble.isConnected(this.dpDevice, () => {
+          this.dpDevice.paired = true;
+          this.logEvent('Success', 'device paired', JSON.stringify(this.dpDevice.paired, null, 2));
+          clearInterval(jwtCheckInterval);
+          if (callback) {
+            callback();
+          }
+        }, (err: any) => {
+          console.log('this._ble.isConnected err: ', err);
+          bleErr = true;
+          clearInterval(jwtCheckInterval);
+          clearInterval(this.jwtCheckIntervalPermanent);
+        });
+      }
     }, 1000);
   }
 
@@ -752,7 +757,7 @@ export class RegisterPenComponent {
               },
               (error: any) => {
                 this.logEvent('Info', 'Firmware image transfer ERROR: ', JSON.stringify(error, null, 2));
-                alert('Firmware image transfer ERROR: ' + JSON.stringify(error));
+                // alert('Firmware image transfer ERROR: ' + JSON.stringify(error));
               }
             );
           } else {

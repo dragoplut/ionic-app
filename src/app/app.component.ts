@@ -15,6 +15,7 @@ export class MyApp {
   public rootPage: any = pages.SigninComponent;
 
   public pages: Array<{ title: string, component: any }>;
+  public backPressed: boolean = false;
 
   constructor(
     public platform: Platform,
@@ -48,13 +49,26 @@ export class MyApp {
         let activeView: ViewController = nav.getActive();
 
         if(activeView != null){
-          if(nav.canGoBack()) {
-            nav.pop();
-          } else if (typeof activeView.instance.backButtonAction === 'function') {
-            activeView.instance.backButtonAction();
+          if (!this.backPressed) {
+            this.backPressed = true;
+            setTimeout(() => {
+              this.backPressed = false;
+              if(nav.canGoBack() && typeof activeView.instance.backButtonAction !== 'function') {
+                nav.pop();
+              } else if (typeof activeView.instance.backButtonAction === 'function') {
+                activeView.instance.backButtonAction();
+              } else if (nav.canGoBack()) {
+                nav.pop();
+              } else {
+                if (nav && nav.parent) {
+                  nav.parent.select(0); // goes to the first tab
+                }
+              }
+            }, 300);
           } else {
-            nav.parent.select(0); // goes to the first tab
+            this.platform.exitApp();
           }
+
         }
       });
     });

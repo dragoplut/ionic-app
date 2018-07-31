@@ -21,12 +21,12 @@ export class BleService {
 
   public enable() {
     // this.bluetoothSerial.enable();
-    // this.ble.enable();
+    this.ble.enable();
   }
 
-  public discoverableSec(sec: number) {
-    this.bluetoothSerial.setDiscoverable(sec);
-  }
+  // public discoverableSec(sec: number) {
+  //   this.bluetoothSerial.setDiscoverable(sec);
+  // }
 
   public scan(existingDevice: any, onSuccess: any, onErr: any) {
     /** Stop previous scan if it was active **/

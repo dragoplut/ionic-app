@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import { AccountService } from '../../services/index';
-import { ActionSheetController, NavController } from 'ionic-angular'
+import { App, ActionSheetController, NavController, Nav } from 'ionic-angular'
 
 import {
   API_URL,
@@ -15,13 +15,14 @@ import {
   MyPasswordComponent,
   HomeMenu,
   SigninComponent
-} from '../index';
+} from '../';
 
 @Component({
   selector: 'my-account',
   templateUrl: 'my-account.html'
 })
 export class MyAccountComponent {
+  @ViewChild(Nav) nav: Nav;
 
   public account: any = {};
   public logoTransparent: string = DPW_LOGO_TRANSPARENT;
@@ -31,6 +32,7 @@ export class MyAccountComponent {
   public appVersion: string = APP_VERSION;
 
   constructor(
+    public appCtrl: App,
     public navCtrl: NavController,
     public actionSheetCtrl: ActionSheetController,
     public _account: AccountService
@@ -79,7 +81,7 @@ export class MyAccountComponent {
   }
 
   public logOut() {
-    this.openPage(SigninComponent);
+    this.appCtrl.getRootNav().setRoot(SigninComponent);
   }
 
   public goBack() {

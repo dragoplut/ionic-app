@@ -18,7 +18,7 @@
       </div>
       <div class="clear-container">
         <custom-input
-          [itemDisabled]="false"
+          [itemDisabled]="loading"
           [itemValue]="user.email"
           [itemLabel]="'Email'"
           [itemType]="'email'"
@@ -26,7 +26,7 @@
           (itemChange)="user.email = $event"
         ></custom-input>
         <custom-input
-          [itemDisabled]="false"
+          [itemDisabled]="loading"
           [itemValue]="user.password"
           [itemLabel]="'Password'"
           [itemType]="'password'"

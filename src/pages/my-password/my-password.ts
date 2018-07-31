@@ -5,8 +5,8 @@ import {
   ANGLE_IMG,
   DPW_LOGO_TRANSPARENT
 } from '../../app/constants';
-import { AuthService } from '../../services/index';
-import { MyAccountComponent } from '../index';
+import { AuthService } from '../../services/';
+import { MyAccountComponent } from '../';
 
 @Component({
   selector: 'my-password',
@@ -68,6 +68,9 @@ export class MyPasswordComponent {
     {
       this.errorMessages.currentPassword = !this.user.currentPassword ?
         'Error. Please provide old password!' : '';
+      this.errorMessages.currentPassword = this.user.currentPassword && this.user.newPassword &&
+        (this.user.currentPassword === this.user.newPassword) ?
+        'Error. New password should not be the same as old!' : '';
       this.errorMessages.newPassword = !this.user.newPassword ?
         'Error. Please provide new password!' : '';
       this.errorMessages.confirmPassword = !this.user.confirmPassword ?

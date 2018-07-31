@@ -42,7 +42,7 @@ export class EditClinicComponent implements OnInit {
   public emailRegExp: any = EMAIL_REGEXP;
 
   public createAccInputs: any = [
-    { modelName: 'phoneNumber', placeholder: 'Phone Number', type: 'text', required: false },
+    { modelName: 'phoneNumber', placeholder: 'Phone Number', type: 'number', required: false },
     { modelName: 'contactPerson', placeholder: 'Contact Person', type: 'text', required: false },
     { modelName: 'webSiteUrl', placeholder: 'Website URL', type: 'text', required: false }
   ];
@@ -70,6 +70,7 @@ export class EditClinicComponent implements OnInit {
   }
 
   public showMap(acc: any) {
+    if (!acc || !acc.location) { return; }
     let mapOptions = {
       center: new google.maps.LatLng(
         acc && acc.location && acc.location.latitude ?
@@ -251,16 +252,21 @@ export class EditClinicComponent implements OnInit {
   }
 
   public save() {
-    const valid: boolean = this.validate(this.account);
-    if (valid) {
-      this._clinic.updateClinic(this.account).subscribe(
-        (resp: any) => {
-          this.openPage(MyClinicComponent);
-        },
-        (err: any) => {
-          console.log('err: ', err);
-        }
-      );
+    if (!this.loading) {
+      this.loading = true;
+      const valid: boolean = this.validate(this.account);
+      if (valid) {
+        this._clinic.updateClinic(this.account).subscribe(
+          (resp: any) => {
+            this.loading = false;
+            this.openPage(MyClinicComponent);
+          },
+          (err: any) => {
+            console.log('err: ', err);
+            this.loading = false;
+          }
+        );
+      }
     }
   }
 
@@ -300,7 +306,7 @@ export class EditClinicComponent implements OnInit {
       (err: any) => {
         this.loading = false;
         if (callback) { callback(); }
-        alert(JSON.stringify(err));
+        console.log(JSON.stringify(err));
       }
     );
   }

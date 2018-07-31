@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AlertController, NavController, NavParams } from 'ionic-angular';
+import { AlertController, ActionSheetController, NavController, NavParams } from 'ionic-angular';
 // noinspection TypeScriptCheckImport
 // import * as _ from 'lodash';
 
@@ -35,7 +35,8 @@ export class MyClinicComponent {
     public _clinic: ClinicService,
     public alertCtrl: AlertController,
     public navCtrl: NavController,
-    public navParams: NavParams
+    public navParams: NavParams,
+    public actionSheetCtrl: ActionSheetController
   ) {
     this.clinicListFiltered = this.searchByString(this.searchInput, this.clinicList);
   }
@@ -98,7 +99,8 @@ export class MyClinicComponent {
         this.getClinics();
       },
       (err: any) => {
-        alert(JSON.stringify(err));
+        console.log(JSON.stringify(err));
+        alert('Error. Clinic not removed. It may have connected pen!')
       }
     );
   }
@@ -178,6 +180,31 @@ export class MyClinicComponent {
       ]
     });
     alert.present();
+  }
+
+  public presentActionsConfirm(item: any) {
+    let actionSheet = this.actionSheetCtrl.create({
+      title: item.title,
+      buttons: [
+        {
+          text: 'Delete',
+          role: 'destructive',
+          handler: () => {
+            console.log('Destructive clicked');
+            this.requestRemove(item);
+          }
+        },
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          handler: () => {
+            console.log('Cancel clicked');
+          }
+        }
+      ]
+    });
+
+    actionSheet.present();
   }
 
   public doConfirmed(action: string, item?: any) {

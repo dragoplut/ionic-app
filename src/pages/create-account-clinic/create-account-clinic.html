@@ -1,7 +1,7 @@
 <ion-header>
   <ion-navbar class="custom-header">
-    <ion-icon class="header-action-icon pull-left" name="arrow-back" tapable (click)="goBack()"></ion-icon>
-    <ion-title>Create Account</ion-title>
+    <!--<ion-icon class="header-action-icon pull-left" name="arrow-back" tapable (click)="goBack()"></ion-icon>-->
+    <ion-title>Create Clinic</ion-title>
   </ion-navbar>
 </ion-header>
 <ion-content>
@@ -15,7 +15,7 @@
     >
       <div class="clear-container">
         <ion-spinner name="crescent" *ngIf="loading"></ion-spinner>
-        <span class="info-text-small">For registration purposes you must register at least one clinic to your account.</span>
+        <span class="info-text-small">Account created. To finish registration you must register at least one clinic to your account.</span>
 
         <custom-input
           [itemDisabled]="false"
@@ -26,7 +26,7 @@
           (itemChange)="account.clinic.name = $event; onChangeValidate()"
         ></custom-input>
 
-        <div class="custom-input-container">
+        <div class="custom-input-container relative-inline-block">
           <span class="custom-input-label input-not-empty">Address</span>
           <google-places-autocomplete types="geocode" [addressValue]="account.clinic.location.address" (callback)="detail($event[0])" (inputChanged)="account.clinic.location.address = $event; onChangeValidate()" key="AIzaSyDJYtcVzKXghryIDmQaTBDp5gWYPbTBqfU"></google-places-autocomplete>
         </div>

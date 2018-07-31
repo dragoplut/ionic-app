@@ -40,16 +40,21 @@ export class HomeMenu implements OnInit {
   }
 
   public ngOnInit() {
-    this._account.isAgreementAgreed().subscribe(
-      (isAgreed: boolean) => {
-        if (!isAgreed) {
-          this.openPage(LegalsComponent, { isEula: true })
-        }
-      },
-      (err: any) => {
-        alert(JSON.stringify(err));
+    // this._account.isAgreementAgreed().subscribe(
+    //   (isAgreed: boolean) => {
+    //     if (!isAgreed) {
+    //       this.openPage(LegalsComponent, { isEula: true })
+    //     }
+    //   },
+    //   (err: any) => {
+    //     alert(JSON.stringify(err));
+    //   }
+    // );
+    this._account.checkAgreements((resp: any) => {
+      if (resp && resp.shouldAgree && resp.shouldAgree.length) {
+        this.openPage(LegalsComponent, { shouldAgree: resp.shouldAgree });
       }
-    );
+    });
   }
 
   public ionViewDidLoad() {
@@ -60,7 +65,7 @@ export class HomeMenu implements OnInit {
           this.openPage(SigninComponent);
         },
         (err: any) => {
-          alert(err);
+          console.log(err);
         }
       );
     } else {

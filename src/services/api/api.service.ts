@@ -1,4 +1,5 @@
 import { Injectable, OnInit } from '@angular/core';
+import { AlertController } from 'ionic-angular';
 import {
   Headers,
   Http,
@@ -9,7 +10,8 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/throw';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/map';
-import { API_URL } from '../../app/constants';
+import 'rxjs/add/operator/timeout';
+import { API_URL, NETWORK_TIMEOUT } from '../../app/constants';
 
 @Injectable()
 export class ApiService implements OnInit {
@@ -23,7 +25,8 @@ export class ApiService implements OnInit {
   protected endpoint: string = API_URL;
 
   constructor(
-    public http: Http
+    public http: Http,
+    public alertCtrl: AlertController
   ) {}
 
   public ngOnInit() {
@@ -35,15 +38,23 @@ export class ApiService implements OnInit {
 
   public get(path: string): Observable<any> {
     return this.http.get(`${this.endpoint}${path}`, this.getDefaultOptions())
+      .timeout(NETWORK_TIMEOUT)
       .map(this.checkForError)
-      .catch((err: any) => Observable.throw(err))
+      .catch((err: any) => {
+        this.checkAndShowAlert(err);
+        return Observable.throw(err);
+      })
       .map(this.getJson);
   }
 
   public getByUrl(url: string): Observable<any> {
     return this.http.get(`${url}`)
+      .timeout(NETWORK_TIMEOUT)
       .map(this.checkForError)
-      .catch((err: any) => Observable.throw(err))
+      .catch((err: any) => {
+        this.checkAndShowAlert(err);
+        return Observable.throw(err);
+      })
       .map((resp: any) => resp);
   }
 
@@ -53,8 +64,12 @@ export class ApiService implements OnInit {
       JSON.stringify(body),
       this.getDefaultOptions()
       )
+      .timeout(NETWORK_TIMEOUT)
       .map(this.checkForError)
-      .catch((err: any) => Observable.throw(err))
+      .catch((err: any) => {
+        this.checkAndShowAlert(err);
+        return Observable.throw(err);
+      })
       .map(this.getJson);
   }
 
@@ -64,15 +79,23 @@ export class ApiService implements OnInit {
       JSON.stringify(body),
       this.getDefaultOptions()
       )
+      .timeout(NETWORK_TIMEOUT)
       .map(this.checkForError)
-      .catch((err: any) => Observable.throw(err))
+      .catch((err: any) => {
+        this.checkAndShowAlert(err);
+        return Observable.throw(err);
+      })
       .map(this.getJson);
   }
 
   public delete(path: string): Observable<any> {
     return this.http.delete(`${this.endpoint}${path}`, this.getDefaultOptions())
+      .timeout(NETWORK_TIMEOUT)
       .map(this.checkForError)
-      .catch((err: any) => Observable.throw(err))
+      .catch((err: any) => {
+        this.checkAndShowAlert(err);
+        return Observable.throw(err);
+      })
       .map(this.getJson);
   }
 
@@ -111,6 +134,21 @@ export class ApiService implements OnInit {
     const tokenEncrypted: any = localStorage.getItem('token_mobile');
     this.token = tokenEncrypted ? atob(tokenEncrypted) : '';
     this.setHeaders({ Authorization: `Bearer ${this.token}` });
+  }
+
+  /**
+   * Show error alert if network connection issue occurs
+   * @param err
+   */
+  public checkAndShowAlert(err: any) {
+    if (err && (err.name === 'TimeoutError' || err.status === 0)) {
+      const alert: any = this.alertCtrl.create({
+        title: 'Error',
+        subTitle: 'Network connection error.',
+        buttons: ['OK']
+      });
+      alert.present();
+    }
   }
 
   protected getDefaultOptions(): RequestOptions {

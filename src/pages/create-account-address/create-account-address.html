@@ -16,33 +16,38 @@
       <div class="clear-container">
         <ion-spinner name="crescent" *ngIf="loading"></ion-spinner>
         <span *ngIf="account.created && !loading" class="text-center red">Account created and can be change only after sign in!</span>
-        <custom-select
-          [itemDisabled]="account.created || loading"
+        <span class="text-center">Search for your Address. Country, State and City will be filled automatically.</span><br/><br/><br/>
+
+        <div class="custom-input-container relative-inline-block">
+          <span class="custom-input-label input-not-empty">Search for Address</span>
+          <google-places-autocomplete types="geocode" [addressValue]="account.location.address" (callback)="detail($event[0])" (inputChanged)="account.clinic.location.address = $event; onChangeValidate()" key="AIzaSyDJYtcVzKXghryIDmQaTBDp5gWYPbTBqfU"></google-places-autocomplete>
+        </div>
+        <br/>
+
+        <custom-input
+          [itemDisabled]="true"
           [itemValue]="account.location.country"
           [itemLabel]="'Country'"
-          [itemOptions]="countryNamesArr || []"
           [itemType]="'text'"
           [itemError]="''"
           (itemChange)="account.location.country = $event; onChangeValidate('country')"
-        ></custom-select>
-        <custom-select
-          [itemDisabled]="!account.location.country || account.created || loading"
+        ></custom-input>
+        <custom-input
+          [itemDisabled]="true"
           [itemValue]="account.location.state || ''"
           [itemLabel]="'State'"
-          [itemOptions]="stateNamesArr || []"
           [itemType]="'text'"
           [itemError]="''"
           (itemChange)="account.location.state = $event; onChangeValidate('state')"
-        ></custom-select>
-        <custom-select
-          [itemDisabled]="!account.location.state || account.created || loading"
+        ></custom-input>
+        <custom-input
+          [itemDisabled]="true"
           [itemValue]="account.location.city"
           [itemLabel]="'City'"
-          [itemOptions]="cityNamesArr || []"
           [itemType]="'text'"
           [itemError]="''"
           (itemChange)="account.location.city = $event; onChangeValidate('city')"
-        ></custom-select>
+        ></custom-input>
       </div>
       <div class="actions col-xs-12">
         <a class="link-nav pull-right" [ngClass]="!formValid || loading ? 'disabled' : ''" (click)="formValid || loading ? next() : false">

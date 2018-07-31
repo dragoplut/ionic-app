@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ApiService } from '../index';
+import { ApiService } from '../';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import { APP_USER } from '../../app/constants';

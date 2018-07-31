@@ -1,7 +1,7 @@
 <ion-header>
   <ion-navbar class="custom-header">
     <ion-icon class="header-action-icon pull-left" name="arrow-back" tapable (click)="goBack()"></ion-icon>
-    <ion-title>Name</ion-title>
+    <ion-title>Account Details</ion-title>
   </ion-navbar>
 </ion-header>
 <ion-content>
@@ -13,7 +13,7 @@
       #userUpdateForm="ngForm"
       (submit)="save()"
     >
-      <div class="clear-container">
+      <ion-grid class="clear-container">
         <input-select
           *ngFor="let field of updateAccInputs"
           [itemDisabled]="field.disabled || loading"
@@ -24,9 +24,9 @@
           [itemError]="''"
           (itemChange)="user[field.modelName] = $event; onChangeValidate()"
         ></input-select>
-      </div>
+      </ion-grid>
       <div class="actions col-xs-12 text-center">
-        <a [ngClass]="formValid ? '' : 'disabled'" class="link-nav pull-right" (click)="formValid ? save() : false">
+        <a [ngClass]="formValid && changed && !loading ? '' : 'disabled'" class="link-nav pull-right" (click)="formValid && changed && !loading ? save() : false">
           Save
         </a>
       </div>

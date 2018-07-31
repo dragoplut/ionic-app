@@ -13,7 +13,7 @@
       #editClinicForm="ngForm"
       (submit)="save()"
     >
-      <div class="clear-container">
+      <ion-grid class="clear-container">
         <custom-input
           [itemDisabled]="false"
           [itemValue]="account.name"
@@ -23,7 +23,7 @@
           (itemChange)="account.name = $event; onChangeValidate()"
         ></custom-input>
 
-        <div class="custom-input-container">
+        <div class="custom-input-container relative-inline-block">
           <span class="custom-input-label input-not-empty">Address</span>
           <google-places-autocomplete types="geocode" [addressValue]="account.location.address" (callback)="detail($event[0])" (inputChanged)="account.location.address = $event; onChangeValidate()" key="AIzaSyDJYtcVzKXghryIDmQaTBDp5gWYPbTBqfU"></google-places-autocomplete>
         </div>
@@ -66,19 +66,21 @@
             ></custom-input>
           </div>
         </div>
-      </div>
+      </ion-grid>
     </form>
     <div #map1 id="map1" style="height:100%" class="map-container"></div>
-    <custom-input
-      class="input-full-width"
-      *ngFor="let field of createAccInputs; trackById"
-      [itemDisabled]="field.disabled"
-      [itemValue]="account[field.modelName]"
-      [itemLabel]="field.placeholder"
-      [itemType]="field.type"
-      [itemError]="''"
-      (itemChange)="account[field.modelName] = $event; onChangeValidate()"
-    ></custom-input>
+    <ion-grid class="clear-container">
+      <custom-input
+        class="input-full-width"
+        *ngFor="let field of createAccInputs; trackById"
+        [itemDisabled]="field.disabled"
+        [itemValue]="account[field.modelName]"
+        [itemLabel]="field.placeholder"
+        [itemType]="field.type"
+        [itemError]="''"
+        (itemChange)="account[field.modelName] = $event; onChangeValidate()"
+      ></custom-input>
+    </ion-grid>
     <form
       ngForm
       name="editClinicFormSecond"

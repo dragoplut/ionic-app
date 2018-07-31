@@ -16,7 +16,7 @@
         (ionCancel)="onCancel($event)">
       </ion-searchbar>
       <ion-list>
-        <ion-item-sliding *ngFor="let item of penListFiltered">
+        <ion-item-sliding *ngFor="let item of penListFiltered" (press)="presentActionsConfirm(item)">
           <ion-item>
             <button ion-item (click)="itemSelected(item)">
               {{ item.name || item.serialNumber }} <span class="pull-right secondary-blue">Update Pen</span>

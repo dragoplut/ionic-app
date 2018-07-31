@@ -43,7 +43,7 @@ export class GooglePlacesAutocompleteComponent {
 
   constructor(@Inject(Http) public http: Http) {
     if (this.placeholder == null) {
-      this.placeholder = "Search";
+      this.placeholder = "Address";
     }
   }
 

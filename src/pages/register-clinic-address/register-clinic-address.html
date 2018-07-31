@@ -23,7 +23,7 @@
           (itemChange)="account.name = $event; onChangeValidate()"
         ></custom-input>
 
-        <div class="custom-input-container">
+        <div class="custom-input-container relative-inline-block">
           <span class="custom-input-label input-not-empty">Address</span>
           <google-places-autocomplete types="geocode" [addressValue]="account.location.address" (callback)="detail($event[0])" (inputChanged)="account.location.address = $event; onChangeValidate()" key="AIzaSyDJYtcVzKXghryIDmQaTBDp5gWYPbTBqfU"></google-places-autocomplete>
         </div>
@@ -70,7 +70,7 @@
     </form>
     <div #map3 id="map3" style="height:100%" class="map-container"></div>
     <div class="actions col-xs-12">
-      <a [ngClass]="formValid ? '' : 'disabled'" class="link-nav pull-right" (click)="formValid ? next() : false">
+      <a [ngClass]="formValid && !loading ? '' : 'disabled'" class="link-nav pull-right" (click)="formValid && !loading ? next() : false">
         Next
       </a>
     </div>

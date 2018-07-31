@@ -97,10 +97,10 @@ export class CreateAccountAddressComponent implements OnInit {
   public handleErr(err: any) {
     this.loading = false;
     this.formValid = false;
-    const message = err && err._body ?
+    const message = err && err._body && err._body.length ?
       JSON.parse(err._body) : { error: { message: DEFAULT_ERROR_MESSAGE } };
-    alert(message.error.message);
-    return err && err._body ? JSON.parse(err._body) : message;
+    // alert(message.error.message);
+    return err && err._body && err._body.length ? JSON.parse(err._body) : message;
   }
 
   /**
@@ -109,29 +109,29 @@ export class CreateAccountAddressComponent implements OnInit {
    */
   public onChangeValidate(target?: string) {
     /** Clear child items if parent changed **/
-    switch (target) {
-      case 'country':
-        this.account.location.state = '';
-        this.account.location.city = '';
-        this.stateNamesArr = [];
-        this.cityNamesArr = [];
-        break;
-      case 'state':
-        this.account.location.city = '';
-        this.cityNamesArr = [];
-        break;
-      default:
-        break;
-    }
-
-    if (target && target !== 'city') {
-      /** Prepare location params before request update **/
-      const params: T_LOCATION_PARAMS = {
-        countryName: this.account.location.country || '',
-        stateName: this.account.location.state || '',
-      };
-      this.updateLocationParams(params);
-    }
+    // switch (target) {
+    //   case 'country':
+    //     this.account.location.state = '';
+    //     this.account.location.city = '';
+    //     this.stateNamesArr = [];
+    //     this.cityNamesArr = [];
+    //     break;
+    //   case 'state':
+    //     this.account.location.city = '';
+    //     this.cityNamesArr = [];
+    //     break;
+    //   default:
+    //     break;
+    // }
+    //
+    // if (target && target !== 'city') {
+    //   /** Prepare location params before request update **/
+    //   const params: T_LOCATION_PARAMS = {
+    //     countryName: this.account.location.country || '',
+    //     stateName: this.account.location.state || '',
+    //   };
+    //   this.updateLocationParams(params);
+    // }
 
     /** Assume data is valid **/
     let isValid = true;
@@ -181,7 +181,9 @@ export class CreateAccountAddressComponent implements OnInit {
         (resp: any) => {
           this.loading = false;
           // alert('Account created!');
-          this.openPage(CreateAccountClinicComponent);
+          this._account.agreeNextAgreements(['privacy', 'terms'], (done: any) => {
+            this.openPage(CreateAccountClinicComponent);
+          });
         },
         (err: any) => {
           this.loading = false;
@@ -226,9 +228,56 @@ export class CreateAccountAddressComponent implements OnInit {
       (err: any) => {
         this.loading = false;
         if (callback) { callback(); }
-        alert(JSON.stringify(err));
+        // alert(JSON.stringify(err));
       }
     );
+  }
+
+  public detail(address: any) {
+    if (!this.account.clinic) {
+      this.account.clinic = { location: {} };
+    } else if (!this.account.clinic.location) {
+      this.account.clinic.location = {};
+    }
+    let street: string = '';
+    let route: string = '';
+    address.address_components.forEach((el: any) => {
+      switch (el.types[0]) {
+        case 'country':
+          this.account.location.country = el.long_name;
+          break;
+        case 'administrative_area_level_1':
+          this.account.location.state = el.long_name;
+          break;
+        case 'locality':
+          this.account.location.city = el.short_name;
+          break;
+        case 'postal_code':
+          // this.account.clinic.location.zip = el.long_name;
+          break;
+        case 'street_number':
+          street = el.long_name;
+          break;
+        case 'route':
+          route = el.long_name;
+          break;
+      }
+    });
+    // if (street || route) {
+    //   this.account.clinic.location.address = (street + ' ' + route).trim();
+    // }
+    // if (address.geometry && address.geometry.location && address.geometry.location.lat) {
+    //   this.account.clinic.location.latitude = address.geometry.location.lat;
+    //   this.account.clinic.location.longitude = address.geometry.location.lng;
+    // }
+    // this.platform.ready().then(() => {
+    //   // Okay, so the platform is ready and our plugins are available.
+    //   // this.centerMap(address);
+    //   this.onChangeValidate('update');
+    //   this.showMap(this.account.clinic);
+    // });
+    // alert(JSON.stringify(address));
+    this.onChangeValidate();
   }
 
   public openPage(page) {

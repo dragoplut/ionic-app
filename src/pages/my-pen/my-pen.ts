@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AlertController, NavController, NavParams } from 'ionic-angular';
+import { AlertController, ActionSheetController, NavController, NavParams } from 'ionic-angular';
 // noinspection TypeScriptCheckImport
 // import * as _ from 'lodash';
 
@@ -35,6 +35,7 @@ export class MyPenComponent {
     public _pen: PenService,
     public navCtrl: NavController,
     public navParams: NavParams,
+    public actionSheetCtrl: ActionSheetController,
     private alertCtrl: AlertController
   ) {
     this.penListFiltered = this.searchByString(this.searchInput, this.penList);
@@ -104,7 +105,7 @@ export class MyPenComponent {
         this.getPens();
       },
       (resp: any) => {
-        alert(JSON.stringify(resp));
+        console.log(JSON.stringify(resp));
       }
     );
   }
@@ -130,6 +131,31 @@ export class MyPenComponent {
       ]
     });
     alert.present();
+  }
+
+  public presentActionsConfirm(item: any) {
+    let actionSheet = this.actionSheetCtrl.create({
+      title: item.title,
+      buttons: [
+        {
+          text: 'Delete',
+          role: 'destructive',
+          handler: () => {
+            console.log('Destructive clicked');
+            this.requestRemove(item);
+          }
+        },
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          handler: () => {
+            console.log('Cancel clicked');
+          }
+        }
+      ]
+    });
+
+    actionSheet.present();
   }
 
   public getPensSearch(searchValue: string) {

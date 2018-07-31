@@ -14,7 +14,7 @@
     >
       <div class="info-container">
         <div class="plain-text text-left">
-          <span class="secondary-blue">{{dpDevice.name}}</span>
+          <span class="secondary-blue">{{dpDevice.serialNumber || dpDevice.name}}</span>
         </div>
         <br/>
         <div class="plain-text text-left">{{ dependencies.newPen ? 'Registering and Updating Pen ...' : 'Updating Pen ...'}}</div>
@@ -68,7 +68,7 @@
     >
       <div class="info-container">
         <div class="plain-text text-left">
-          <span class="secondary-blue">{{dpDevice.name}}</span> {{ dependencies.newPen ? 'connected' : ''}}
+          <span class="secondary-blue">{{dpDevice.serialNumber || dpDevice.name}}</span> {{ dependencies.newPen ? 'connected' : ''}}
         </div>
         <br/>
         <div class="plain-text text-left">Pen successfully {{ dependencies.newPen ? 'registered' : 'updated'}} !</div>
@@ -89,7 +89,7 @@
     >
       <div class="info-container">
         <div class="plain-text text-left">
-          <span class="secondary-blue">{{ showButton === 'done' ? dpDevice.name || dpDevice.id : 'Error' }}</span>
+          <span class="secondary-blue">{{ showButton === 'done' ? dpDevice.serialNumber || dpDevice.name || dpDevice.id : 'Error' }}</span>
         </div>
         <br/>
         <div class="plain-text text-left">{{errorDescription}}</div>
@@ -111,7 +111,7 @@
     >
       <div class="info-container">
         <div class="plain-text text-left">
-          <span class="secondary-blue">{{dpDevice.name}}</span>
+          <span class="secondary-blue">{{dpDevice.serialNumber || dpDevice.name}}</span>
           <!--<span *ngIf="dpDevice.name && !gettingDevices"> ({{ dpDevice.paired ? 'paired' : 'unpaired' }}) </span>-->
           <!--<span *ngIf="!gettingDevices" class="primary-blue pull-center" tapable (click)="dpDevice.paired ? disconnect() : selectDevice(dpDevice.address || dpDevice.id, dpDevice)">-->
              <!--{{ dpDevice.paired ? ' Disconnect ' : ' ' }}-->
@@ -172,11 +172,11 @@
     <img alt="Dermapenworld" src="{{logoTransparent}}" class="dpw-logo-foot">
   </div>
   <!--<button ion-button block (click)="disconnect()">Disconnect</button>-->
-  <div class="create-account row center-xs middle-xs" *ngIf="logData.length">
-    <ion-list class="device-details">
-      <button ion-button block (click)="logData = []">Clear Log</button>
-    </ion-list>
-    <span class="device-details">Activity Logs:</span><br/>
-    <p class="device-details" *ngFor="let log of logData">{{log}}</p>
-  </div>
+  <!--<div class="create-account row center-xs middle-xs" *ngIf="logData.length">-->
+    <!--<ion-list class="device-details">-->
+      <!--<button ion-button block (click)="logData = []">Clear Log</button>-->
+    <!--</ion-list>-->
+    <!--<span class="device-details">Activity Logs:</span><br/>-->
+    <!--<p class="device-details" *ngFor="let log of logData">{{log}}</p>-->
+  <!--</div>-->
 </ion-content>

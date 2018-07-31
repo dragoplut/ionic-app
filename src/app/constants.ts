@@ -1,4 +1,4 @@
-export const APP_VERSION: string = '1.0.72';
+export const APP_VERSION: string = '1.0.77';
 // tslint:disable-next-line
 export const EMAIL_REGEXP: any = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
@@ -7,16 +7,17 @@ export const GOOGLE_API_KEY_ANDROID: string = 'AIzaSyDJYtcVzKXghryIDmQaTBDp5gWYP
 export const GOOGLE_API_KEY_IOS: string = 'AIzaSyCgHpBF5TgClZPji7fl8LRfE98TnPoTWUY';
 
 // Dev environment
-export const API_URL: string = 'http://regen-dev.azurewebsites.net/api/mobile';
+// export const API_URL: string = 'http://regen-dev.azurewebsites.net/api/mobile';
 // Stable environment
-// export const API_URL: string = 'http://regen-stable.azurewebsites.net/api/mobile';
+export const API_URL: string = 'https://regen-stable.azurewebsites.net/api/mobile';
 // Production environment
-// export const API_URL: string = 'http://regen-production.azurewebsites.net/api/mobile';
+// export const API_URL: string = 'https://regen-production.azurewebsites.net/api/mobile';
 
 // 10000 === 10 seconds
 // for this.snackBar.open(... ,... , { duration: DURATION_ERROR_SNACKBAR })
 export const DURATION_ERROR: number = 10000;
 export const DURATION_NOTIFICATION: number = 5000;
+export const NETWORK_TIMEOUT: number = 5000; // 5000 milliseconds === 5 seconds
 
 export const CHECK: string = 'cmVnZW5AQ2xvdWQhOTE=';
 

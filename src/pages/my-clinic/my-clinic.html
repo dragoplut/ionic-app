@@ -16,7 +16,7 @@
         (ionCancel)="onCancel($event)">
       </ion-searchbar>
       <ion-list>
-        <ion-item-sliding *ngFor="let item of clinicListFiltered">
+        <ion-item-sliding *ngFor="let item of clinicListFiltered" (press)="presentActionsConfirm(item)">
           <ion-item>
             <button ion-item (click)="itemSelected(item)">
               {{ item.name }} <span class="pull-right">{{ item.address }}</span>

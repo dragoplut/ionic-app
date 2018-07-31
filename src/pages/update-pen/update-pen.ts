@@ -458,12 +458,12 @@ export class UpdatePenComponent {
           case 3:
             this.updatePercent += 10;
             const packagesAmount: number = Math.ceil(resultViktor.length / 18);
-            alert('packagesAmount: ' + packagesAmount);
+            // alert('packagesAmount: ' + packagesAmount);
             for (let i = 0; i < packagesAmount; i++) {
               const rawPackageData: any = resultViktorUint8.slice(i ? 18 * i - 1 : i, 18 * (i + 1));
               let packageData: any = new Uint8Array(18);
               _.forEach(rawPackageData, (item: any, idx: number) => packageData[idx] = item);
-              alert('packageData: ' + JSON.stringify(packageData, null, 2));
+              // alert('packageData: ' + JSON.stringify(packageData, null, 2));
               // if (packageData.length < 18) {
               //   const zeroPaddedBuffer: any = new Uint8Array(packageData.length - 18);
               //   packageData = this.concatTypedArrays(packageData, zeroPaddedBuffer);
@@ -476,7 +476,7 @@ export class UpdatePenComponent {
               const log: string = (new Date()).toISOString() + ' packageBuffer: ' + JSON.stringify(packageBuffer, null, 2);
               this.logData.push(log);
               // alert('resultViktorUint8: ' + JSON.stringify(resultViktorUint8, null, 2));
-              alert('packageBuffer: ' + JSON.stringify(packageBuffer, null, 2));
+              // alert('packageBuffer: ' + JSON.stringify(packageBuffer, null, 2));
 
               this._ble.write(
                 address,
@@ -499,7 +499,7 @@ export class UpdatePenComponent {
             const packageNumber: any = new Uint8Array(2);
             packageNumber[0] = 128;
             const packageBuffer: any = this.concatTypedArrays(packageNumber, rawBuffer);
-            alert('packageBuffer: ' + JSON.stringify(packageBuffer, null, 2));
+            // alert('packageBuffer: ' + JSON.stringify(packageBuffer, null, 2));
             this._ble.write(
               address,
               { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91006-38e9-4fbe-83f3-d82aae6ff68e', type: 'fileWriteBuffer' },
@@ -524,7 +524,7 @@ export class UpdatePenComponent {
   }
 
   public onFileResponse(data: any, address: string, item: any, rawData: any) {
-    alert('onFileResponse ' + JSON.stringify(data, null, 2));
+    // alert('onFileResponse ' + JSON.stringify(data, null, 2));
   }
 
   public onData(data: any, address: string, item: any, rawData: any) {
@@ -564,7 +564,7 @@ export class UpdatePenComponent {
           default:
             break;
         }
-        alert('decodeBuffer resp: ' + JSON.stringify(resp, null, 2));
+        // alert('decodeBuffer resp: ' + JSON.stringify(resp, null, 2));
         this.logData.push(resp.log);
         this.decodedData = _.clone(resp.result);
         this.successData = JSON.stringify(this.decodedData, null, 2);
@@ -700,16 +700,26 @@ export class UpdatePenComponent {
   }
 
   public initConnectionChecker() {
+    let bleErr: boolean = false;
     let jwtCheckInterval: any = setInterval(() => {
-      this._ble.isConnected(this.dpDevice, () => {
-        clearInterval(jwtCheckInterval);
-      }, false);
+      if (!bleErr) {
+        this._ble.isConnected(
+          this.dpDevice,
+          () => {
+            clearInterval(jwtCheckInterval);
+          },
+          (err: any) => {
+            console.log('initConnectionChecker bleErr', err);
+            bleErr = true;
+          }
+        );
+      }
     }, 1000);
   }
 
   public isConnected(device: any) {
     this._ble.isConnected(device, (resp: any) => {
-      alert('isConnected: ' + JSON.stringify(resp));
+      // alert('isConnected: ' + JSON.stringify(resp));
     }, this.fail);
   }
 
@@ -735,7 +745,7 @@ export class UpdatePenComponent {
   public updateBlackWhiteList() {
     this._pen.getWhitelist().subscribe(
       (resp: any) => {
-        alert('getWhitelist: ' + JSON.stringify(resp));
+        // alert('getWhitelist: ' + JSON.stringify(resp));
         if (resp && resp.length) {
           this.dummyWhiteBlackList = resp;
         }

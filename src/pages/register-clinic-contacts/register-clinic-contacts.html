@@ -25,7 +25,7 @@
         ></custom-input>
       </div>
       <div class="actions col-xs-12">
-        <a [ngClass]="formValid ? '' : 'disabled'" class="link-nav pull-right" (click)="formValid ? save() : false">
+        <a [ngClass]="formValid && !loading ? '' : 'disabled'" class="link-nav pull-right" (click)="formValid && !loading ? save() : false">
           Save
         </a>
       </div>

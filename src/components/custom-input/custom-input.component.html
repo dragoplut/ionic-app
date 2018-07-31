@@ -9,12 +9,13 @@
   <ion-input
     ngModel
     [disabled]="itemDisabled"
-    [ngClass]="itemError && !inputLabel.isActive ? 'error' : ''"
+    [ngClass]="{ 'error': itemError && !inputLabel.isActive, 'input-active': inputLabel.isActive }"
     type="{{itemType ? itemType : 'text'}}"
     name="customInput{{itemLabel.split(' ').join('')}}"
-    (focus)="inputLabel.isActive=true"
-    (blur)="inputLabel.isActive=false"
+    (ionFocus)="inputLabel.isActive=true"
+    (ionBlur)="inputLabel.isActive=false; valueChange()"
     (keyup)="valueChange()"
+    (input)="valueChange()"
     [(ngModel)]="itemValue"
     autoComplete="false"
     spellCheck="false"

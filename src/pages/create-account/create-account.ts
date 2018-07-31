@@ -7,7 +7,7 @@ import {
   EMAIL_REGEXP,
   PAGES_LIST
 } from '../../app/constants';
-import { CreateAccountAddressComponent, LegalsComponent } from '../';
+import { CreateAccountAddressComponent, SigninComponent } from '../';
 import { Nav, NavController, NavParams } from 'ionic-angular';
 // noinspection TypeScriptCheckImport
 import * as _ from 'lodash';
@@ -36,7 +36,7 @@ export class CreateAccountComponent implements OnInit {
     { modelName: 'email', placeholder: 'Email', type: 'email', required: true },
     { modelName: 'password', placeholder: 'Password', type: 'password', required: true },
     { modelName: 'confirmPassword', placeholder: 'Confirm Password', type: 'password', required: true },
-    { modelName: 'phoneNumber', placeholder: 'Phone Number', type: 'text', required: true }
+    { modelName: 'phoneNumber', placeholder: 'Phone Number', type: 'number', required: true }
   ];
 
   constructor(
@@ -105,7 +105,7 @@ export class CreateAccountComponent implements OnInit {
     if (this._permission.isAllowedAction('view', 'signin')) {
       for (const page of this.PAGES_LIST) {
         if (this._permission.isAllowedAction('view', page.permissionRef)) {
-          this.openPage(LegalsComponent);
+          this.openPage(SigninComponent);
           break;
         }
       }
@@ -119,10 +119,10 @@ export class CreateAccountComponent implements OnInit {
 
   public handleErr(err: any) {
     this.loading = false;
-    const message = err && err._body ?
+    const message = err && err._body && err._body.length ?
       JSON.parse(err._body) : { error: { message: DEFAULT_ERROR_MESSAGE } };
     this.showErrorMessage(message.error.message);
-    return err && err._body ? JSON.parse(err._body) : message;
+    return err && err._body && err._body.length ? JSON.parse(err._body) : message;
   }
 
   public authenticate() {
@@ -152,14 +152,14 @@ export class CreateAccountComponent implements OnInit {
   }
 
   public goBack() {
-    this.openPage(LegalsComponent);
+    this.openPage(SigninComponent, { createAccount: true });
   }
 
   public next() {
     this.openPage(CreateAccountAddressComponent);
   }
 
-  public openPage(page) {
-    this.navCtrl.push(page, { account: this.user });
+  public openPage(page: any, params?: any) {
+    this.navCtrl.push(page, params ? params : { account: this.user });
   }
 }

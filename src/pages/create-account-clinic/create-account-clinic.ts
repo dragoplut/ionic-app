@@ -18,8 +18,8 @@ import {
   PAGES_LIST
 } from '../../app/constants';
 import { T_LOCATION_PARAMS } from '../../app/types';
-import { CreateAccountAddressComponent, SigninComponent, HomeMenu } from '../index';
-import {Nav, NavController, NavParams, Platform} from 'ionic-angular';
+import { CreateAccountAddressComponent, SigninComponent, HomeMenu } from '../';
+import { App, Nav, NavController, NavParams, Platform } from 'ionic-angular';
 // noinspection TypeScriptCheckImport
 import * as _ from 'lodash';
 
@@ -60,10 +60,13 @@ export class CreateAccountClinicComponent implements OnInit {
     { modelName: 'email', placeholder: 'Email', type: 'email', required: true },
     { modelName: 'password', placeholder: 'Password', type: 'password', required: true },
     { modelName: 'confirmPassword', placeholder: 'Confirm Password', type: 'password', required: true },
-    { modelName: 'phoneNumber', placeholder: 'Phone Number', type: 'text', required: false }
+    { modelName: 'phoneNumber', placeholder: 'Phone Number', type: 'number', required: false }
   ];
 
+  public backButtonAction: any = () => {};
+
   constructor(
+    public appCtrl: App,
     public navCtrl: NavController,
     public navParams: NavParams,
     public platform: Platform,
@@ -77,6 +80,9 @@ export class CreateAccountClinicComponent implements OnInit {
 
   public ionViewDidLoad() {
     this.account = this.navParams.get('account');
+    this.backButtonAction = () => {
+      console.log('backButtonAction tap');
+    };
     if (!this.account.clinic) {
       this.account.clinic = { location: {} };
     }
@@ -92,6 +98,7 @@ export class CreateAccountClinicComponent implements OnInit {
   }
 
   public showMap(acc: any) {
+    if (!acc || !acc.location) { return; }
     let mapOptions = {
       center: new google.maps.LatLng(
         acc && acc.location && acc.location.latitude ?
@@ -124,14 +131,6 @@ export class CreateAccountClinicComponent implements OnInit {
 
   public showErrorMessage(message?: string) {
     this.errorMessage = message ? message : DEFAULT_ERROR_MESSAGE;
-  }
-
-  public goToReset() {
-    console.log('goToReset');
-  }
-
-  public clearError() {
-    this.errorMessage = '';
   }
 
   public onChangeValidate(target?: string) {
@@ -285,7 +284,8 @@ export class CreateAccountClinicComponent implements OnInit {
           this.loading = false;
           console.log('nex: ', this.account.clinic);
           // alert('Clinic created!');
-          this.openPage(HomeMenu);
+          // this.openPage(HomeMenu);
+          this.appCtrl.getRootNav().setRoot(HomeMenu);
         },
         (err: any) => {
           this.handleErr(err);
@@ -297,10 +297,10 @@ export class CreateAccountClinicComponent implements OnInit {
   public handleErr(err: any) {
     this.loading = false;
     this.formValid = false;
-    const message = err && err._body ?
+    const message = err && err._body && err._body.length ?
       JSON.parse(err._body) : { error: { message: DEFAULT_ERROR_MESSAGE } };
     alert(message.error.message);
-    return err && err._body ? JSON.parse(err._body) : message;
+    return err && err._body && err._body.length ? JSON.parse(err._body) : message;
   }
 
   /**
@@ -325,7 +325,7 @@ export class CreateAccountClinicComponent implements OnInit {
       (err: any) => {
         this.loading = false;
         if (callback) { callback(); }
-        alert(JSON.stringify(err));
+        // alert(JSON.stringify(err));
       }
     );
   }

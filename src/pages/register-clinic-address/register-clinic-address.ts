@@ -240,7 +240,7 @@ export class RegisterClinicAddressComponent implements OnInit {
       (err: any) => {
         this.loading = false;
         if (callback) { callback(); }
-        alert(JSON.stringify(err));
+        // alert(JSON.stringify(err));
       }
     );
   }

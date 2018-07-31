@@ -26,7 +26,7 @@ export class RegisterClinicContactsComponent implements OnInit {
   public cityNamesArr: any[] = US_CITY_NAMES;
 
   public createAccInputs: any = [
-    { modelName: 'phoneNumber', placeholder: 'Phone Number', type: 'text', required: false },
+    { modelName: 'phoneNumber', placeholder: 'Phone Number', type: 'number', required: false },
     { modelName: 'contactPerson', placeholder: 'Contact Person', type: 'text', required: false },
     { modelName: 'webSiteUrl', placeholder: 'Website URL', type: 'text', required: false }
   ];
@@ -94,12 +94,15 @@ export class RegisterClinicContactsComponent implements OnInit {
   public save() {
     const valid: boolean = this.validate(this.account);
     if (valid) {
+      this.loading = true;
       this._clinic.createClinic(this.account).subscribe(
         (resp: any) => {
+          this.loading = false;
           this.openPage(MyClinicComponent);
         },
         (err: any) => {
           console.log('err: ', err);
+          this.loading = false;
         }
       );
     }
