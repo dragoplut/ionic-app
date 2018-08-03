@@ -109,6 +109,12 @@ export class UtilService {
     return { buffer, bytesLength };
   }
 
+  public uint8to32int(arr: any[]) {
+    return arr.reduce((acc, next) => {
+      return acc * 256 + next;
+    }, 0);
+  }
+
   // private uint32to8arr(uint32: any) {
   //   let resultArr: any = new Uint8Array(4);
   //   resultArr[3] = uint32 & 0xff;

@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 /** Bluetooth **/
 import { BluetoothSerial } from '@ionic-native/bluetooth-serial';
 import { BLE } from '@ionic-native/ble';
+import { UtilService } from '../';
 
 // noinspection TypeScriptCheckImport
 import * as _ from 'lodash';
@@ -16,7 +17,8 @@ export class BleService {
 
   constructor(
     private ble: BLE,
-    private bluetoothSerial: BluetoothSerial
+    private bluetoothSerial: BluetoothSerial,
+    private _util: UtilService
   ) {}
 
   public enable() {
@@ -299,6 +301,7 @@ export class BleService {
     switch (type) {
       case 'fileWrite':
       case 'fileRequest':
+      case 'fileSize':
         let uint8arr2: any = new Uint8Array(2);
         let uint32arr: any = new Uint32Array(1);
         uint8arr2[0] = arr[0];
@@ -331,9 +334,18 @@ export class BleService {
     switch (type) {
       case 'fileRequest':
       case 'fileResponse':
+        console.log('arrFromBufferByType fileResponse buffer', buffer);
         result = {
           idx: new Uint8Array(buffer, 0, 2),
           data: new Uint8Array(buffer, 2, 18)
+        };
+        break;
+      case 'fileSize':
+        console.log('arrFromBufferByType fileResponse buffer', buffer);
+        const uint8x4: any = new Uint8Array(buffer, 2, 4);
+        result = {
+          idx: new Uint8Array(buffer, 0, 2),
+          data: this._util.uint8to32int(uint8x4)
         };
         break;
       case 'fileWrite':
@@ -342,6 +354,7 @@ export class BleService {
         };
         break;
       default:
+        console.log('arrFromBufferByType default buffer', buffer);
         const bufferUint: any = new Uint8Array(buffer);
         if (buffer && buffer.length === 20) {
           result = {

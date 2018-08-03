@@ -459,14 +459,17 @@ export class PenService {
       this.firmwareBuffer = item.device.dataBuffer;
     }
 
+    console.log('writeWithResponse rawData', rawData);
     if (rawData && rawData.length) {
       switch (rawData[CHAR_ELEM.action]) {
+        case CHAR_ELEM.read.action.size:
         case CHAR_ELEM.read.action.write:
           this._ble.startNotification(
             address,
             { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91004-38e9-4fbe-83f3-d82aae6ff68e', type: item.type },
             (data: any) => this.onFileResponse(data, address, item, rawData, success, progressInfo),
-            (err: any) => this._ble.stopNotification(address, { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91004-38e9-4fbe-83f3-d82aae6ff68e' }, true, err));
+            (err: any) => this._ble.stopNotification(address, { serviceUUID: item.serviceUUID, characteristicUUID: 'a8a91004-38e9-4fbe-83f3-d82aae6ff68e' }, true, err)
+          );
           break;
         case CHAR_ELEM.read.action.read:
           this._ble.startNotification(
@@ -513,8 +516,9 @@ export class PenService {
       address,
       { serviceUUID: item.serviceUUID, characteristicUUID: item.characteristicUUID, type: item.type },
       rawData,
-      (done: any) => {},
-      fail);
+      (done: any) => { console.log('_ble.write done', done); },
+      fail
+    );
   }
 
   // public intToVarints128(value: number) {
@@ -575,7 +579,10 @@ export class PenService {
   }
 
   public onFileResponse(data: any, address: string, item: any, rawData: any, callback?: any, progressInfo?: any) {
-    if (data && data.data) {
+    console.log('onFileResponse data', data, ' rawData', rawData);
+    if (item && item.type === 'fileSize') {
+      if (callback) { callback(data.data); };
+    } else if (data && data.data) {
       const idx8arr4: any[] = data.data.slice(this.config.packIdxStart, this.config.packIdxEnd);
       const index: number = this.uint8to32int(idx8arr4);
       switch (data.data[CHAR_ELEM.file]) {
@@ -622,6 +629,7 @@ export class PenService {
                 }
               }
               break;
+            case CHAR_ELEM.write.action.size:
             case CHAR_ELEM.write.action.done:
               this.buffWriteStatus.idx = 0;
               this.buffWriteStatus.status = data.data[CHAR_ELEM.action];
@@ -771,6 +779,7 @@ export class PenService {
   }
 
   public onData(data: any, address: string, item: any, rawData: any, callback: any) {
+    console.log('onData data: ', data, ' rawData ', rawData);
     /** Describes last buffer package in queue **/
     const lastPackIdx: any = new Uint8Array([ 0x80 ]);
 
@@ -781,7 +790,7 @@ export class PenService {
       this.rawData.push(data.data[prop]);
     }
     if (data && data.idx && data.idx.length && data.idx[0] === lastPackIdx[0]) {
-      // console.log('onData dataDone rawData: ', this.rawData);
+      console.log('onData dataDone rawData: ', this.rawData);
       const dataDone: any = rawData;
       dataDone[CHAR_ELEM.action] = CHAR_ELEM.read.action.done;
       this._ble.write(address, { serviceUUID: item.serviceUUID, characteristicUUID: item.characteristicUUID, type: item.type }, dataDone, (done: any) => {
@@ -789,23 +798,20 @@ export class PenService {
         switch (dataDone[CHAR_ELEM.file]) {
           case CHAR_ELEM.read.file.usage_list:
             resp = this.decodeBuffer(this.rawData, 'usageList');
-            resp.rawResult = this.rawData;
             break;
           case CHAR_ELEM.read.file.error_list:
             resp = this.decodeBuffer(this.rawData, 'errorList');
-            resp.rawResult = this.rawData;
             break;
           case CHAR_ELEM.read.file.black_list:
             resp = this.decodeBuffer(this.rawData, 'blackList');
-            resp.rawResult = this.rawData;
             break;
           case CHAR_ELEM.read.file.settings:
             resp = this.decodeBuffer(this.rawData, 'settings');
-            resp.rawResult = this.rawData;
             break;
           default:
             break;
         }
+        resp.rawResult = this.rawData;
         this.rawData = [];
         this._ble.startNotification(
           address,

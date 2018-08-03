@@ -1,8 +1,8 @@
 export { ApiService } from './api/api.service';
 export { AuthService } from './auth/auth.service';
 export { AccountService } from './account/account.service';
-export { BleService } from './ble/ble.service';
 export { UtilService } from './util/util.service';
+export { BleService } from './ble/ble.service';
 export { ClinicService } from './clinic/clinic.service';
 export { FirmwareService } from './firmware/firmware.service';
 export { GoogleService } from './google/google.service';
