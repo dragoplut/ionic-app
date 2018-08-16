@@ -7,6 +7,7 @@ import {
   APP_VERSION,
   ANGLE_IMG,
   DPW_LOGO_TRANSPARENT,
+  ENV,
   USER_PROFILE_IMG
 } from '../../app/constants';
 
@@ -30,6 +31,7 @@ export class MyAccountComponent {
   public angleImg: string = ANGLE_IMG;
   public apiUrl: string = API_URL;
   public appVersion: string = APP_VERSION;
+  public env: string = ENV;
 
   constructor(
     public appCtrl: App,

@@ -29,7 +29,7 @@
       </a>
     </div>
     <div class="info-container">
-      <div class="plain-text text-small-size text-center">{{apiUrl}}</div><br/>
+      <div class="plain-text text-small-size text-center" *ngIf="env !== 'production'">{{apiUrl}}</div><br/>
       <div class="plain-text text-small-size text-center">{{appVersion}}</div>
     </div>
     <img alt="Dermapenworld" src="{{logoTransparent}}" class="dpw-logo-foot bottom-absolute">

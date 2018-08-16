@@ -16,14 +16,14 @@
         (ionCancel)="onCancel($event)">
       </ion-searchbar>
       <ion-list>
-        <ion-item-sliding *ngFor="let item of clinicListFiltered" (press)="presentActionsConfirm(item)">
+        <ion-item-sliding *ngFor="let item of clinicListFiltered" (press)="isDev ? presentActionsConfirm(item) : false">
           <ion-item>
             <button ion-item (click)="itemSelected(item)">
               {{ item.name }} <span class="pull-right">{{ item.address }}</span>
               <ion-icon class="list-icon-absolute" name="arrow-forward"></ion-icon>
             </button>
           </ion-item>
-          <ion-item-options>
+          <ion-item-options *ngIf="isDev">
             <button class="danger" (click)="requestRemove(item)">Delete</button>
           </ion-item-options>
         </ion-item-sliding>

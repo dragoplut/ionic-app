@@ -1,5 +1,5 @@
 import { Injectable, OnInit } from '@angular/core';
-import { AlertController } from 'ionic-angular';
+import { AlertController, App, NavController, Platform } from 'ionic-angular';
 import {
   Headers,
   Http,
@@ -11,7 +11,8 @@ import 'rxjs/add/observable/throw';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/timeout';
-import { API_URL, NETWORK_TIMEOUT } from '../../app/constants';
+import { SigninComponent } from '../../pages';
+import { API_URL, APP_USER, NETWORK_TIMEOUT } from '../../app/constants';
 
 @Injectable()
 export class ApiService implements OnInit {
@@ -21,13 +22,21 @@ export class ApiService implements OnInit {
     'Content-type': 'application/json-patch+json'
   });
   public token: string = '';
+
+  private nav: NavController;
   // Environment URL
   protected endpoint: string = API_URL;
 
   constructor(
     public http: Http,
-    public alertCtrl: AlertController
-  ) {}
+    public alertCtrl: AlertController,
+    private platform: Platform,
+    private app: App
+  ) {
+    this.platform.ready().then(() => {
+      this.nav = this.app.getActiveNav();
+    });
+  }
 
   public ngOnInit() {
     this.headers = new Headers({
@@ -148,7 +157,21 @@ export class ApiService implements OnInit {
         buttons: ['OK']
       });
       alert.present();
+    } else if (err && err.status === 401) {
+      this.cleanUserData();
+      this.nav.push(SigninComponent, { dependencies: {} });
+      const alert: any = this.alertCtrl.create({
+        title: 'Error',
+        subTitle: 'Token is expired',
+        buttons: ['OK']
+      });
+      alert.present();
     }
+  }
+
+  private cleanUserData() {
+    localStorage.removeItem(APP_USER);
+    localStorage.removeItem('token_mobile');
   }
 
   protected getDefaultOptions(): RequestOptions {

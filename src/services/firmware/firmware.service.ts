@@ -10,7 +10,7 @@ export class FirmwareService {
   constructor(private api: ApiService) {}
 
   public isNewVersionAvailable(version: string): Observable<any> {
-    return this.api.get(`${this.path}/isNewVersionAvailable?version=${version}`)
+    return this.api.get(`${this.path}/isNewVersionAvailable?upgradeFromVersion=${version}`)
       .map((res: any) => res);
   }
 
@@ -19,12 +19,12 @@ export class FirmwareService {
       .map((res: any) => res);
   }
 
-  public getLastVersionFirmware(keyInfo: any[]): Observable<any> {
+  public getLastVersionFirmware(keyInfo: any[], upgradeFromVersion: string): Observable<any> {
     let keyInfoStr: string = '?';
     keyInfo.forEach((n: number) => {
       keyInfoStr = keyInfoStr + (keyInfoStr.length > 1 ? '&keyInfo=' : 'keyInfo=') + n;
     });
-    return this.api.get(`${this.path}/getLastVersionFirmware${keyInfoStr}`)
+    return this.api.get(`${this.path}/getUpgradeVersionFirmware${keyInfoStr}&upgradeFromVersion=${upgradeFromVersion}`)
       .map((res: any) => res);
   }
 }

@@ -6,7 +6,8 @@ import { AlertController, ActionSheetController, NavController, NavParams } from
 import { ClinicService } from '../../services/index';
 import {
   ANGLE_IMG,
-  DPW_LOGO_TRANSPARENT
+  DPW_LOGO_TRANSPARENT,
+  ENV
 } from '../../app/constants';
 import {
   EditClinicComponent,
@@ -30,6 +31,7 @@ export class MyClinicComponent {
   public clinicListFiltered: any[] = [];
 
   public dependencies: any = {};
+  public isDev: boolean = ENV === 'dev';
 
   constructor(
     public _clinic: ClinicService,

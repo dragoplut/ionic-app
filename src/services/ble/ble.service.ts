@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 /** Bluetooth **/
 import { BluetoothSerial } from '@ionic-native/bluetooth-serial';
 import { BLE } from '@ionic-native/ble';
+import { UtilService } from '../';
 
 // noinspection TypeScriptCheckImport
 import * as _ from 'lodash';
@@ -16,7 +17,8 @@ export class BleService {
 
   constructor(
     private ble: BLE,
-    private bluetoothSerial: BluetoothSerial
+    private bluetoothSerial: BluetoothSerial,
+    private _util: UtilService
   ) {}
 
   public enable() {
@@ -84,7 +86,6 @@ export class BleService {
             });
 
         } else {
-          console.log('2 this.connect(device', device);
           // this.isConnected(device, (connected: any) => console.log(connected), false);
           this.stopScan();
           this.connect(device, (done: any) => {
@@ -178,7 +179,6 @@ export class BleService {
       },
       (notConnected: any) => {
         console.log('not connected: ', notConnected);
-        console.log('ble.service.ts connect device: ', device);
         this.ble.connect(device.mac || device.id).subscribe(onSuccess, onErr);
       },
     );
@@ -192,17 +192,14 @@ export class BleService {
     this.isConnected(
       device,
       (connected: any) => {
-        console.log('isConnected (disconnection required) connected: ', connected);
 
         this.ble.disconnect(device.mac || device.id || device.address)
           .then(
             (resp: any) => {
-              console.log('disconnect resp: ', resp);
               this.stopScan((stopScanDone: any) => { console.log('stopScanDone: ', stopScanDone); });
               onSuccess(resp);
             },
             (err: any) => {
-              console.log('disconnect err: ', err);
               onErr(err);
             }
           );
@@ -264,7 +261,6 @@ export class BleService {
   private clearNotificationsQueue() {
     _.forEach(this.activeNotifications, (item: T_BLE_NOTIFICATION_ACTIVE) => {
       this.stopNotification(item.address, item.uuid, () => {
-        console.log('stopNotification', item);
         this.removeActiveNotification(item.timestamp);
       },
       (err: any) => {
@@ -299,6 +295,7 @@ export class BleService {
     switch (type) {
       case 'fileWrite':
       case 'fileRequest':
+      case 'fileSize':
         let uint8arr2: any = new Uint8Array(2);
         let uint32arr: any = new Uint32Array(1);
         uint8arr2[0] = arr[0];
@@ -334,6 +331,12 @@ export class BleService {
         result = {
           idx: new Uint8Array(buffer, 0, 2),
           data: new Uint8Array(buffer, 2, 18)
+        };
+        break;
+      case 'fileSize':
+        const uint8x4: any = new Uint8Array(buffer, 2, 4);
+        result = {
+          data: this._util.uint8to32int(uint8x4)
         };
         break;
       case 'fileWrite':

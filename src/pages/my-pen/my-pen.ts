@@ -6,7 +6,8 @@ import { AlertController, ActionSheetController, NavController, NavParams } from
 import { PenService } from '../../services';
 import {
   ANGLE_IMG,
-  DPW_LOGO_TRANSPARENT
+  DPW_LOGO_TRANSPARENT,
+  ENV
 } from '../../app/constants';
 import {
   HomeMenu,
@@ -30,6 +31,7 @@ export class MyPenComponent {
   public penListFiltered: any[] = [];
 
   public dependencies: any = {};
+  public isDev: boolean = ENV === 'dev';
 
   constructor(
     public _pen: PenService,
