@@ -19,7 +19,7 @@ import {
   CreateAccountComponent,
   SigninComponent
 } from '../';
-import { Nav, NavController, NavParams } from 'ionic-angular';
+import { Nav, NavController, NavParams, AlertController } from 'ionic-angular';
 
 // noinspection TypeScriptCheckImport
 import * as _ from 'lodash';
@@ -54,7 +54,8 @@ export class CreateAccountAddressComponent implements OnInit {
     public _auth: AuthService,
     public _account: AccountService,
     public _permission: PermissionService,
-    public _util: UtilService
+    public _util: UtilService,
+    private alertCtrl: AlertController
   ) {}
 
   public ionViewDidLoad() {
@@ -99,7 +100,7 @@ export class CreateAccountAddressComponent implements OnInit {
     this.formValid = false;
     const message = err && err._body && err._body.length ?
       JSON.parse(err._body) : { error: { message: DEFAULT_ERROR_MESSAGE } };
-    // alert(message.error.message);
+    this.alertOk(message.message || message.error.message);
     return err && err._body && err._body.length ? JSON.parse(err._body) : message;
   }
 
@@ -282,5 +283,14 @@ export class CreateAccountAddressComponent implements OnInit {
 
   public openPage(page) {
     this.navCtrl.push(page, { account: this.account, dependencies: this.dependencies });
+  }
+
+  public alertOk(text: string) {
+    let alert: any = this.alertCtrl.create({
+      title: 'Error',
+      message: text,
+      buttons: [ { text: 'Ok', role: 'cancel' } ]
+    });
+    alert.present();
   }
 }

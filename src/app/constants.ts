@@ -1,7 +1,7 @@
 // Environment options are dev,stable,production
 export const ENV: string = 'stable';
 
-export const APP_VERSION: string = `1.0.83-${ENV}`;
+export const APP_VERSION: string = `1.0.84-${ENV}`;
 // tslint:disable-next-line
 export const EMAIL_REGEXP: any = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 

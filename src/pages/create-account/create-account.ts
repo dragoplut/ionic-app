@@ -29,15 +29,7 @@ export class CreateAccountComponent implements OnInit {
 
   public emailRegExp: any = EMAIL_REGEXP;
 
-  public createAccInputs: any = [
-    { modelName: 'firstName', placeholder: 'First Name', type: 'text', required: true },
-    { modelName: 'lastName', placeholder: 'Last Name', type: 'text', required: false },
-    { modelName: 'companyName', placeholder: 'Company Name', type: 'text', required: true },
-    { modelName: 'email', placeholder: 'Email', type: 'email', required: true },
-    { modelName: 'password', placeholder: 'Password', type: 'password', required: true },
-    { modelName: 'confirmPassword', placeholder: 'Confirm Password', type: 'password', required: true },
-    { modelName: 'phoneNumber', placeholder: 'Phone Number', type: 'number', required: true }
-  ];
+  public createAccInputs: any[] = [];
 
   constructor(
     public navCtrl: NavController,
@@ -53,6 +45,17 @@ export class CreateAccountComponent implements OnInit {
     if (acc) {
       this.user = acc;
     }
+    // Ugly hack to prevent iOS uncontrolled focus on last input in populated inputs list.
+    setTimeout(() => {
+      this.createAccInputs = [
+        { modelName: 'lastName', placeholder: 'Last Name', type: 'text', required: false },
+        { modelName: 'companyName', placeholder: 'Company Name', type: 'text', required: true },
+        { modelName: 'email', placeholder: 'Email', type: 'email', required: true },
+        { modelName: 'password', placeholder: 'Password', type: 'password', required: true },
+        { modelName: 'confirmPassword', placeholder: 'Confirm Password', type: 'password', required: true },
+        { modelName: 'phoneNumber', placeholder: 'Phone Number', type: 'number', required: true }
+      ];
+    }, 50);
     this.onChangeValidate();
   }
 
@@ -62,14 +65,6 @@ export class CreateAccountComponent implements OnInit {
 
   public showErrorMessage(message?: string) {
     this.errorMessage = message ? message : DEFAULT_ERROR_MESSAGE;
-  }
-
-  public goToReset() {
-    console.log('goToReset');
-  }
-
-  public clearError() {
-    this.errorMessage = '';
   }
 
   public validateItem(field: any) {
@@ -152,7 +147,7 @@ export class CreateAccountComponent implements OnInit {
   }
 
   public goBack() {
-    this.openPage(SigninComponent, { createAccount: true });
+    this.navCtrl.pop();
   }
 
   public next() {

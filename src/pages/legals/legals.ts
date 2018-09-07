@@ -1,5 +1,5 @@
 import { Component, OnInit, NgZone, ViewChild } from '@angular/core';
-import { App, NavController, NavParams, Nav, Content } from 'ionic-angular';
+import { App, AlertController, NavController, NavParams, Nav, Content } from 'ionic-angular';
 import { AccountService, ApiService } from '../../services/';
 import {
   ANGLE_IMG,
@@ -39,6 +39,7 @@ export class LegalsComponent implements OnInit {
 
   constructor(
     public appCtrl: App,
+    public alertCtrl: AlertController,
     public navCtrl: NavController,
     public navParams: NavParams,
     public _account: AccountService,
@@ -47,7 +48,6 @@ export class LegalsComponent implements OnInit {
   ) {}
 
   public ngOnInit() {
-    console.log('navParams: ', this.navParams.get('isEula'));
     this.isEula = this.navParams.get('isEula');
     this.shouldAgree = this.navParams.get('shouldAgree') || [];
     this.shouldAgreeItems = this.navParams.get('shouldAgreeItems') || [];
@@ -84,6 +84,8 @@ export class LegalsComponent implements OnInit {
           this.zone.run(() => {
             this.shouldAgreeItems = result;
             setTimeout(() => {
+              const message: string = `Please read, scroll down, and agree to ${result[0].title}`;
+              this.agreementReadPrompt(message);
               this.legalsContent.scrollToTop();
             }, 300);
           });
@@ -93,7 +95,11 @@ export class LegalsComponent implements OnInit {
   }
 
   public goBack() {
-    this.openPage(SigninComponent);
+    if (this.shouldAgree && this.shouldAgree.length === 1 && this.shouldAgree[0] === 'eula') {
+      this.openPage(SigninComponent);
+    } else {
+      this.navCtrl.pop();
+    }
   }
 
   public pageRendered() {
@@ -133,6 +139,18 @@ export class LegalsComponent implements OnInit {
   }
 
   public openPage(page: any, params?: any) {
-    this.appCtrl.getRootNav().setRoot(page, params ? params : {});
+    this.navCtrl.push(page, params ? params : {});
+  }
+
+  /**
+   * Prompt user to read, scroll and agree to agreements.
+   * @param {string} text
+   */
+  public agreementReadPrompt(text: string) {
+    let alert: any = this.alertCtrl.create({
+      message: text,
+      buttons: [ { text: 'Ok', role: 'cancel' } ]
+    });
+    alert.present();
   }
 }

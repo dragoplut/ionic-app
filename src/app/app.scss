@@ -450,6 +450,7 @@ ion-content {
 custom-input ion-input input.text-input.text-input-md,
 custom-input ion-input input.text-input.text-input-ios {
   position: initial !important;
+  -webkit-transform: translateZ(0px);
 }
 .custom-input-container {
   .input-active {

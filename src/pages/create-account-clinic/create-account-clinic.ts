@@ -102,9 +102,9 @@ export class CreateAccountClinicComponent implements OnInit {
     let mapOptions = {
       center: new google.maps.LatLng(
         acc && acc.location && acc.location.latitude ?
-          acc.location.latitude : 43.0741904,
+          acc.location.latitude : -37.8136,
         acc && acc.location && acc.location.longitude ?
-          acc.location.longitude : -89.3809802),
+          acc.location.longitude : 144.9631),
       zoom: 12,
       minZoom: 3,
       maxZoom: 17,
@@ -120,9 +120,9 @@ export class CreateAccountClinicComponent implements OnInit {
     this.markers[0] = new google.maps.Marker({
       position: new google.maps.LatLng(
         acc && acc.location && acc.location.latitude ?
-          acc.location.latitude : 43.0741904,
+          acc.location.latitude : -37.8136,
         acc && acc.location && acc.location.longitude ?
-          acc.location.longitude : -89.3809802),
+          acc.location.longitude : 144.9631),
       map: this.map,
       animation: 'DROP',
       title: acc && acc.location ? acc.location.address : 'Marker'
@@ -282,7 +282,6 @@ export class CreateAccountClinicComponent implements OnInit {
       this._clinic.createClinic(this.account.clinic).subscribe(
         (resp: any) => {
           this.loading = false;
-          console.log('nex: ', this.account.clinic);
           // alert('Clinic created!');
           // this.openPage(HomeMenu);
           this.appCtrl.getRootNav().setRoot(HomeMenu);
